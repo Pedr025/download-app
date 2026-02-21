@@ -1,0 +1,1342 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Party - PKFilmes</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --bg: #0f0f0f;
+            --bg-secondary: #1a1a1a;
+            --accent: #8a2be2;
+            --text-primary: #fff;
+            --text-secondary: #a0a0a0;
+            --border: #2a2a2a;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            background-color: var(--bg);
+            color: var(--text-primary);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            overflow: hidden;
+        }
+
+        .party-container {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            height: 100vh;
+        }
+
+        /* PLAYER SECTION */
+        .player-section {
+            width: 100%;
+            height: 400px;
+            background-color: #000;
+            position: relative;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .player-wrapper {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .player-controls-overlay {
+            position: absolute;
+            inset: 0;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.6) 0%, transparent 25%, transparent 70%, rgba(0,0,0,0.7) 100%);
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .player-controls-overlay.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .player-top-bar {
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+        }
+
+        .player-top-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .player-top-bar a {
+            color: #fff;
+            font-size: 20px;
+            text-decoration: none;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .player-top-bar a:hover {
+            opacity: 0.8;
+        }
+
+        .player-top-bar h3 {
+            margin: 0;
+            font-size: 16px;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+            color: #fff;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 250px;
+        }
+
+        .player-bottom-bar {
+            padding: 15px 20px;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            height: 5px;
+            background: rgba(255,255,255,0.3);
+            cursor: pointer;
+            margin-bottom: 10px;
+            border-radius: 5px;
+        }
+
+        .progress-bar {
+            width: 0;
+            height: 100%;
+            background: var(--accent);
+            border-radius: 5px;
+        }
+
+        .bottom-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .controls-left, .controls-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .bottom-controls button {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 18px;
+            cursor: pointer;
+            padding: 5px;
+            transition: opacity 0.2s;
+        }
+
+        .bottom-controls button:hover {
+            opacity: 0.8;
+        }
+
+        .time-display {
+            font-size: 14px;
+            font-weight: 500;
+            color: #fff;
+        }
+
+        /* DISCUSSION SECTION */
+        .discussion-section {
+            flex: 1;
+            background-color: var(--bg-secondary);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            border-top: 1px solid var(--border);
+        }
+
+        .discussion-header {
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .discussion-header h3 {
+            font-size: 14px;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .discussion-content {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding: 12px;
+        }
+
+        .discussion-item {
+            display: flex;
+            gap: 10px;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .discussion-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            object-fit: cover;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: border-color 0.2s;
+        }
+
+        .discussion-avatar:hover {
+            border-color: var(--accent);
+        }
+
+        .discussion-message {
+            flex: 1;
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+            padding: 8px 10px;
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .discussion-header-msg {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 3px;
+        }
+
+        .discussion-name {
+            font-weight: 600;
+            font-size: 12px;
+            color: var(--text-primary);
+        }
+
+        .discussion-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 2px;
+            font-size: 10px;
+            padding: 0 3px;
+            border-radius: 2px;
+            background: rgba(138, 43, 226, 0.2);
+        }
+
+        .discussion-badge.verified {
+            color: #00d4ff;
+        }
+
+        .discussion-badge.premium {
+            color: #ffd700;
+        }
+
+        .discussion-text {
+            font-size: 12px;
+            color: var(--text-secondary);
+            line-height: 1.3;
+            word-break: break-word;
+        }
+
+        /* INPUT AREA - FIXED BOTTOM */
+        .input-area {
+            display: flex;
+            gap: 8px;
+            align-items: flex-end;
+            background-color: var(--bg-secondary);
+            padding: 10px;
+            border-top: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+
+        .input-wrapper {
+            flex: 1;
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 8px 10px;
+        }
+
+        .chat-input {
+            flex: 1;
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            font-size: 12px;
+            outline: none;
+            font-family: inherit;
+            min-height: 28px;
+            resize: none;
+            max-height: 60px;
+        }
+
+        .chat-input::placeholder {
+            color: var(--text-secondary);
+        }
+
+        .input-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 14px;
+            padding: 0;
+            transition: color 0.2s;
+            flex-shrink: 0;
+        }
+
+        .input-btn:hover {
+            color: var(--accent);
+        }
+
+        .send-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            transition: opacity 0.2s;
+            flex-shrink: 0;
+        }
+
+        .send-btn:hover {
+            opacity: 0.9;
+        }
+
+        /* EMOJI PICKER */
+        .emoji-picker {
+            position: fixed;
+            bottom: 60px;
+            right: 20px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 8px;
+            display: none;
+            z-index: 100;
+            max-width: 250px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        }
+
+        .emoji-picker.visible {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 4px;
+        }
+
+        .emoji-item {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+
+        .emoji-item:hover {
+            background: rgba(138, 43, 226, 0.2);
+        }
+
+        /* POPUPS */
+        .popup {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+            backdrop-filter: blur(5px);
+        }
+
+        .popup.visible {
+            display: flex;
+        }
+
+        .popup-content {
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            padding: 20px;
+            max-width: 350px;
+            width: 90%;
+            border: 1px solid var(--border);
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .popup-header {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .popup-text {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+
+        .popup-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .popup-btn {
+            padding: 10px;
+            border: none;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+
+        .popup-btn-primary {
+            background: var(--accent);
+            color: #fff;
+        }
+
+        .popup-btn-primary:hover {
+            opacity: 0.9;
+        }
+
+        .popup-btn-secondary {
+            background: rgba(255,255,255,0.1);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        .popup-btn-secondary:hover {
+            background: rgba(255,255,255,0.15);
+        }
+
+        .popup-btn-danger {
+            background: #e74c3c;
+            color: #fff;
+        }
+
+        .popup-btn-danger:hover {
+            opacity: 0.9;
+        }
+
+        /* CONTENT LIST */
+        .content-item {
+            display: flex;
+            gap: 10px;
+            padding: 10px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 6px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .content-item:hover {
+            background: rgba(138, 43, 226, 0.15);
+        }
+
+        .content-item img {
+            width: 50px;
+            height: 70px;
+            border-radius: 4px;
+            object-fit: cover;
+        }
+
+        .content-info {
+            flex: 1;
+        }
+
+        .content-title {
+            font-weight: 600;
+            font-size: 12px;
+            margin-bottom: 3px;
+        }
+
+        .content-type {
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+
+        /* CONNECTED LIST */
+        .connected-list {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .connected-user-mini {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: border-color 0.2s;
+            position: relative;
+        }
+
+        .connected-user-mini:hover {
+            border-color: var(--accent);
+        }
+
+        .connected-user-mini.host::after {
+            content: '👑';
+            position: absolute;
+            bottom: -5px;
+            right: -5px;
+            font-size: 12px;
+        }
+
+        /* SCROLLBAR */
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.2);
+            border-radius: 2px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .player-section {
+                height: 300px;
+            }
+
+            .player-top-bar h3 {
+                font-size: 14px;
+                max-width: 150px;
+            }
+
+            .player-top-bar a {
+                font-size: 18px;
+            }
+
+            .bottom-controls button {
+                font-size: 16px;
+            }
+
+            .time-display {
+                font-size: 12px;
+            }
+
+            .controls-left, .controls-right {
+                gap: 15px;
+            }
+
+            .discussion-header h3 {
+                font-size: 13px;
+            }
+
+            .popup-content {
+                max-width: 90%;
+                padding: 15px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .player-section {
+                height: 250px;
+            }
+
+            .player-top-bar {
+                padding: 10px 15px;
+            }
+
+            .player-bottom-bar {
+                padding: 10px 15px;
+            }
+
+            .discussion-header {
+                padding: 10px 12px;
+            }
+
+            .input-area {
+                padding: 8px;
+            }
+
+            .input-wrapper {
+                padding: 6px 8px;
+            }
+
+            .chat-input {
+                font-size: 11px;
+                min-height: 24px;
+            }
+
+            .send-btn {
+                width: 28px;
+                height: 28px;
+                font-size: 12px;
+            }
+
+            .input-btn {
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="party-container">
+        <!-- PLAYER SECTION -->
+        <div class="player-section">
+            <div class="player-wrapper">
+                <video id="video-player" playsinline></video>
+                
+                <div class="player-controls-overlay" id="controls-overlay">
+                    <div class="player-top-bar">
+                        <div class="player-top-left">
+                            <a id="back-btn"><i class="fa-solid fa-arrow-left"></i></a>
+                            <h3 id="title">Carregando...</h3>
+                        </div>
+                    </div>
+                    <div class="player-bottom-bar">
+                        <div class="progress-bar-container" id="progress-bar-container">
+                            <div class="progress-bar" id="progress-bar"></div>
+                        </div>
+                        <div class="bottom-controls">
+                            <div class="controls-left" id="controls-left">
+                                <button id="play-pause-btn"><i class="fa-solid fa-play"></i></button>
+                                <span class="time-display" id="time-display">00:00 / 00:00</span>
+                            </div>
+                            <div class="controls-right">
+                                <button id="change-content-btn" style="display: none;"><i class="fa-solid fa-list"></i></button>
+                                <button id="connected-btn"><i class="fa-solid fa-users"></i></button>
+                                <button id="fullscreen-btn"><i class="fa-solid fa-expand"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- DISCUSSION SECTION -->
+        <div class="discussion-section">
+            <div class="discussion-header">
+                <h3>Discussion</h3>
+                <div class="connected-list" id="connected-list"></div>
+            </div>
+
+            <div class="discussion-content" id="discussion-content">
+                <!-- Messages will be added here -->
+            </div>
+
+            <!-- INPUT AREA -->
+            <div class="input-area">
+                <div class="input-wrapper">
+                    <button class="input-btn" id="poll-btn" title="Criar enquete"><i class="fa-solid fa-chart-pie"></i></button>
+                    <input type="text" id="chat-input" class="chat-input" placeholder="Message">
+                    <button class="input-btn" id="emoji-btn"><i class="fa-solid fa-face-smile"></i></button>
+                    <button class="send-btn" id="send-btn"><i class="fa-solid fa-arrow-up"></i></button>
+                </div>
+                <div class="emoji-picker" id="emoji-picker"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CONNECTED POPUP -->
+    <div class="popup" id="connected-popup">
+        <div class="popup-content">
+            <div class="popup-header"><i class="fa-solid fa-users"></i> Conectados</div>
+            <div id="connected-popup-list"></div>
+        </div>
+    </div>
+
+    <!-- USER PROFILE POPUP -->
+    <div class="popup" id="user-profile-popup">
+        <div class="popup-content">
+            <img id="profile-avatar" style="width: 80px; height: 80px; border-radius: 50%; margin: 0 auto 12px; display: block; border: 2px solid var(--accent);">
+            <div id="profile-name" style="font-weight: 600; text-align: center; margin-bottom: 8px;"></div>
+            <div id="profile-bio" style="font-size: 12px; color: var(--text-secondary); text-align: center; margin-bottom: 15px;"></div>
+            <button class="popup-btn popup-btn-danger" id="kick-btn" style="display: none;">Expulsar da Sala</button>
+        </div>
+    </div>
+
+    <!-- EXIT POPUP -->
+    <div class="popup" id="exit-popup">
+        <div class="popup-content">
+            <div class="popup-header">Deseja sair da sala?</div>
+            <div class="popup-text">Você será removido da sala e perderá a conexão com os outros usuários.</div>
+            <div class="popup-buttons">
+                <button class="popup-btn popup-btn-secondary" id="cancel-exit-btn">Cancelar</button>
+                <button class="popup-btn popup-btn-primary" id="confirm-exit-btn">Sair</button>
+            </div>
+        </div>
+    </div>
+
+<!-- REQUEST POPUP -->
+    <div class="popup" id="request-popup">
+        <div class="popup-content">
+            <div class="popup-header">Sala Privada</div>
+            <div class="popup-text">Esta é uma sala privada. Você precisa enviar uma solicitação para entrar.</div>
+            <div class="popup-buttons">
+                <button class="popup-btn popup-btn-secondary" id="cancel-request-btn">Voltar</button>
+                <button class="popup-btn popup-btn-primary" id="send-request-btn">Enviar Solicitação</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CHANGE CONTENT POPUP (Host Only) -->
+    <div class="popup" id="change-content-popup">
+        <div class="popup-content">
+            <div class="popup-header">Trocar Conteúdo</div>
+            <div id="content-list" style="max-height: 400px; overflow-y: auto;"></div>
+        </div>
+    </div>
+
+    <!-- CREATE POLL POPUP -->
+    <div class="popup" id="create-poll-popup">
+        <div class="popup-content">
+            <div class="popup-header">Criar Enquete</div>
+            <input type="text" id="poll-title" placeholder="Pergunta" style="width: 100%; padding: 8px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 4px; color: var(--text-primary); margin-bottom: 10px; font-size: 12px;">
+            <div id="poll-options-input" style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px;">
+                <input type="text" class="poll-input" placeholder="Opção 1" style="width: 100%; padding: 8px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 4px; color: var(--text-primary); font-size: 12px;">
+                <input type="text" class="poll-input" placeholder="Opção 2" style="width: 100%; padding: 8px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 4px; color: var(--text-primary); font-size: 12px;">
+            </div>
+            <div class="popup-buttons">
+                <button class="popup-btn popup-btn-secondary" id="cancel-poll-btn">Cancelar</button>
+                <button class="popup-btn popup-btn-primary" id="create-poll-btn">Criar</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getDatabase, ref, get, set, update, remove, onValue, push, onDisconnect } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBIQSqbbN-adfJjONc0pmTY4PZahwk6a6w",
+            authDomain: "nupcine.firebaseapp.com",
+            databaseURL: "https://nupcine-default-rtdb.firebaseio.com",
+            projectId: "nupcine",
+            storageBucket: "nupcine.appspot.com",
+            messagingSenderId: "602295443044",
+            appId: "1:602295443044:web:af618627a1dbe5b142c971",
+            measurementId: "G-YD3TPSJTCF"
+        };
+
+        const fbApp = initializeApp(firebaseConfig);
+        const auth = getAuth(fbApp);
+        const db = getDatabase(fbApp);
+
+        const emojis = ['😀', '😂', '😍', '🔥', '👍', '❤️', '😢', '😱', '🎉', '🎬', '📺', '🍿', '🎮', '🎵', '⭐', '✨', '😎', '🤔', '😴', '🤣', '💯', '🙌'];
+
+        let currentUser = null;
+        let currentUserData = null;
+        let partyId = null;
+        let partyData = null;
+        let isHost = false;
+        let connectedUsers = {};
+        let controlsTimeout;
+        let lastSyncTime = 0;
+
+        const video = document.getElementById('video-player');
+        const controlsOverlay = document.getElementById('controls-overlay');
+        const playPauseBtn = document.getElementById('play-pause-btn');
+        const controlsLeft = document.getElementById('controls-left');
+        const progressBar = document.getElementById('progress-bar');
+        const progressBarContainer = document.getElementById('progress-bar-container');
+        const timeDisplay = document.getElementById('time-display');
+        const titleElem = document.getElementById('title');
+        const fullscreenBtn = document.getElementById('fullscreen-btn');
+        const backBtn = document.getElementById('back-btn');
+        const discussionContent = document.getElementById('discussion-content');
+        const chatInput = document.getElementById('chat-input');
+        const sendBtn = document.getElementById('send-btn');
+        const emojiBtn = document.getElementById('emoji-btn');
+        const emojiPicker = document.getElementById('emoji-picker');
+        const connectedBtn = document.getElementById('connected-btn');
+        const connectedPopup = document.getElementById('connected-popup');
+        const connectedList = document.getElementById('connected-list');
+        const exitPopup = document.getElementById('exit-popup');
+        const requestPopup = document.getElementById('request-popup');
+        const pollBtn = document.getElementById('poll-btn');
+        const changeContentBtn = document.getElementById('change-content-btn');
+
+        partyId = window.location.hash.replace('#', '') || window.location.pathname.split('/').pop();
+        
+        if (!partyId) {
+            window.location.href = 'index.html';
+        }
+
+        function initEmojiPicker() {
+            emojiPicker.innerHTML = '';
+            emojis.forEach(emoji => {
+                const item = document.createElement('div');
+                item.className = 'emoji-item';
+                item.textContent = emoji;
+                item.onclick = () => {
+                    chatInput.value += emoji;
+                    emojiPicker.classList.remove('visible');
+                };
+                emojiPicker.appendChild(item);
+            });
+        }
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUser = user;
+                const snapshot = await get(ref(db, 'users/' + user.uid));
+                if (snapshot.exists()) {
+                    currentUserData = snapshot.val();
+                }
+                loadPartyData();
+            } else {
+                window.location.href = 'onboarding.html';
+            }
+        });
+
+        async function loadPartyData() {
+            try {
+                const snapshot = await get(ref(db, 'salas/' + partyId));
+                if (snapshot.exists()) {
+                    partyData = snapshot.val();
+                    isHost = partyData.host === currentUserData.username;
+
+                    if (!partyData.isPublic && !isHost) {
+                        requestPopup.classList.add('visible');
+                        return;
+                    }
+
+                    if (!isHost) {
+                        controlsLeft.style.display = 'none';
+                        changeContentBtn.style.display = 'none';
+                    } else {
+                        changeContentBtn.style.display = 'block';
+                    }
+
+                    await addUserToConnected();
+                    await loadContent();
+                    setupRealtimeListeners();
+                    setupPlayerControls();
+                    setupChatControls();
+                    initEmojiPicker();
+                } else {
+                    window.location.href = 'index.html';
+                }
+            } catch (error) {
+                console.error("Erro ao carregar party:", error);
+            }
+        }
+
+        async function addUserToConnected() {
+            const connectedRef = ref(db, `salas/${partyId}/conectados/${currentUser.uid}`);
+            await set(connectedRef, {
+                uid: currentUser.uid,
+                username: currentUserData.username,
+                profilePhoto: currentUserData.profilePhoto,
+                bio: currentUserData.bio || '',
+                verificado: currentUserData.verificado || false,
+                Premium: currentUserData.Premium || 'off',
+                joinedAt: Date.now(),
+                lastActive: Date.now()
+            });
+
+            onDisconnect(connectedRef).remove();
+
+            setInterval(async () => {
+                await update(connectedRef, { lastActive: Date.now() });
+            }, 5000);
+        }
+
+        async function loadContent() {
+            try {
+                if (partyData.link_mp4) {
+                    video.src = partyData.link_mp4;
+                    titleElem.textContent = partyData.contentTitle;
+                    if (partyData.epTitle) {
+                        titleElem.textContent += ` - ${partyData.epTitle}`;
+                    }
+                }
+            } catch (error) {
+                console.error("Erro ao carregar conteúdo:", error);
+                titleElem.textContent = partyData.contentTitle;
+            }
+        }
+
+        function setupRealtimeListeners() {
+            onValue(ref(db, `salas/${partyId}/conectados`), (snapshot) => {
+                connectedUsers = snapshot.val() || {};
+                
+                const now = Date.now();
+                Object.keys(connectedUsers).forEach(uid => {
+                    if (now - connectedUsers[uid].lastActive > 10000) {
+                        remove(ref(db, `salas/${partyId}/conectados/${uid}`));
+                    }
+                });
+                
+                updateConnectedUI();
+            });
+
+            onValue(ref(db, `salas/${partyId}/mensagens`), (snapshot) => {
+                const messages = snapshot.val() || {};
+                updateDiscussionUI(messages);
+            });
+
+            if (!isHost) {
+                onValue(ref(db, `salas/${partyId}/currentTime`), (snapshot) => {
+                    const data = snapshot.val();
+                    if (data && Math.abs(video.currentTime - data.time) > 2) {
+                        video.currentTime = data.time;
+                    }
+                });
+            }
+
+            onValue(ref(db, `salas/${partyId}/conectados`), (snapshot) => {
+                const users = snapshot.val();
+                if (!users || Object.keys(users).length === 0) {
+                    remove(ref(db, `salas/${partyId}`));
+                }
+            });
+        }
+
+        function setupPlayerControls() {
+            function togglePlay() {
+                const icon = playPauseBtn.querySelector('i');
+                if (video.paused) {
+                    video.play();
+                    icon.className = 'fa-solid fa-pause';
+                } else {
+                    video.pause();
+                    icon.className = 'fa-solid fa-play';
+                }
+            }
+
+            function formatTime(seconds) {
+                if (isNaN(seconds)) return '00:00';
+                const h = Math.floor(seconds / 3600).toString().padStart(2, '0');
+                const m = Math.floor((seconds % 3600) / 60).toString().padStart(2, '0');
+                const s = Math.floor(seconds % 60).toString().padStart(2, '0');
+                return video.duration >= 3600 ? `${h}:${m}:${s}` : `${m}:${s}`;
+            }
+
+            function handleTimeUpdate() {
+                const progress = (video.currentTime / video.duration) * 100;
+                progressBar.style.width = `${progress}%`;
+                timeDisplay.textContent = `${formatTime(video.currentTime)} / ${formatTime(video.duration)}`;
+
+                if (isHost && Date.now() - lastSyncTime > 3000) {
+                    update(ref(db, `salas/${partyId}`), {
+                        currentTime: { time: video.currentTime, timestamp: Date.now() }
+                    });
+                    lastSyncTime = Date.now();
+                }
+            }
+
+            function handleProgressBarClick(e) {
+                const rect = progressBarContainer.getBoundingClientRect();
+                const clickX = e.clientX - rect.left;
+                video.currentTime = (clickX / rect.width) * video.duration;
+            }
+
+            function toggleFullscreen() {
+                if (!document.fullscreenElement) {
+                    document.querySelector('.player-wrapper').requestFullscreen().catch(err => console.error(`Erro: ${err.message}`));
+                } else {
+                    document.exitFullscreen();
+                }
+            }
+
+            function showControls() {
+                controlsOverlay.classList.add('visible');
+                clearTimeout(controlsTimeout);
+                controlsTimeout = setTimeout(() => {
+                    controlsOverlay.classList.remove('visible');
+                }, 3000);
+            }
+
+            if (isHost) {
+                playPauseBtn.addEventListener('click', togglePlay);
+            }
+            
+            video.addEventListener('timeupdate', handleTimeUpdate);
+            progressBarContainer.addEventListener('click', handleProgressBarClick);
+            fullscreenBtn.addEventListener('click', toggleFullscreen);
+            video.addEventListener('click', showControls);
+            controlsOverlay.addEventListener('click', (e) => {
+                if (e.target === controlsOverlay) showControls();
+            });
+            document.querySelector('.player-wrapper').addEventListener('mousemove', showControls);
+
+            backBtn.addEventListener('click', () => {
+                exitPopup.classList.add('visible');
+            });
+
+            document.getElementById('cancel-exit-btn').addEventListener('click', () => {
+                exitPopup.classList.remove('visible');
+            });
+
+            document.getElementById('confirm-exit-btn').addEventListener('click', async () => {
+                await remove(ref(db, `salas/${partyId}/conectados/${currentUser.uid}`));
+                
+                if (isHost) {
+                    const connectedRef = ref(db, `salas/${partyId}/conectados`);
+                    const snapshot = await get(connectedRef);
+                    const users = snapshot.val();
+                    if (users && Object.keys(users).length > 0) {
+                        const newHostUid = Object.keys(users)[0];
+                        const newHost = users[newHostUid];
+                        await update(ref(db, `salas/${partyId}`), {
+                            host: newHost.username
+                        });
+                    }
+                }
+                
+                window.location.href = 'index.html';
+            });
+
+            connectedBtn.addEventListener('click', () => {
+                connectedPopup.classList.add('visible');
+            });
+
+            connectedPopup.addEventListener('click', (e) => {
+                if (e.target === connectedPopup) connectedPopup.classList.remove('visible');
+            });
+
+            changeContentBtn.addEventListener('click', loadContentList);
+        }
+
+        async function loadContentList() {
+            try {
+                const response = await fetch('https://pkapi-six.vercel.app/filmes/series');
+                const data = await response.json();
+                
+                const contentList = document.getElementById('content-list');
+                contentList.innerHTML = '';
+                
+                data.forEach(item => {
+                    const div = document.createElement('div');
+                    div.className = 'content-item';
+                    div.innerHTML = `
+                        <img src="${item.capa}" alt="${item.titulo}">
+                        <div class="content-info">
+                            <div class="content-title">${item.titulo}</div>
+                            <div class="content-type">${item.tipo === 'serie' ? 'Série' : 'Filme'}</div>
+                        </div>
+
+  `;
+                    div.onclick = async () => {
+                        try {
+                            const detailsResponse = await fetch(`https://pkapi-six.vercel.app/page/detalhes_ID?id=${item.id}`);
+                            const details = await detailsResponse.json();
+                            
+                            let mp4Url = '';
+                            if (details.link_mp4 && typeof details.link_mp4 === 'object') {
+                                mp4Url = details.link_mp4.url || details.link_mp4.link || Object.values(details.link_mp4)[0];
+                            } else if (typeof details.link_mp4 === 'string') {
+                                mp4Url = details.link_mp4;
+                            }
+                            
+                            // Atualizar player
+                            video.src = mp4Url;
+                            titleElem.textContent = details.titulo;
+                            
+                            // Atualizar Firebase
+                            await update(ref(db, `salas/${partyId}`), {
+                                contentTitle: details.titulo,
+                                link_mp4: mp4Url,
+                                contentBanner: details.banner || details.capa
+                            });
+                            
+                            document.getElementById('change-content-popup').classList.remove('visible');
+                        } catch (error) {
+                            console.error("Erro ao carregar detalhes:", error);
+                            alert('Erro ao carregar conteúdo');
+                        }
+                    };
+                    contentList.appendChild(div);
+                });
+                
+                document.getElementById('change-content-popup').classList.add('visible');
+            } catch (error) {
+                console.error("Erro ao carregar conteúdo:", error);
+                alert('Erro ao carregar conteúdo');
+            }
+        }
+
+        function updateConnectedUI() {
+            connectedList.innerHTML = '';
+            
+            const hostUser = Object.values(connectedUsers).find(u => u.username === partyData.host);
+            if (hostUser) {
+                const img = document.createElement('img');
+                img.src = hostUser.profilePhoto;
+                img.className = 'connected-user-mini host';
+                img.title = hostUser.username + ' (HOST)';
+                img.onclick = () => showUserProfile(hostUser);
+                connectedList.appendChild(img);
+            }
+
+            Object.values(connectedUsers).forEach(user => {
+                if (user.username !== partyData.host) {
+                    const img = document.createElement('img');
+                    img.src = user.profilePhoto;
+                    img.className = 'connected-user-mini';
+                    img.title = user.username;
+                    img.onclick = () => showUserProfile(user);
+                    connectedList.appendChild(img);
+                }
+            });
+
+            const connectedPopupList = document.getElementById('connected-popup-list');
+            connectedPopupList.innerHTML = '';
+            
+            if (hostUser) {
+                const userEl = createConnectedUserElement(hostUser, true);
+                connectedPopupList.appendChild(userEl);
+            }
+
+            Object.values(connectedUsers).forEach(user => {
+                if (user.username !== partyData.host) {
+                    const userEl = createConnectedUserElement(user, false);
+                    connectedPopupList.appendChild(userEl);
+                }
+            });
+        }
+
+        function createConnectedUserElement(user, isHostUser) {
+            const div = document.createElement('div');
+            div.style.cssText = 'display: flex; align-items: center; gap: 10px; padding: 10px; background: rgba(255,255,255,0.05); border-radius: 6px; margin-bottom: 8px; cursor: pointer;';
+            div.innerHTML = `
+                <img src="${user.profilePhoto}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
+                <div style="flex: 1;">
+                    <div style="font-weight: 600; font-size: 13px;">${user.username} ${isHostUser ? '👑' : ''}</div>
+                    <div style="font-size: 11px; color: var(--text-secondary);">Online</div>
+                </div>
+            `;
+            div.onclick = () => {
+                connectedPopup.classList.remove('visible');
+                showUserProfile(user);
+            };
+            return div;
+        }
+
+        function showUserProfile(user) {
+            document.getElementById('profile-avatar').src = user.profilePhoto;
+            document.getElementById('profile-name').textContent = user.username;
+            document.getElementById('profile-bio').textContent = user.bio || 'Sem biografia';
+            
+            const kickBtn = document.getElementById('kick-btn');
+            if (isHost && user.uid !== currentUser.uid) {
+                kickBtn.style.display = 'block';
+                kickBtn.onclick = async () => {
+                    await remove(ref(db, `salas/${partyId}/conectados/${user.uid}`));
+                    document.getElementById('user-profile-popup').classList.remove('visible');
+                };
+            } else {
+                kickBtn.style.display = 'none';
+            }
+            
+            document.getElementById('user-profile-popup').classList.add('visible');
+        }
+
+        document.getElementById('user-profile-popup').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('user-profile-popup')) {
+                document.getElementById('user-profile-popup').classList.remove('visible');
+            }
+        });
+
+        function setupChatControls() {
+            emojiBtn.addEventListener('click', () => {
+                emojiPicker.classList.toggle('visible');
+            });
+
+            sendBtn.addEventListener('click', sendMessage);
+            chatInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                }
+            });
+
+            pollBtn.addEventListener('click', () => {
+                document.getElementById('create-poll-popup').classList.add('visible');
+            });
+
+            document.getElementById('cancel-poll-btn').addEventListener('click', () => {
+                document.getElementById('create-poll-popup').classList.remove('visible');
+            });
+
+            document.getElementById('create-poll-btn').addEventListener('click', createPoll);
+
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.input-btn') && !e.target.closest('.emoji-picker')) {
+                    emojiPicker.classList.remove('visible');
+                }
+            });
+        }
+
+        async function sendMessage() {
+            const text = chatInput.value.trim();
+            if (!text) return;
+
+            const messageRef = push(ref(db, `salas/${partyId}/mensagens`));
+            await set(messageRef, {
+                uid: currentUser.uid,
+                username: currentUserData.username,
+                profilePhoto: currentUserData.profilePhoto,
+                verificado: currentUserData.verificado || false,
+                Premium: currentUserData.Premium || 'off',
+                text: text,
+                timestamp: Date.now()
+            });
+
+            chatInput.value = '';
+            emojiPicker.classList.remove('visible');
+        }
+
+        function updateDiscussionUI(messages) {
+            discussionContent.innerHTML = '';
+            Object.values(messages).sort((a, b) => a.timestamp - b.timestamp).forEach(msg => {
+                const msgEl = document.createElement('div');
+                msgEl.className = 'discussion-item';
+                
+                let badges = '';
+                if (msg.verificado) {
+                    badges += '<span class="discussion-badge verified"><i class="fa-solid fa-check-circle"></i></span>';
+                }
+                if (msg.Premium === 'on') {
+                    badges += '<span class="discussion-badge premium"><i class="fa-solid fa-crown"></i></span>';
+                }
+
+                msgEl.innerHTML = `
+                    <img src="${msg.profilePhoto}" class="discussion-avatar">
+                    <div class="discussion-message">
+                        <div class="discussion-header-msg">
+                            <span class="discussion-name">${msg.username}</span>
+                            ${badges}
+                        </div>
+                        <div class="discussion-text">${escapeHtml(msg.text)}</div>
+                    </div>
+                `;
+
+                msgEl.querySelector('.discussion-avatar').addEventListener('click', () => {
+                    showUserProfile(msg);
+                });
+
+                discussionContent.appendChild(msgEl);
+            });
+
+            discussionContent.scrollTop = discussionContent.scrollHeight;
+        }
+
+        async function createPoll() {
+            const title = document.getElementById('poll-title').value.trim();
+            const options = Array.from(document.querySelectorAll('.poll-input')).map(input => input.value.trim()).filter(v => v);
+
+            if (!title || options.length < 2) {
+                alert('Preencha a pergunta e pelo menos 2 opções');
+                return;
+            }
+
+            const pollRef = push(ref(db, `salas/${partyId}/enquetes`));
+            await set(pollRef, {
+                question: title,
+                options: options,
+                votes: options.reduce((acc, _, i) => { acc[i] = 0; return acc; }, {}),
+                createdAt: Date.now()
+            });
+
+            document.getElementById('create-poll-popup').classList.remove('visible');
+            document.getElementById('poll-title').value = '';
+            document.querySelectorAll('.poll-input').forEach(input => input.value = '');
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        document.getElementById('send-request-btn').addEventListener('click', async () => {
+            const requestRef = push(ref(db, `salas/${partyId}/solicitacoes`));
+            await set(requestRef, {
+                uid: currentUser.uid,
+                username: currentUserData.username,
+                profilePhoto: currentUserData.profilePhoto,
+                requestedAt: Date.now()
+            });
+            requestPopup.classList.remove('visible');
+            alert('Solicitação enviada! Aguarde a aprovação do host.');
+        });
+
+        document.getElementById('cancel-request-btn').addEventListener('click', () => {
+            window.location.href = 'index.html';
+        });
+
+        window.addEventListener('beforeunload', async () => {
+            if (currentUser) {
+                await remove(ref(db, `salas/${partyId}/conectados/${currentUser.uid}`));
+            }
+        });
+    </script>
+</body>
+</html>

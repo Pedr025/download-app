@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Meu Perfil - PKFilmes</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --bg: #0b0b0b;
+            --surface: #1a1a1a;
+            --accent: #8a2be2;
+            --accent-light: #a855f7;
+            --text-main: #ffffff;
+            --text-dim: #a0a0a0;
+            --nav-bg: rgba(11, 11, 11, 0.8);
+            --card-radius: 12px;
+            --transition: all 0.3s ease;
+        }
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; user-select: none; -webkit-user-select: none; }
+        body { background-color: var(--bg); color: var(--text-main); font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; padding-bottom: 100px; overflow-x: hidden; }
+
+        /* HEADER */
+        header { position: fixed; top: 0; left: 0; right: 0; z-index: 1000; padding: 15px 20px; background: var(--bg); border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center; }
+        .header-title { font-size: 18px; font-weight: 800; color: white; text-transform: uppercase; letter-spacing: 1px; }
+
+        /* PROFILE HEADER */
+        .profile-header { display: flex; flex-direction: column; align-items: center; padding: 100px 20px 30px; gap: 15px; background: linear-gradient(to bottom, rgba(138, 43, 226, 0.15) 0%, transparent 100%); }
+        .avatar-container { position: relative; width: 110px; height: 110px; cursor: pointer; transition: var(--transition); }
+        .avatar-container:active { transform: scale(0.95); }
+        .profile-avatar { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 3px solid var(--accent); box-shadow: 0 0 25px rgba(138, 43, 226, 0.4); }
+        .edit-badge { position: absolute; bottom: 5px; right: 5px; background: var(--accent); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 3px solid var(--bg); font-size: 12px; color: white; }
+
+        /* STATUS XP */
+        .status-container { background: var(--surface); border: 1px solid rgba(255,255,255,0.05); border-radius: 20px; margin: 0 20px 25px; display: flex; justify-content: space-around; align-items: center; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        .status-item { flex: 1; text-align: center; display: flex; flex-direction: column; gap: 5px; }
+        .status-label { font-size: 11px; font-weight: 700; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px; }
+        .status-value { color: var(--accent-light); font-size: 18px; font-weight: 900; }
+        .status-divider { width: 1px; height: 35px; background: rgba(255,255,255,0.1); }
+
+        /* SECTIONS */
+        .section { padding: 0 0 30px 20px; }
+        .section-title { font-size: 18px; font-weight: 800; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; color: white; }
+        .section-title::before { content: ''; width: 4px; height: 18px; background: var(--accent); border-radius: 2px; }
+
+        /* HORIZONTAL SCROLL */
+        .scroll-container { display: flex; gap: 12px; overflow-x: auto; padding-right: 20px; scrollbar-width: none; -ms-overflow-style: none; }
+        .scroll-container::-webkit-scrollbar { display: none; }
+
+        /* CONTINUE WATCHING CARDS (REPLICANDO INÍCIO) */
+        .continue-card { min-width: 220px; width: 220px; background: var(--surface); border-radius: var(--card-radius); overflow: hidden; position: relative; border: 1px solid rgba(255,255,255,0.05); flex-shrink: 0; }
+        .continue-thumb { width: 100%; height: 120px; background-size: cover; background-position: center; position: relative; cursor: pointer; }
+        .continue-info { padding: 12px; cursor: pointer; }
+        .continue-title-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+        .continue-name { font-size: 13px; font-weight: 800; color: white; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 70%; }
+        .continue-meta { font-size: 10px; font-weight: 700; color: var(--accent-light); background: rgba(138, 43, 226, 0.15); padding: 2px 6px; border-radius: 4px; }
+        .continue-progress-container { width: 100%; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; margin-top: 8px; overflow: hidden; }
+        .continue-progress-bar { height: 100%; background: var(--accent); box-shadow: 0 0 10px var(--accent); }
+        .continue-remove { position: absolute; top: 8px; right: 8px; width: 24px; height: 24px; background: rgba(0,0,0,0.6); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 10px; z-index: 10; cursor: pointer; }
+
+        /* FAVORITE CARDS */
+        .card { min-width: 110px; width: 110px; aspect-ratio: 2/3; border-radius: var(--card-radius); overflow: hidden; background: var(--surface); flex-shrink: 0; border: 1px solid rgba(255,255,255,0.05); cursor: pointer; }
+        .card img { width: 100%; height: 100%; object-fit: cover; }
+
+        /* ACCOUNT BUTTONS */
+        .account-actions { padding: 0 20px 30px; display: flex; flex-direction: column; gap: 12px; }
+        .action-btn { background: var(--surface); border: 1px solid rgba(255,255,255,0.05); color: white; padding: 16px; border-radius: 15px; display: flex; align-items: center; justify-content: space-between; text-decoration: none; font-size: 14px; font-weight: 700; transition: var(--transition); }
+        .action-btn i { color: var(--accent); font-size: 18px; }
+        .action-btn .btn-info { display: flex; align-items: center; gap: 12px; }
+        .action-btn .btn-value { font-size: 12px; color: var(--text-dim); font-weight: 500; }
+        
+        .delete-btn { background: rgba(229, 9, 20, 0.05); border: 1px solid rgba(229, 9, 20, 0.2); color: #ff4d4d; margin-top: 10px; }
+        .delete-btn i { color: #ff4d4d; }
+
+        /* BANNER CURSO */
+        .premium-banner { background: linear-gradient(135deg, var(--accent) 0%, #4b0082 100%); padding: 25px 20px; border-radius: 20px; margin: 0 20px 30px; text-align: center; box-shadow: 0 15px 35px rgba(138, 43, 226, 0.3); cursor: pointer; }
+        .premium-banner h3 { font-size: 20px; font-weight: 900; margin-bottom: 8px; text-transform: uppercase; }
+        .premium-banner p { font-size: 13px; opacity: 0.9; margin-bottom: 18px; line-height: 1.4; }
+        .premium-banner button { background: white; color: var(--accent); border: none; padding: 12px 35px; border-radius: 30px; font-weight: 800; font-size: 14px; text-transform: uppercase; }
+
+        /* SOCIAL */
+        .social-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 0 20px 30px; }
+        .social-item { background: var(--surface); border: 1px solid rgba(255,255,255,0.05); color: white; padding: 15px; border-radius: 15px; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 13px; font-weight: 700; }
+
+        /* VISITOR BLUR OVERLAY */
+        #visitor-overlay { position: fixed; top: 0; left: 0; width: 100%; height: calc(100% - 75px); background: rgba(0,0,0,0.7); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); z-index: 1500; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 40px; text-align: center; }
+        .visitor-icon { font-size: 50px; color: var(--accent); margin-bottom: 20px; }
+        .visitor-title { font-size: 22px; font-weight: 900; color: white; margin-bottom: 15px; }
+        .visitor-text { font-size: 15px; color: var(--text-dim); margin-bottom: 30px; line-height: 1.5; }
+        .btn-login { background: var(--accent); color: white; border: none; padding: 16px 50px; border-radius: 35px; font-weight: 800; font-size: 16px; box-shadow: 0 10px 25px rgba(138, 43, 226, 0.4); cursor: pointer; text-transform: uppercase; }
+
+        /* NAV */
+        .nav { position: fixed; bottom: 0; left: 0; right: 0; height: 75px; background: var(--nav-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); display: flex; justify-content: space-around; z-index: 2000; border-top: 1px solid rgba(255,255,255,0.05); padding-bottom: 10px; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-dim); text-decoration: none; font-size: 10px; font-weight: 600; gap: 5px; flex: 1; }
+        .nav-item i { font-size: 20px; }
+        .nav-item.active { color: var(--accent); }
+        .nav-profile { width: 24px; height: 24px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; color: white; font-size: 12px; overflow: hidden; border: 1px solid var(--accent); }
+        .nav-profile img { width: 100%; height: 100%; object-fit: cover; }
+
+        .skeleton { background: #1a1a1a; border-radius: 12px; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 0.8; } 100% { opacity: 0.5; } }
+    </style>
+</head>
+<body>
+
+    <div id="visitor-overlay">
+        <div class="visitor-icon"><i class="fa-solid fa-user-secret"></i></div>
+        <h2 class="visitor-title">Modo Visitante</h2>
+        <p class="visitor-text">Faça login para salvar seu progresso, favoritar filmes e ganhar XP!</p>
+        <button class="btn-login" onclick="window.location.href='onboarding.html'">Fazer Login</button>
+    </div>
+
+    <header>
+        <div class="header-title" id="user-name-header">MEU PERFIL</div>
+    </header>
+
+    <div class="profile-header">
+        <div class="avatar-container" id="avatar-click">
+            <img src="https://via.placeholder.com/150" class="profile-avatar" id="profile-avatar-img">
+            <div class="edit-badge"><i class="fa-solid fa-pencil"></i></div>
+        </div>
+    </div>
+
+    <main>
+        <div class="status-container">
+            <div class="status-item">
+                <span class="status-label">Experiência</span>
+                <span class="status-value" id="user-xp">0 XP</span>
+            </div>
+            <div class="status-divider"></div>
+            <div class="status-item">
+                <span class="status-label">Nível Atual</span>
+                <span class="status-value" id="user-level">Nível 1</span>
+            </div>
+        </div>
+
+        <div class="section" id="continue-section">
+            <h2 class="section-title">Continuar assistindo</h2>
+            <div class="scroll-container" id="continue-list">
+                <div class="continue-card skeleton" style="height: 180px;"></div>
+            </div>
+        </div>
+
+        <div class="section" id="favorites-section">
+            <h2 class="section-title">Meus favoritos</h2>
+            <div class="scroll-container" id="favorites-list">
+                <div class="card skeleton"></div>
+                <div class="card skeleton"></div>
+                <div class="card skeleton"></div>
+            </div>
+        </div>
+
+        <div class="account-actions">
+            <div class="action-btn">
+                <div class="btn-info"><i class="fa-solid fa-envelope"></i><span>E-mail</span></div>
+                <span class="btn-value" id="user-email-display">carregando...</span>
+            </div>
+            <button class="action-btn delete-btn" id="delete-account-btn">
+                <div class="btn-info"><i class="fa-solid fa-user-xmark"></i><span>Excluir Conta</span></div>
+                <i class="fa-solid fa-chevron-right" style="font-size: 12px; opacity: 0.5;"></i>
+            </button>
+        </div>
+
+        <div class="premium-banner" onclick="window.location.href='https://filmesrave.com/curso.html'">
+            <h3>Crie seu próprio Site</h3>
+            <p>Estamos entregando um site igual a este, totalmente grátis!</p>
+            <button>Começar Agora</button>
+        </div>
+
+        <div class="social-grid">
+            <a href="https://www.instagram.com/pkfilmes" class="social-item"><i class="fa-brands fa-instagram"></i> Instagram</a>
+            <a href="https://chat.whatsapp.com/K9co3Mm8SX8KCCpaHoAXOq?mode=gi_c" class="social-item"><i class="fa-brands fa-whatsapp"></i> Grupo 1</a>
+ 	    <a href="https://chat.whatsapp.com/LG8ZPekuM751OnVsHo3ydb?mode=gi_c" class="social-item"><i class="fa-brands fa-whatsapp"></i> Grupo 2</a>        
+
+	</div>
+    </main>
+
+    <nav class="nav">
+        <a href="index.html" class="nav-item"><i class="fa-solid fa-house"></i><span>Início</span></a>
+        <a href="buscar.html" class="nav-item"><i class="fa-solid fa-magnifying-glass"></i><span>Buscar</span></a>
+        <a href="novidades.html" class="nav-item"><i class="fa-solid fa-crown"></i><span>Ranking</span></a>
+        <a href="perfil.html" class="nav-item active">
+            <div class="nav-profile" id="nav-profile-icon"><i class="fa-solid fa-user"></i></div>
+            <span>Perfil</span>
+        </a>
+    </nav>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut, deleteUser } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getDatabase, ref, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBIQSqbbN-adfJjONc0pmTY4PZahwk6a6w",
+            authDomain: "nupcine.firebaseapp.com",
+            databaseURL: "https://nupcine-default-rtdb.firebaseio.com",
+            projectId: "nupcine",
+            storageBucket: "nupcine.appspot.com",
+            messagingSenderId: "602295443044",
+            appId: "1:602295443044:web:af618627a1dbe5b142c971",
+            measurementId: "G-YD3TPSJTCF"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+
+        onAuthStateChanged(auth, (user) => {
+            const isVisitor = localStorage.getItem('isVisitor') === 'true';
+            if (user) {
+                document.getElementById('visitor-overlay').style.display = 'none';
+                document.getElementById('user-email-display').textContent = user.email || 'Não informado';
+                setupProfileListener(user.uid);
+            } else if (isVisitor) {
+                document.getElementById('visitor-overlay').style.display = 'flex';
+                document.getElementById('user-email-display').textContent = 'Visitante';
+            } else {
+                window.location.href = 'onboarding.html';
+            }
+        });
+
+        function setupProfileListener(uid) {
+            const userRef = ref(db, `users/${uid}`);
+            onValue(userRef, (snapshot) => {
+                if (snapshot.exists()) {
+                    const data = snapshot.val();
+                    document.getElementById('user-name-header').textContent = (data.username || 'MEU PERFIL').toUpperCase();
+                    document.getElementById('user-xp').textContent = `${data.xp || 0} XP`;
+                    document.getElementById('user-level').textContent = `Nível ${data.level || 1}`;
+                    if (data.profilePhoto) {
+                        document.getElementById('profile-avatar-img').src = data.profilePhoto;
+                        document.getElementById('nav-profile-icon').innerHTML = `<img src="${data.profilePhoto}">`;
+                    }
+                    renderContinueWatching(data.progress, uid);
+                    renderFavorites(data.favoriteMovies);
+                }
+            });
+        }
+
+        async function renderContinueWatching(progress, uid) {
+            const container = document.getElementById('continue-list');
+            if (!progress) {
+                document.getElementById('continue-section').style.display = 'none';
+                return;
+            }
+            document.getElementById('continue-section').style.display = 'block';
+            container.innerHTML = '';
+            const sortedKeys = Object.keys(progress).sort((a, b) => (progress[b].date || 0) - (progress[a].date || 0));
+            for (const key of sortedKeys) {
+                const item = progress[key];
+                const card = await createContinueCard(item, key, uid);
+                if (card) container.appendChild(card);
+            }
+        }
+
+        async function createContinueCard(data, key, uid) {
+            try {
+                const res = await fetch(`https://pkapi-six.vercel.app/page/detalhes_ID?id=${data.contentId}`);
+                const details = await res.json();
+                const card = document.createElement('div');
+                card.className = 'continue-card';
+                let thumb = details.banner || details.capa;
+                let title = details.titulo;
+                let meta = details.generos ? details.generos.split(',')[0] : '';
+                let link = `detalhes.html?id=${data.contentId}`;
+                if (data.season && data.episode) {
+                    const ep = details.episodios.find(e => e.temporada == data.season && e.episodio == data.episode);
+                    if (ep) {
+                        thumb = ep.capa || thumb;
+                        meta = `T${data.season} EP${data.episode}`;
+                        link = `player.html?id=${data.contentId}&season=${data.season}&ep=${data.episode}`;
+                    }
+                } else {
+                    link = `player.html?id=${data.contentId}`;
+                }
+                const progressPercent = (data.time / data.duration) * 100;
+                card.innerHTML = `
+                    <div class="continue-remove" onclick="event.stopPropagation(); window.removeProgress('${key}', '${uid}')">
+                        <i class="fa-solid fa-xmark"></i>
+                    </div>
+                    <div class="continue-thumb" style="background-image: url('${thumb}')" onclick="window.location.href='${link}'"></div>
+                    <div class="continue-info" onclick="window.location.href='${link}'">
+                        <div class="continue-title-row">
+                            <span class="continue-name">${title}</span>
+                            <span class="continue-meta">${meta}</span>
+                        </div>
+                        <div class="continue-progress-container">
+                            <div class="continue-progress-bar" style="width: ${progressPercent}%"></div>
+                        </div>
+                    </div>
+                `;
+                return card;
+            } catch (e) { return null; }
+        }
+
+        window.removeProgress = async (key, uid) => {
+            if (confirm('Remover este item do seu histórico?')) {
+                await remove(ref(db, `users/${uid}/progress/${key}`));
+            }
+        };
+
+        async function renderFavorites(favorites) {
+            const container = document.getElementById('favorites-list');
+            if (!favorites) {
+                document.getElementById('favorites-section').style.display = 'none';
+                return;
+            }
+            document.getElementById('favorites-section').style.display = 'block';
+            container.innerHTML = '';
+            const favoriteIds = Object.values(favorites);
+            for (const id of favoriteIds) {
+                try {
+                    const res = await fetch(`https://pkapi-six.vercel.app/page/detalhes_ID?id=${id}`);
+                    const details = await res.json();
+                    const card = document.createElement('div');
+                    card.className = 'card';
+                    card.onclick = () => window.location.href = `detalhes.html?id=${id}`;
+                    card.innerHTML = `<img src="${details.capa || details.banner}" alt="${details.titulo}">`;
+                    container.appendChild(card);
+                } catch (e) {}
+            }
+        }
+
+        document.getElementById('delete-account-btn').onclick = async () => {
+            if (confirm('ATENÇÃO: Isso excluirá permanentemente sua conta e todos os seus dados. Deseja continuar?')) {
+                const user = auth.currentUser;
+                if (user) {
+                    try {
+                        await remove(ref(db, `users/${user.uid}`));
+                        await deleteUser(user);
+                        localStorage.removeItem('isVisitor');
+                        window.location.href = 'onboarding.html';
+                    } catch (e) {
+                        alert('Para excluir sua conta, você precisa ter feito login recentemente. Saia e entre novamente para realizar esta ação.');
+                    }
+                }
+            }
+        };
+
+        document.getElementById('avatar-click').onclick = () => {
+            const newUrl = prompt("Insira a URL da nova foto de perfil:");
+            if (newUrl && auth.currentUser) {
+                update(ref(db, `users/${auth.currentUser.uid}`), { profilePhoto: newUrl });
+            }
+        };
+
+        document.getElementById('logout-btn').onclick = () => {
+            signOut(auth).then(() => {
+                localStorage.removeItem('isVisitor');
+                window.location.href = 'onboarding.html';
+            });
+        };
+    </script>
+</body>
+</html>

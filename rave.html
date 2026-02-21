@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html class='nJs' dir='ltr' lang='pt'>
+<head>
+    <meta charset='UTF-8'/>
+    <meta content='IE=edge' http-equiv='X-UA-Compatible'/>
+    <meta content='width=device-width, initial-scale=1.0, user-scalable=1.0, minimum-scale=1.0, maximum-scale=5.0' name='viewport'/>
+    <title id="page-title">PK FILMES</title>
+    
+    <!-- METADADOS OPEN GRAPH (ESTÁTICOS PARA O RAVE) -->
+    <meta content='Filmes P K - Filmes e Séries' property='og:site_name'/>
+    <meta content='' property='og:title' id="og-title"/>
+    <meta content='article' property='og:type'/>
+    <meta content='' property='og:description' id="og-description"/>
+    <meta content='' property='og:image' id="og-image"/>
+    <meta content='1280' property='og:image:width'/>
+    <meta content='720' property='og:image:height'/>
+    
+    <!-- METADADOS DE VÍDEO QUE O RAVE CAPTURA -->
+    <meta content='' property='og:video' id="og-video"/>
+    <meta content='' property='og:video:secure_url' id="og-video-secure"/>
+    <meta content='video/mp4' property='og:video:type'/>
+    <meta content='1280' property='og:video:width'/>
+    <meta content='720' property='og:video:height'/>
+
+    <meta content='summary_large_image' name='twitter:card'/>
+    <meta content='' name='twitter:title' id="tw-title"/>
+    <meta content='' name='twitter:image' id="tw-image"/>
+
+    <style>
+        :root {
+            --bodyB: #1e1e1e;
+            --accent: #482dff;
+            --white: #fffdfc;
+        }
+        body {
+            background-color: var(--bodyB);
+            color: var(--white);
+            font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .main-wrap {
+            width: 100%;
+            max-width: 800px;
+            padding: 20px;
+            text-align: center;
+        }
+        .movie-card {
+            background: #2d2d30;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .poster-img {
+            width: 180px;
+            border-radius: 8px;
+            border: 2px solid var(--accent);
+            margin-bottom: 15px;
+        }
+        .movie-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        .play-btn a {
+            display: inline-block;
+            background: #fff;
+            color: #000;
+            padding: 15px 40px;
+            border-radius: 30px;
+            font-weight: bold;
+            text-decoration: none;
+            font-size: 18px;
+            margin: 10px;
+            transition: 0.3s;
+        }
+        .play-btn a:hover {
+            transform: scale(1.05);
+            background: #eee;
+        }
+        .player2-btn {
+            display: inline-block;
+            background: linear-gradient(135deg, #ff0080, #7c3aed);
+            color: #fff;
+            padding: 12px 30px;
+            border-radius: 30px;
+            font-weight: bold;
+            text-decoration: none;
+            margin-top: 20px;
+        }
+        .hidden-video {
+            width: 1px;
+            height: 1px;
+            opacity: 0.01;
+            position: absolute;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-wrap">
+        <div class="movie-card">
+            <img src="" alt="Poster" class="poster-img" id="poster-display">
+            <h1 class="movie-title" id="title-display">Carregando...</h1>
+            
+            <div class="play-btn">
+                <!-- O RAVE CAPTURA O LINK DESTE BOTÃO -->
+                <a href="" id="main-play-link">&#9654; ASSISTIR</a>
+            </div>
+            
+            <a href="" class="player2-btn" id="player2-link">Player 2</a>
+        </div>
+    </div>
+
+    <!-- PLAYER PARA O RAVE DETECTAR O STREAM -->
+    <video class="hidden-video" controls autoplay name="media" id="rave-video">
+        <source src="" type="video/mp4" id="video-src">
+    </video>
+
+    <script type='application/ld+json' id="schema-data">
+    {
+        "@context": "http://schema.org",
+        "@type": "VideoObject",
+        "name": "",
+        "description": "",
+        "thumbnailUrl": "",
+        "uploadDate": "2026-02-08T08:30:20-03:00",
+        "contentUrl": ""
+    }
+    </script>
+
+    <script>
+        // Função para pegar parâmetros da URL
+        function getParam(name) {
+            return new URLSearchParams(window.location.search).get(name);
+        }
+
+        const title = getParam('title');
+        const poster = getParam('poster');
+        const videoUrl = getParam('videoUrl');
+        const initialUrl = getParam('initialUrl');
+
+        if (title && poster && videoUrl) {
+            // Atualiza elementos visuais
+            document.title = title;
+            document.getElementById('title-display').innerText = title;
+            document.getElementById('poster-display').src = poster;
+            document.getElementById('main-play-link').href = videoUrl;
+            document.getElementById('player2-link').href = initialUrl || videoUrl;
+            
+            // Atualiza vídeo
+            document.getElementById('video-src').src = videoUrl;
+            document.getElementById('rave-video').load();
+
+            // Atualiza Metadados (Importante para o Rave)
+            document.getElementById('og-title').setAttribute('content', title);
+            document.getElementById('og-description').setAttribute('content', title);
+            document.getElementById('og-image').setAttribute('content', poster);
+            document.getElementById('og-video').setAttribute('content', videoUrl);
+            document.getElementById('og-video-secure').setAttribute('content', videoUrl);
+            document.getElementById('tw-title').setAttribute('content', title);
+            document.getElementById('tw-image').setAttribute('content', poster);
+
+            // Atualiza Schema
+            const schema = JSON.parse(document.getElementById('schema-data').textContent);
+            schema.name = title;
+            schema.description = title;
+            schema.thumbnailUrl = poster;
+            schema.contentUrl = videoUrl;
+            document.getElementById('schema-data').textContent = JSON.stringify(schema);
+        }
+    </script>
+</body>
+</html>

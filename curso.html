@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Crie seu Site com IA e Celular - PKFilmes</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --bg: #0a0a0a;
+            --surface: #1c1c1c;
+            --accent: #8a2be2; /* Roxo */
+            --accent-light: #a855f7;
+            --neon-blue: #00f0ff;
+            --neon-green: #00ff80;
+            --text-main: #ffffff;
+            --text-dim: #a0a0a0;
+            --nav-bg: rgba(11, 11, 11, 0.8);
+            --card-radius: 12px;
+            --btn-radius: 30px;
+            --transition: all 0.3s ease;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        body { 
+            background-color: var(--bg); 
+            color: var(--text-main); 
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+            line-height: 1.6; 
+            padding-bottom: 100px; 
+            overflow-x: hidden; 
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* General Styles */
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+        section { padding: 60px 0; text-align: center; }
+        h1, h2, h3 { font-weight: 800; line-height: 1.2; margin-bottom: 20px; }
+        h1 { font-size: 36px; }
+        h2 { font-size: 28px; }
+        h3 { font-size: 22px; }
+        p { font-size: 16px; margin-bottom: 15px; color: var(--text-dim); }
+
+        /* Buttons */
+        .btn { 
+            display: inline-block; 
+            background: var(--accent); 
+            color: white; 
+            padding: 15px 30px; 
+            border-radius: var(--btn-radius); 
+            text-decoration: none; 
+            font-weight: 700; 
+            font-size: 18px; 
+            border: none; 
+            cursor: pointer; 
+            transition: var(--transition); 
+            box-shadow: 0 8px 20px rgba(138, 43, 226, 0.4);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .btn:hover { background: var(--accent-light); transform: translateY(-3px); box-shadow: 0 12px 25px rgba(138, 43, 226, 0.6); }
+        .btn-secondary { background: var(--neon-blue); box-shadow: 0 8px 20px rgba(0, 240, 255, 0.4); }
+        .btn-secondary:hover { background: #33f3ff; box-shadow: 0 12px 25px rgba(0, 240, 255, 0.6); }
+
+        /* Hero Section */
+        #hero { 
+            background: linear-gradient(180deg, var(--bg) 0%, #10001c 100%); 
+            padding: 100px 0 60px; 
+            position: relative; 
+            overflow: hidden;
+        }
+        #hero::before { 
+            content: ''; 
+            position: absolute; 
+            top: -50px; left: -50px; right: -50px; bottom: -50px; 
+            background: url('https://via.placeholder.com/1920x1080/0a0a0a/00f0ff?text=Fundo+Tecnologico') no-repeat center center/cover; 
+            opacity: 0.1; 
+            filter: blur(5px); 
+            z-index: 0;
+        }
+        #hero .container { position: relative; z-index: 1; }
+        #hero h1 { font-size: 48px; color: var(--neon-blue); text-shadow: 0 0 15px rgba(0, 240, 255, 0.6); margin-bottom: 25px; }
+        #hero .subtitle { font-size: 20px; color: var(--text-main); max-width: 700px; margin: 0 auto 40px; opacity: 0.9; }
+        #hero .hero-image { max-width: 80%; height: auto; margin-top: 40px; border-radius: var(--card-radius); box-shadow: 0 15px 40px rgba(0,0,0,0.5); border: 1px solid rgba(0, 240, 255, 0.3); }
+
+        /* Offer Section */
+        #offer { background: var(--surface); padding: 40px 0; border-top: 1px solid rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.05); }
+        #offer .highlight { font-size: 24px; font-weight: 900; color: var(--neon-green); text-shadow: 0 0 10px rgba(0, 255, 128, 0.5); margin-bottom: 15px; }
+        #offer .price-old { font-size: 28px; color: var(--text-dim); text-decoration: line-through; margin-right: 10px; }
+        #offer .price-new { font-size: 48px; font-weight: 900; color: var(--accent); text-shadow: 0 0 20px rgba(138, 43, 226, 0.8); display: block; margin-bottom: 20px; }
+        #offer .payment-info { font-size: 14px; color: var(--text-dim); margin-bottom: 30px; }
+        #offer .countdown { font-size: 28px; font-weight: 700; color: var(--neon-blue); margin-top: 20px; }
+
+        /* Bonus Section */
+        #bonus { background: var(--bg); }
+        #bonus h2 { color: var(--neon-blue); }
+        #bonus .bonus-features { display: flex; justify-content: center; gap: 30px; margin-top: 30px; flex-wrap: wrap; }
+        #bonus .feature-item { font-size: 18px; font-weight: 600; color: var(--text-main); display: flex; align-items: center; gap: 10px; }
+        #bonus .feature-item i { color: var(--neon-green); font-size: 24px; }
+        #bonus .mockup-image { max-width: 60%; height: auto; margin-top: 40px; border-radius: var(--card-radius); box-shadow: 0 15px 40px rgba(0,0,0,0.5); border: 1px solid rgba(0, 240, 255, 0.3); }
+
+        /* What You Learn Section */
+        #learn { background: var(--surface); }
+        #learn h2 { color: var(--accent); }
+        #learn .learn-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 25px; margin-top: 40px; }
+        #learn .learn-card { background: var(--bg); padding: 25px; border-radius: var(--card-radius); border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+        #learn .learn-card i { font-size: 40px; color: var(--neon-blue); margin-bottom: 15px; }
+        #learn .learn-card h3 { font-size: 18px; color: var(--text-main); }
+
+        /* For Whom Section */
+        #for-whom { background: var(--bg); }
+        #for-whom p { max-width: 700px; margin: 0 auto; font-size: 18px; color: var(--neon-green); text-shadow: 0 0 8px rgba(0, 255, 128, 0.4); }
+
+        /* Testimonials Section */
+        #testimonials { background: var(--surface); }
+        #testimonials h2 { color: var(--neon-blue); }
+        .testimonial-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; margin-top: 40px; }
+        .testimonial-card { background: var(--bg); padding: 25px; border-radius: var(--card-radius); border: 1px solid rgba(255,255,255,0.05); text-align: left; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+        .testimonial-card .stars { color: var(--gold); margin-bottom: 10px; font-size: 18px; }
+        .testimonial-card p { font-style: italic; font-size: 15px; color: var(--text-main); margin-bottom: 15px; }
+        .testimonial-card .author { font-weight: 700; color: var(--accent-light); font-size: 14px; }
+
+        /* CTA Final Section */
+        #cta-final { background: linear-gradient(135deg, var(--accent) 0%, #4b0082 100%); padding: 60px 0; }
+        #cta-final h2 { color: white; font-size: 32px; text-shadow: 0 0 10px rgba(0,0,0,0.3); }
+        #cta-final p { color: rgba(255,255,255,0.9); font-size: 18px; margin-bottom: 30px; }
+        #cta-final .btn { background: white; color: var(--accent); box-shadow: 0 10px 30px rgba(0,0,0,0.4); }
+        #cta-final .btn:hover { background: #f0f0f0; transform: translateY(-3px); box-shadow: 0 15px 35px rgba(0,0,0,0.6); }
+
+        /* Footer */
+        footer { background: var(--surface); color: var(--text-dim); padding: 40px 0; font-size: 14px; border-top: 1px solid rgba(255,255,255,0.05); }
+        footer .container { display: flex; flex-direction: column; gap: 15px; }
+        footer a { color: var(--text-dim); text-decoration: none; transition: var(--transition); }
+        footer a:hover { color: var(--accent-light); }
+
+        /* NAV (from other pages) */
+        .nav { 
+            position: fixed; 
+            bottom: 0; 
+            left: 0; 
+            right: 0; 
+            height: 75px; 
+            background: var(--nav-bg); 
+            backdrop-filter: blur(20px); 
+            -webkit-backdrop-filter: blur(20px); 
+            display: flex; 
+            justify-content: space-around; 
+            z-index: 2000; 
+            border-top: 1px solid rgba(255,255,255,0.05); 
+            padding-bottom: 10px; 
+        }
+        .nav-item { 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            color: var(--text-dim); 
+            text-decoration: none; 
+            font-size: 10px; 
+            font-weight: 600; 
+            gap: 5px; 
+            flex: 1; 
+            transition: var(--transition);
+        }
+        .nav-item i { font-size: 20px; }
+        .nav-item.active { color: var(--accent); }
+        .nav-profile { 
+            width: 24px; 
+            height: 24px; 
+            border-radius: 50%; 
+            background: var(--accent); 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            color: white; 
+            font-size: 12px; 
+            overflow: hidden; 
+            border: 1px solid var(--accent); 
+        }
+        .nav-profile img { width: 100%; height: 100%; object-fit: cover; }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            h1 { font-size: 32px; }
+            h2 { font-size: 24px; }
+            #hero .subtitle { font-size: 18px; }
+            #offer .price-new { font-size: 40px; }
+            #learn .learn-grid { grid-template-columns: 1fr; }
+            .testimonial-grid { grid-template-columns: 1fr; }
+            #hero .hero-image, #bonus .mockup-image { max-width: 95%; }
+        }
+    </style>
+</head>
+<body>
+
+    <main>
+        <!-- HERO SECTION -->
+        <section id="hero">
+            <div class="container">
+                <h1>Crie seu próprio site e ganhe em dólar usando só o celular + IA</h1>
+                <p class="subtitle">Aprenda passo a passo e ainda ganhe um site pronto exatamente como este — grátis para editar e publicar.</p>
+                <a href="https://pay.kiwify.com.br/PRG91Ix" class="btn">Quero começar agora</a>
+                <img src="https://blog.abemf.com.br/wp-content/uploads/2024/03/FOTOS-5-1024x683.png" alt="" class="hero-image">
+            </div>
+        </section>
+
+        <!-- OFFER / PROMOTION -->
+        <section id="offer">
+            <div class="container">
+                <p class="highlight">🔥 PROMOÇÃO LIMITADA</p>
+                <p><span class="price-old">De R$300</span> <span class="price-new">por apenas R$29,90</span></p>
+                <p class="payment-info">Pagamento único — acesso completo</p>
+                <a href="https://pay.kiwify.com.br/PRG91Ix" class="btn btn-secondary">Garantir minha vaga</a>
+                <p class="countdown">⏳ A oferta termina em: <span id="countdown-timer"></span></p>
+            </div>
+        </section>
+
+        <!-- BÔNUS -->
+        <section id="bonus">
+            <div class="container">
+                <h2>Você ganha um site pronto — grátis</h2>
+                <p>Receba um projeto completo igual a este site para personalizar, publicar e monetizar — tudo direto do celular.</p>
+                <div class="bonus-features">
+                    <div class="feature-item"><i class="fa-solid fa-check-circle"></i> Editável</div>
+                    <div class="feature-item"><i class="fa-solid fa-check-circle"></i> Publicável</div>
+                    <div class="feature-item"><i class="fa-solid fa-check-circle"></i> Monetizável</div>
+                </div>
+                <img src="https://via.placeholder.com/600x400/0a0a0a/00f0ff?text=Mockup+Site+no+Celular" alt="Mockup de site aberto no celular" class="mockup-image">
+            </div>
+        </section>
+
+        <!-- O QUE VOCÊ VAI APRENDER -->
+        <section id="learn">
+            <div class="container">
+                <h2>O que você vai aprender</h2>
+                <div class="learn-grid">
+                    <div class="learn-card">
+                        <i class="fa-solid fa-mobile-alt"></i>
+                        <h3>Criar site pelo celular</h3>
+                    </div>
+                    <div class="learn-card">
+                        <i class="fa-solid fa-robot"></i>
+                        <h3>Usar IA para automatizar</h3>
+                    </div>
+                    <div class="learn-card">
+                        <i class="fa-solid fa-cloud-upload-alt"></i>
+                        <h3>Publicar sem programar</h3>
+                    </div>
+                    <div class="learn-card">
+                        <i class="fa-solid fa-dollar-sign"></i>
+                        <h3>Monetizar em dólar</h3>
+                    </div>
+                    <div class="learn-card">
+                        <i class="fa-solid fa-palette"></i>
+                        <h3>Personalização total</h3>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PARA QUEM É -->
+        <section id="for-whom">
+            <div class="container">
+                <p>Perfeito para iniciantes que querem renda online sem computador ou conhecimento técnico.</p>
+            </div>
+        </section>
+
+        <!-- PROVA / CONFIANÇA -->
+        <section id="testimonials">
+            <div class="container">
+                <h2>O que nossos alunos dizem</h2>
+                <div class="testimonial-grid">
+                    <div class="testimonial-card">
+                        <div class="stars">★★★★★</div>
+                        <p>"Nunca imaginei que seria tão fácil criar meu próprio site e começar a ganhar dinheiro. O curso é incrível!"</p>
+                        <div class="author">- Ana S.</div>
+                    </div>
+                    <div class="testimonial-card">
+                        <div class="stars">★★★★★</div>
+                        <p>"Com a IA, tudo ficou mais rápido e prático. Já estou com meu site no ar e gerando renda."</p>
+                        <div class="author">- Bruno M.</div>
+                    </div>
+                    <div class="testimonial-card">
+                        <div class="stars">★★★★★</div>
+                        <p>"Sem precisar de computador, só com o celular, consegui montar um projeto profissional. Recomendo!"</p>
+                        <div class="author">- Carla P.</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA FINAL -->
+        <section id="cta-final">
+            <div class="container">
+                <h2>Comece hoje — transforme seu celular em renda</h2>
+                <p>Vagas promocionais por tempo limitado.</p>
+                <a href="https://pay.kiwify.com.br/PRG91Ix" class="btn">Entrar agora por R$29,90</a>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 PKFilmes. Todos os direitos reservados.</p>
+            <p><a href="#">Política de Privacidade</a> | <a href="#">Termos de Uso</a></p>
+            <p>Garantia de satisfação de 7 dias.</p>
+        </div>
+    </footer>
+
+    <nav class="nav">
+        <a href="index.html" class="nav-item"><i class="fa-solid fa-house"></i><span>Início</span></a>
+        <a href="buscar.html" class="nav-item"><i class="fa-solid fa-magnifying-glass"></i><span>Buscar</span></a>
+        <a href="novidades.html" class="nav-item"><i class="fa-solid fa-crown"></i><span>Ranking</span></a>
+        <a href="perfil.html" class="nav-item"><div class="nav-profile"><i class="fa-solid fa-user"></i></div><span>Perfil</span></a>
+    </nav>
+
+    <script>
+        // Countdown Timer for Offer Section
+        const countdownElement = document.getElementById('countdown-timer');
+        const endDate = new Date();
+        endDate.setDate(endDate.getDate() + 7); // Offer ends in 7 days from now
+
+        function updateCountdown() {
+            const now = new Date().getTime();
+            const distance = endDate.getTime() - now;
+
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            countdownElement.innerHTML = `${days}d ${hours}h ${minutes}m ${seconds}s`;
+
+            if (distance < 0) {
+                clearInterval(countdownInterval);
+                countdownElement.innerHTML = "EXPIRADA!";
+            }
+        }
+
+        updateCountdown();
+        const countdownInterval = setInterval(updateCountdown, 1000);
+    </script>
+</body>
+</html>

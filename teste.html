@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Teste Limpo - Inserção no Supabase</title>
+    <!-- Script oficial do Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            display: grid;
+            place-content: center;
+            min-height: 100vh;
+            text-align: center;
+            background: #181818;
+            color: #f0f0f0;
+            margin: 0;
+        }
+        .container {
+            background: #2a2a2a;
+            padding: 2rem 3rem;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        }
+        h1 {
+            margin-top: 0;
+            color: #e0e0e0;
+        }
+        button {
+            font-size: 1.2rem;
+            padding: 0.8rem 1.5rem;
+            cursor: pointer;
+            border-radius: 8px;
+            border: none;
+            background-color: #8a2be2;
+            color: white;
+            font-weight: 600;
+            transition: background-color 0.2s;
+        }
+        button:hover {
+            background-color: #9945ff;
+        }
+        button:disabled {
+            background-color: #555;
+            cursor: not-allowed;
+        }
+        #status {
+            margin-top: 1.5rem;
+            font-size: 1.1rem;
+            font-family: "Courier New", Courier, monospace;
+            min-height: 2em;
+            padding: 0.5em;
+            border-radius: 6px;
+            background: #111;
+        }
+        .success {
+            color: #4ade80; /* Verde-claro */
+        }
+        .error {
+            color: #f7556c; /* Vermelho-claro */
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Teste de Inserção no Novo Projeto</h1>
+        <p>Tabela: <strong>progress</strong> | Colunas: <strong>id (text)</strong>, <strong>timer (text)</strong></p>
+        <button id="testButton">1. Inserir Registro de Teste</button>
+        <div id="status">Aguardando o teste...</div>
+    </div>
+
+    <script>
+        // =================================================================
+        // CREDENCIAIS DO SEU NOVO PROJETO
+        // =================================================================
+        const SUPABASE_URL = 'https://arkeruofrcqqluejrglu.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFya2VydW9mcmNxcWx1ZWpyZ2x1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzNTU5NjksImV4cCI6MjA4NjkzMTk2OX0.-zBwImuvLwCFR5ZyMSgf90dzIbqe5YllW9p09wDZ2mE';
+
+        // Inicializa o cliente Supabase
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        // Pega os elementos da página
+        const testButton = document.getElementById('testButton');
+        const statusDiv = document.getElementById('status');
+
+        // Adiciona o evento de clique ao botão
+        testButton.addEventListener('click', async () => {
+            // Atualiza a interface para mostrar que o processo começou
+            statusDiv.textContent = 'Enviando dados para o Supabase...';
+            statusDiv.className = '';
+            testButton.disabled = true;
+
+            try {
+                // Tenta inserir os dados na tabela 'progress'
+                const { data, error } = await supabase
+                    .from('progress')
+                    .insert([
+                        { id: 'teste', timer: 'teste' } 
+                    ]);
+
+                // Se o Supabase retornar um erro, ele será lançado para o bloco 'catch'
+                if (error) {
+                    throw error;
+                }
+
+                // Se a inserção for bem-sucedida
+                console.log('Dados inseridos com sucesso:', data);
+                statusDiv.textContent = 'SUCESSO! Linha inserida. Verifique sua tabela "progress".';
+                statusDiv.classList.add('success');
+                testButton.textContent = 'Teste Concluído!';
+
+            } catch (error) {
+                // Se qualquer erro ocorrer (seja de rede ou do Supabase)
+                console.error('O teste falhou:', error);
+                statusDiv.textContent = `ERRO: ${error.message}`;
+                statusDiv.classList.add('error');
+                testButton.textContent = 'O Teste Falhou';
+            }
+        });
+    </script>
+
+</body>
+</html>
+

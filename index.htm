@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>PKFilmes</title>
+    <!-- FontAwesome carregado com defer para não bloquear renderização -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" media="print" onload="this.media='all'">
+    <style>
+        :root {
+            --bg: #000;
+            --accent: #8a2be2;
+            --card-w: 110px;
+            --card-h: 165px;
+            --header-height: 100px;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        html { scroll-behavior: smooth; background-color: #000; }
+        body {
+            background-color: var(--bg); color: #fff;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            padding-bottom: 70px; overflow-x: hidden;
+            min-height: 100vh;
+        }
+        
+        /* Efeito Roxo apenas no topo (Banner) */
+        .bg-gradient {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100vh;
+            background: radial-gradient(circle at top, rgba(138, 43, 226, 0.4) 0%, rgba(0, 0, 0, 1) 70%);
+            z-index: -1; pointer-events: none;
+        }
+
+        header {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
+            padding: 15px; transition: background-color 0.3s ease;
+        }
+        .top-nav { display: flex; align-items: center; justify-content: center; margin-bottom: 15px; }
+        .logo { font-size: 24px; font-weight: 800; letter-spacing: 1px; }
+        .logo span { color: var(--accent); }
+        
+        .header-nav { display: flex; gap: 10px; align-items: center; justify-content: center; }
+        .header-nav a, .header-nav .category-btn {
+            color: #fff; text-decoration: none; font-weight: 500; font-size: 14px;
+            padding: 8px 15px; border: 1px solid rgba(255,255,255,0.2); 
+            border-radius: 20px; background-color: rgba(0,0,0,0.5);
+            transition: all 0.2s ease;
+        }
+        .dropdown { position: relative; }
+        .dropdown-content {
+            display: none; position: absolute; top: 120%; left: 50%;
+            transform: translateX(-50%); background-color: #141414;
+            border: 1px solid #333; border-radius: 8px;
+            min-width: 200px; box-shadow: 0 8px 16px rgba(0,0,0,0.8);
+            z-index: 101; padding: 10px 0; max-height: 60vh; overflow-y: auto;
+        }
+        .dropdown-content a { color: white; padding: 12px 20px; text-decoration: none; display: block; text-align: center; font-size: 15px; }
+        .dropdown:hover .dropdown-content { display: block; }
+
+        .banner-container { padding-top: var(--header-height); padding-bottom: 10px; width: 100%; display: flex; justify-content: center; }
+        .banner {
+            position: relative; width: 90%; max-width: 400px;
+            aspect-ratio: 2/3; display: flex; flex-direction: column; justify-content: flex-end; align-items: center;
+            padding: 30px 20px; background-size: cover; background-position: center;
+            background-color: #111; border-radius: 15px; overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .banner-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, transparent 60%); z-index: 1; }
+        .banner-content { position: relative; z-index: 2; width: 100%; display: flex; flex-direction: column; align-items: center; text-align: center; }
+        .banner-logo { width: 85%; max-height: 90px; margin-bottom: 15px; object-fit: contain; }
+        .banner-genre { font-size: 13px; font-weight: 500; color: #fff; margin-bottom: 20px; opacity: 0.9; display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+        .banner-genre span::after { content: " • "; margin-left: 8px; opacity: 0.5; }
+        .banner-genre span:last-child::after { content: ""; }
+        .banner-btns { display: flex; gap: 12px; width: 100%; justify-content: center; }
+        .btn-main { flex: 1; max-width: 160px; height: 42px; border: none; border-radius: 6px; font-weight: 700; font-size: 15px; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; background: #fff; color: #000; }
+        
+        /* Skeleton Styles */
+        @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+        .skeleton { 
+            background: linear-gradient(90deg, #111 25%, #1a1a1a 50%, #111 75%); 
+            background-size: 200% 100%; 
+            animation: shimmer 1.5s infinite linear; 
+        }
+        
+        .section { padding: 20px 0 5px 15px; }
+        .section-title { font-size: 18px; font-weight: 700; margin-bottom: 12px; color: #fff; }
+        .row { display: flex; gap: 10px; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; padding-right: 15px; }
+        .row::-webkit-scrollbar { display: none; }
+        
+        .card { 
+            min-width: var(--card-w); width: var(--card-w); height: var(--card-h); 
+            border-radius: 6px; overflow: hidden; background: #111; 
+            flex-shrink: 0; position: relative; transition: transform 0.2s;
+        }
+        .card img { width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 0.3s ease; }
+        .card img.loaded { opacity: 1; }
+
+        /* Navigation */
+        .nav { position: fixed; bottom: 0; left: 0; right: 0; height: 65px; background: rgba(0,0,0,0.95); backdrop-filter: blur(10px); display: flex; justify-content: space-around; align-items: center; border-top: 1px solid rgba(255,255,255,0.1); z-index: 100; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; color: #888; text-decoration: none; font-size: 10px; gap: 4px; }
+        .nav-item.active { color: #fff; }
+        .nav-item i { font-size: 20px; }
+
+        /* Full Screen Loading Skeleton */
+        #loading-screen {
+            position: fixed; inset: 0; background: #000; z-index: 2000;
+            display: flex; flex-direction: column; padding: 20px;
+        }
+        .sk-banner { width: 90%; height: 400px; margin: 80px auto 20px; border-radius: 15px; }
+        .sk-row { display: flex; gap: 10px; margin-bottom: 20px; overflow: hidden; }
+        .sk-card { width: var(--card-w); height: var(--card-h); border-radius: 6px; flex-shrink: 0; }
+        .sk-title { width: 150px; height: 20px; margin-bottom: 15px; border-radius: 4px; }
+
+        #app { display: none; opacity: 0; transition: opacity 0.5s ease; }
+        #app.visible { display: block; opacity: 1; }
+    </style>
+</head>
+<body>
+
+    <div class="bg-gradient"></div>
+
+    <!-- Skeleton de Carregamento Inicial -->
+    <div id="loading-screen">
+        <div class="sk-banner skeleton"></div>
+        <div class="sk-title skeleton"></div>
+        <div class="sk-row">
+            <div class="sk-card skeleton"></div>
+            <div class="sk-card skeleton"></div>
+            <div class="sk-card skeleton"></div>
+            <div class="sk-card skeleton"></div>
+        </div>
+        <div class="sk-title skeleton"></div>
+        <div class="sk-row">
+            <div class="sk-card skeleton"></div>
+            <div class="sk-card skeleton"></div>
+            <div class="sk-card skeleton"></div>
+            <div class="sk-card skeleton"></div>
+        </div>
+    </div>
+
+    <div id="app">
+        <header id="main-header">
+            <div class="top-nav">
+                <div class="logo">PK<span>FILMES</span></div>
+            </div>
+            <nav class="header-nav">
+                <a href="?tipo=serie">Séries</a>
+                <a href="?tipo=filme">Filmes</a>
+                <div class="dropdown">
+                    <button class="category-btn">Categorias <i class="fa-solid fa-caret-down fa-xs"></i></button>
+                    <div class="dropdown-content" id="category-dropdown"></div>
+                </div>
+            </nav>
+        </header>
+
+        <main>
+            <div class="banner-container">
+                <section class="banner" id="banner">
+                    <div class="banner-overlay"></div>
+                    <div class="banner-content">
+                        <img src="" alt="Logo" class="banner-logo" id="banner-logo">
+                        <div class="banner-genre" id="banner-genre"></div>
+                        <div class="banner-btns">
+                            <button class="btn-main" id="banner-play-btn"><i class="fa-solid fa-play"></i> Assistir</button>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <div id="content-container"></div>
+        </main>
+
+        <nav class="nav">
+            <a href="index.html" class="nav-item active"><i class="fa-solid fa-house"></i><span>Início</span></a>
+            <a href="#" class="nav-item"><i class="fa-solid fa-magnifying-glass"></i><span>Busca</span></a>
+            <a href="#" class="nav-item"><i class="fa-solid fa-download"></i><span>Downloads</span></a>
+            <a href="#" class="nav-item"><i class="fa-solid fa-user"></i><span>Perfil</span></a>
+        </nav>
+    </div>
+
+    <script>
+        const API_URL = 'https://api.pancadao.com/v1/get_content.php';
+        
+        // Títulos criativos para as linhas
+        const CREATIVE_TITLES = {
+            "Ação": ["Adrenalina Pura", "Combate e Explosão", "Heróis em Ação"],
+            "Comédia": ["Para Morrer de Rir", "Diversão Garantida", "Comédias Imperdíveis"],
+            "Terror": ["Noites de Pesadelo", "Terror Psicológico", "Sustos Garantidos"],
+            "Drama": ["Histórias Emocionantes", "Dramas Intensos", "Para Refletir"],
+            "Ficção científica": ["Futuro Distópico", "Viagens Espaciais", "Sci-Fi de Respeito"],
+            "Animação": ["Mundo Animado", "Para Toda a Família", "Desenhos e Animes"]
+        };
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function goToDetailPage(id) {
+            window.location.href = `post.html?id=${id}`;
+        }
+
+        function createRow(title, items) {
+            if (!items || items.length === 0) return null;
+            const section = document.createElement('section');
+            section.className = 'section';
+            section.innerHTML = `<h2 class="section-title">${title}</h2>`;
+            const row = document.createElement('div');
+            row.className = 'row';
+            
+            items.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'card skeleton';
+                const img = new Image();
+                img.src = item.capa;
+                img.loading = "lazy";
+                img.onload = () => { 
+                    img.classList.add('loaded'); 
+                    card.classList.remove('skeleton'); 
+                };
+                img.onerror = () => card.remove();
+                card.onclick = () => goToDetailPage(item.id);
+                card.appendChild(img);
+                row.appendChild(card);
+            });
+            
+            section.appendChild(row);
+            return section;
+        }
+
+        function setupBanner(items) {
+            const item = items[Math.floor(Math.random() * items.length)];
+            if (!item) return;
+            const banner = document.getElementById('banner');
+            banner.style.backgroundImage = `url(${item.capa})`;
+            document.getElementById('banner-logo').src = item.logo;
+            document.getElementById('banner-genre').innerHTML = item.generos.split(',').map(g => `<span>${g.trim()}</span>`).join('');
+            document.getElementById('banner-play-btn').onclick = () => goToDetailPage(item.id);
+        }
+
+        async function init() {
+            try {
+                // Timeout para o fetch para evitar tela preta infinita em conexões ruins
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 segundos
+
+                const response = await fetch(API_URL, { signal: controller.signal });
+                clearTimeout(timeoutId);
+
+                if (!response.ok) throw new Error("Erro na API");
+                const allContent = await response.json();
+                
+                const urlParams = new URLSearchParams(window.location.search);
+                const selectedCategory = urlParams.get('categoria');
+                const selectedType = urlParams.get('tipo');
+
+                // 1. Filtrar categorias: Só mostrar se tiver pelo menos 20 itens
+                const genreCounts = {};
+                allContent.forEach(item => {
+                    item.generos.split(',').forEach(g => {
+                        const genre = g.trim();
+                        if (genre) genreCounts[genre] = (genreCounts[genre] || 0) + 1;
+                    });
+                });
+
+                const validGenres = Object.keys(genreCounts)
+                    .filter(genre => genreCounts[genre] >= 20)
+                    .sort();
+
+                // Preencher dropdown de categorias
+                const dropdown = document.getElementById('category-dropdown');
+                validGenres.forEach(genre => {
+                    dropdown.innerHTML += `<a href="?categoria=${encodeURIComponent(genre)}">${genre}</a>`;
+                });
+
+                const container = document.getElementById('content-container');
+                let contentToDisplay = allContent;
+
+                if (selectedCategory) {
+                    contentToDisplay = allContent.filter(item => item.generos.includes(selectedCategory));
+                } else if (selectedType) {
+                    contentToDisplay = allContent.filter(item => item.tipo === selectedType);
+                }
+
+                setupBanner(contentToDisplay);
+
+                if (selectedCategory || selectedType) {
+                    const title = selectedCategory || (selectedType === 'filme' ? 'Filmes' : 'Séries');
+                    const row = createRow(title, contentToDisplay);
+                    if (row) container.appendChild(row);
+                } else {
+                    // Home: Mostrar algumas categorias válidas aleatórias
+                    const homeGenres = shuffleArray([...validGenres]).slice(0, 8);
+                    homeGenres.forEach(genre => {
+                        const items = allContent.filter(item => item.generos.includes(genre));
+                        const creativeTitle = (CREATIVE_TITLES[genre] && CREATIVE_TITLES[genre][0]) || genre;
+                        const row = createRow(creativeTitle, items);
+                        if (row) container.appendChild(row);
+                    });
+                }
+
+                // Finalizar carregamento
+                document.getElementById('loading-screen').style.display = 'none';
+                const app = document.getElementById('app');
+                app.classList.add('visible');
+
+            } catch (error) {
+                console.error(error);
+                document.body.innerHTML = `
+                    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;text-align:center;padding:20px;">
+                        <i class="fa-solid fa-circle-exclamation" style="font-size:48px;color:var(--accent);margin-bottom:20px;"></i>
+                        <h2>Ops! Problema de conexão</h2>
+                        <p style="margin:10px 0 20px;opacity:0.7;">Não conseguimos carregar o conteúdo. Verifique sua internet.</p>
+                        <button onclick="location.reload()" style="padding:12px 30px;background:var(--accent);border:none;border-radius:25px;color:white;font-weight:bold;">Tentar Novamente</button>
+                    </div>`;
+            }
+        }
+
+        // Iniciar quando o DOM estiver pronto
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

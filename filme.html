@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>PK FILMES | Detalhes</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --bg: #000;
+            --accent: #7c3aed;
+            --text: #fff;
+            --text-muted: #aaa;
+            --card-w: 100px;
+            --card-h: 150px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0; padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            overflow-x: hidden;
+            padding-bottom: 40px;
+        }
+
+        /* HEADER */
+        header {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+            height: 55px; padding: 0 15px;
+            display: flex; align-items: center;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
+        }
+        .back-btn {
+            font-size: 20px; color: #fff; text-decoration: none;
+            width: 40px; height: 40px; display: flex; align-items: center;
+        }
+
+        /* TRAILER CONTAINER */
+        .hero-container {
+            position: relative; height: 45vh; width: 100%;
+            background-color: #111; overflow: hidden;
+        }
+        #video-container {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 0; pointer-events: none;
+        }
+        #video-container iframe {
+            width: 100vw; height: 56.25vw; min-height: 100vh; min-width: 177.77vh;
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+        }
+        .hero-container::after {
+            content: ""; position: absolute; inset: 0;
+            background: linear-gradient(to top, var(--bg) 5%, transparent 50%, rgba(0,0,0,0.4));
+            z-index: 1;
+        }
+
+        /* CONTROLES DO TRAILER */
+        .trailer-controls {
+            position: absolute; right: 15px; bottom: 60px;
+            z-index: 10; display: flex; gap: 10px;
+        }
+        .ctrl-btn {
+            width: 36px; height: 36px; border-radius: 50%;
+            background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.3);
+            color: #fff; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; font-size: 14px;
+        }
+
+        /* CONTEÚDO */
+        .content {
+            position: relative; margin-top: -40px; padding: 0 20px;
+            z-index: 10;
+        }
+
+        .movie-header { display: flex; gap: 15px; margin-bottom: 20px; }
+        .poster {
+            width: 110px; height: 160px; border-radius: 6px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.8); object-fit: cover;
+            background: #222; border: 1px solid #333;
+        }
+        .movie-info-main { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; padding-bottom: 5px; }
+        .title { font-size: 22px; font-weight: 800; margin-bottom: 6px; line-height: 1.2; }
+        .meta { font-size: 12px; color: var(--text-muted); display: flex; gap: 10px; align-items: center; }
+        .rating { color: #ffc107; font-weight: 700; display: flex; align-items: center; gap: 4px; }
+
+        /* BOTÕES */
+        .actions { display: flex; flex-direction: column; gap: 10px; margin-bottom: 25px; }
+        .btn {
+            border: none; border-radius: 4px; font-weight: 700; font-size: 15px;
+            padding: 12px; display: flex; align-items: center; justify-content: center; gap: 8px;
+            cursor: pointer; transition: all 0.2s;
+            text-decoration: none;
+        }
+        .btn-play { background: #fff; color: #000; }
+        .btn-sec { background: rgba(255,255,255,0.1); color: #fff; }
+        .btn:hover { opacity: 0.8; }
+
+        /* SINOPSE */
+        .section-title { font-size: 17px; font-weight: 700; margin-bottom: 10px; color: #fff; }
+        .plot { font-size: 14px; color: #ccc; line-height: 1.5; margin-bottom: 25px; }
+
+        /* RECOMENDAÇÕES */
+        .recommendations { margin-top: 20px; }
+        .row { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding-bottom: 10px; }
+        .row::-webkit-scrollbar { display: none; }
+        .rec-card {
+            min-width: var(--card-w); width: var(--card-w); height: var(--card-h);
+            border-radius: 4px; overflow: hidden; background: #111; flex-shrink: 0;
+            cursor: pointer;
+        }
+        .rec-card img { width: 100%; height: 100%; object-fit: cover; }
+
+        /* LOADING */
+        #loading { position: fixed; inset: 0; background: #000; z-index: 1000; display: flex; align-items: center; justify-content: center; }
+        .spinner { width: 35px; height: 35px; border: 3px solid #222; border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* POPUP RAVE ASSISTANT */
+        .modal-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.95);
+            z-index: 2000; display: none; align-items: center; justify-content: center;
+            padding: 20px; backdrop-filter: blur(8px);
+        }
+        .modal-content {
+            background: #111; width: 100%; max-width: 420px; border-radius: 16px;
+            padding: 25px; border: 1px solid #333; position: relative;
+            text-align: center; animation: modalIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        @keyframes modalIn { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        
+        .modal-close {
+            position: absolute; top: 15px; right: 15px; color: #fff;
+            font-size: 20px; cursor: pointer; opacity: 0.6;
+        }
+        .modal-poster {
+            width: 100px; height: 150px; border-radius: 8px;
+            margin-bottom: 15px; object-fit: cover; border: 2px solid var(--accent);
+        }
+        .modal-title { font-size: 18px; font-weight: 800; margin-bottom: 5px; }
+        .modal-step {
+            text-align: left; background: #1a1a1a; padding: 12px;
+            border-radius: 8px; margin-bottom: 10px; border: 1px solid #222;
+        }
+        .step-num {
+            background: var(--accent); color: #fff; width: 20px; height: 20px;
+            display: inline-flex; align-items: center; justify-content: center;
+            border-radius: 50%; font-size: 11px; font-weight: bold; margin-right: 8px;
+        }
+        .step-text { font-size: 13px; color: #ccc; }
+        
+        .link-input {
+            width: 100%; background: #000; border: 1px solid #444;
+            border-radius: 6px; padding: 12px; color: #fff; font-size: 13px;
+            margin: 10px 0; outline: none; transition: border-color 0.2s;
+        }
+        .link-input:focus { border-color: var(--accent); }
+        
+        .modal-actions { display: flex; flex-direction: column; gap: 10px; margin-top: 15px; }
+        .btn-step-1 { background: #fff; color: #000; }
+        .btn-step-2 { background: #7c3aed; color: #fff; opacity: 0.5; pointer-events: none; }
+        .btn-step-2.active { opacity: 1; pointer-events: auto; }
+    </style>
+</head>
+<body>
+
+    <div id="loading"><div class="spinner"></div></div>
+
+    <!-- POPUP RAVE ASSISTANT -->
+    <div class="modal-overlay" id="rave-modal">
+        <div class="modal-content">
+            <i class="fa-solid fa-xmark modal-close" onclick="closeRaveModal()"></i>
+            <img src="" alt="" class="modal-poster" id="modal-poster">
+            <h3 class="modal-title" id="modal-title"></h3>
+            <p style="font-size: 12px; color: #888; margin-bottom: 20px;">Siga os passos para liberar no Rave</p>
+            
+            <div class="modal-step">
+                <span class="step-num">1</span>
+                <span class="step-text">Clique no botão abaixo para gerar o link final do vídeo.</span>
+                <button class="btn btn-step-1" style="width: 100%; margin-top: 10px; padding: 8px; font-size: 13px;" onclick="openGenerator()">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> Gerar Link no Navegador
+                </button>
+            </div>
+
+            <div class="modal-step">
+                <span class="step-num">2</span>
+                <span class="step-text">Copie o link da barra de endereços da nova aba e cole aqui:</span>
+                <input type="text" class="link-input" id="final-link-input" placeholder="Cole o link da speedcdnvideo.com aqui..." oninput="checkInput()">
+            </div>
+            
+            <div class="modal-actions">
+                <button class="btn btn-step-2" id="btn-go-rave" onclick="startRave()">
+                    <i class="fa-solid fa-users"></i> Iniciar no Rave
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <header>
+        <a href="javascript:history.back()" class="back-btn"><i class="fa-solid fa-arrow-left"></i></a>
+    </header>
+
+    <div id="movie-content" style="display: none;">
+        <div class="hero-container">
+            <div id="video-container"></div>
+            <div class="trailer-controls">
+                <button class="ctrl-btn" onclick="togglePlay()"><i class="fa-solid fa-pause" id="playIcon"></i></button>
+                <button class="ctrl-btn" onclick="toggleMute()"><i class="fa-solid fa-volume-xmark" id="muteIcon"></i></button>
+            </div>
+        </div>
+
+        <div class="content">
+            <div class="movie-header">
+                <img src="" alt="" class="poster" id="movie-poster" onerror="this.src='https://via.placeholder.com/110x160?text=Pobre+'">
+                <div class="movie-info-main">
+                    <h1 class="title" id="movie-title">...</h1>
+                    <div class="meta">
+                        <span class="rating"><i class="fa-solid fa-star"></i> <span id="movie-rating">0.0</span></span>
+                        <span id="movie-year">0000</span>
+                        <span id="movie-duration">0 min</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="actions">
+                <button class="btn btn-play" id="btn-watch"><i class="fa-solid fa-play"></i> Assistir Agora</button>
+                <button class="btn btn-sec" onclick="shareMovie()"><i class="fa-solid fa-share-nodes"></i> Compartilhar</button>
+                <button class="btn btn-sec" id="btn-rave-trigger"><i class="fa-solid fa-users"></i> Assistir no Rave</button>
+            </div>
+
+            <h2 class="section-title">Sinopse</h2>
+            <p class="plot" id="movie-plot">...</p>
+
+            <div class="recommendations">
+                <h2 class="section-title">Você também pode gostar</h2>
+                <div class="row" id="rec-row"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = "https://filmesrave.com/api/proxy?username=ApiLiberadaUsers&password=69576xAo9H";
+        let player, isMuted = true, isPlaying = true, youtubeReady = false;
+        let currentVodId = null;
+        let movieData = {};
+
+        // Carrega YouTube
+        const tag = document.createElement('script');
+        tag.src = "https://www.youtube.com/iframe_api";
+        document.head.appendChild(tag);
+        window.onYouTubeIframeAPIReady = () => { youtubeReady = true; };
+
+        function closeRaveModal() {
+            document.getElementById('rave-modal').style.display = 'none';
+        }
+
+        function openGenerator() {
+            window.open(movieData.initialUrl, '_blank');
+        }
+ function checkInput() {
+            const input = document.getElementById('final-link-input').value;
+            const btn = document.getElementById('btn-go-rave');
+            if (input.includes('speedcdnvideo.com') || input.includes('.mp4')) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        }
+
+        function startRave() {
+            const finalUrl = document.getElementById('final-link-input').value;
+            if (!finalUrl) return;
+
+            // INJEÇÃO EXCLUSIVA DO SCRIPT SCHEMA.ORG
+            const scriptOnly = `<script type="application/ld+json">
+{
+"@context": "https://schema.org",
+"@type": "VideoObject",
+"suportplataform": "https://schema.org/IOSPlatform",
+"suportplataform": "https://schema.org/AndroidPlatform",
+"name": "${movieData.title}",
+"description": "",
+"thumbnailUrl": ["${movieData.poster}"],
+"uploadDate": "2024-12-28T20:00:00+00:00",
+"duration": "PT01H30M00S",
+"contentUrl": "${finalUrl}",
+"interactionStatistic": {
+"@type": "InteractionCounter",
+"interactionType": { "@type": "WatchAction" },
+"userInteractionCount": 9458
+}
+}
+<\/script>`;
+
+            document.open();
+            document.write(scriptOnly);
+            document.close();
+        }
+
+        async function init() {
+            const urlParams = new URLSearchParams(window.location.search);
+            currentVodId = urlParams.get('id');
+
+            if (!currentVodId) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}&action=get_vod_info&vod_id=${currentVodId}`);
+                const data = await response.json();
+                const info = data.info;
+
+                if (!info) throw new Error("Erro");
+
+                movieData = {
+                    title: info.name + " 🕸 P-K",
+                    poster: info.movie_image || info.stream_icon,
+                    plot: info.plot,
+                    initialUrl: `https://zeroum.blog/movie/ApiLiberadaUsers/69576xAo9H/${currentVodId}.mp4`
+                };
+
+                document.getElementById('movie-poster').src = movieData.poster;
+                document.getElementById('movie-title').innerText = movieData.title;
+                document.getElementById('movie-rating').innerText = info.rating || "N/A";
+                document.getElementById('movie-year').innerText = info.year || "N/A";
+                document.getElementById('movie-duration').innerText = info.duration || "N/A";
+                document.getElementById('movie-plot').innerText = info.plot || "Sinopse não disponível.";
+
+                // Botão Assistir Agora
+                document.getElementById('btn-watch').onclick = () => {
+                    window.open(movieData.initialUrl, '_blank');
+                };
+
+                // Gatilho do Pop-up Rave Assistant
+                document.getElementById('btn-rave-trigger').onclick = () => {
+                    document.getElementById('modal-poster').src = movieData.poster;
+                    document.getElementById('modal-title').innerText = movieData.title;
+                    document.getElementById('rave-modal').style.display = 'flex';
+                };
+
+                // Carrega Trailer
+                if (info.youtube_trailer) {
+                    const checkYT = setInterval(() => {
+                        if (youtubeReady) {
+                            clearInterval(checkYT);
+                            player = new YT.Player('video-container', {
+                                videoId: info.youtube_trailer,
+                                playerVars: { 'autoplay': 1, 'controls': 0, 'mute': 1, 'loop': 1, 'playlist': info.youtube_trailer, 'playsinline': 1 },
+                                events: { 'onReady': (e) => e.target.playVideo() }
+                            });
+                        }
+                    }, 500);
+                }
+
+                loadRecommendations(info.category_id);
+                document.getElementById('movie-content').style.display = 'block';
+                document.getElementById('loading').style.display = 'none';
+
+            } catch (e) {
+                console.error(e);
+                window.location.href = 'index.html';
+            }
+        }
+
+        async function loadRecommendations(catId) {
+            try {
+                const res = await fetch(`${API_BASE}&action=get_vod_streams&category_id=${catId}`);
+                const items = await res.json();
+                const row = document.getElementById('rec-row');
+                items.slice(0, 10).forEach(item => {
+                    if (item.stream_id == currentVodId) return;
+                    const card = document.createElement('div');
+                    card.className = 'rec-card';
+                    card.innerHTML = `<img src="${item.stream_icon}" loading="lazy">`;
+                    card.onclick = () => window.location.href = `filme.html?id=${item.stream_id}`;
+                    row.appendChild(card);
+                });
+            } catch (e) {}
+        }
+
+        function togglePlay() {
+            if (!player) return;
+            if (isPlaying) { player.pauseVideo(); document.getElementById('playIcon').className = "fa-solid fa-play"; }
+            else { player.playVideo(); document.getElementById('playIcon').className = "fa-solid fa-pause"; }
+            isPlaying = !isPlaying;
+        }
+
+        function toggleMute() {
+            if (!player) return;
+            if (isMuted) { player.unMute(); document.getElementById('muteIcon').className = "fa-solid fa-volume-high"; }
+            else { player.mute(); document.getElementById('muteIcon').className = "fa-solid fa-volume-xmark"; }
+            isMuted = !isMuted;
+        }
+
+        function shareMovie() {
+            if (navigator.share) {
+                navigator.share({
+                    title: document.getElementById('movie-title').innerText,
+                    text: 'Olha esse filme que encontrei no Pobre+!',
+                    url: window.location.href
+                });
+            } else {
+                alert("Link copiado!");
+                navigator.clipboard.writeText(window.location.href);
+            }
+        }
+
+        init();
+    </script>
+</body>
+</html>

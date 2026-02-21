@@ -1,0 +1,336 @@
+<!<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>PK FILMES | Séries</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --bg: #000;
+            --accent: #7c3aed;
+            --text: #fff;
+            --text-muted: #aaa;
+        }
+
+        * { 
+            box-sizing: border-box; 
+            margin: 0; padding: 0; 
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            overflow-x: hidden;
+            padding-bottom: 40px;
+        }
+
+        header {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+            height: 55px; padding: 0 15px;
+            display: flex; align-items: center;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
+        }
+        .back-btn {
+            font-size: 20px; color: #fff; text-decoration: none;
+            width: 40px; height: 40px; display: flex; align-items: center;
+        }
+
+        .hero-container {
+            position: relative; height: 45vh; width: 100%;
+            background-color: #111; overflow: hidden;
+        }
+        #video-container {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 0; pointer-events: none;
+        }
+        #video-container iframe {
+            width: 100vw; height: 56.25vw; min-height: 100vh; min-width: 177.77vh;
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+        }
+        .hero-container::after {
+            content: ""; position: absolute; inset: 0;
+            background: linear-gradient(to top, var(--bg) 5%, transparent 50%, rgba(0,0,0,0.4));
+            z-index: 1;
+        }
+
+        .trailer-controls {
+            position: absolute; right: 15px; bottom: 60px;
+            z-index: 10; display: flex; gap: 10px;
+        }
+        .ctrl-btn {
+            width: 36px; height: 36px; border-radius: 50%;
+            background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.3);
+            color: #fff; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; font-size: 14px;
+        }
+
+        .content {
+            position: relative; margin-top: -40px; padding: 0 20px;
+            z-index: 10;
+        }
+
+        .serie-header { display: flex; gap: 15px; margin-bottom: 20px; }
+        .poster {
+            width: 110px; height: 160px; border-radius: 6px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.8); object-fit: cover;
+            background: #222; border: 1px solid #333;
+        }
+        .serie-info-main { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; padding-bottom: 5px; }
+        .title { font-size: 22px; font-weight: 800; margin-bottom: 6px; line-height: 1.2; }
+        .meta { font-size: 12px; color: var(--text-muted); display: flex; gap: 10px; align-items: center; }
+        .rating { color: #ffc107; font-weight: 700; display: flex; align-items: center; gap: 4px; }
+
+        .actions { display: flex; gap: 10px; margin-bottom: 25px; }
+        .btn {
+            flex: 1; border: none; border-radius: 4px; font-weight: 700; font-size: 14px;
+            padding: 10px; display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .btn-share { background: #fff; color: #000; }
+        .btn-list { background: rgba(255,255,255,0.1); color: #fff; }
+
+        .section-title { font-size: 17px; font-weight: 700; margin-bottom: 10px; color: #fff; }
+        
+        /* SINOPSE COM VER MAIS */
+        .plot-container { margin-bottom: 25px; }
+        .plot {
+            font-size: 14px; color: #ccc; line-height: 1.5;
+            display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical;
+            overflow: hidden; transition: all 0.3s ease;
+        }
+        .plot.expanded { -webkit-line-clamp: unset; display: block; }
+        .btn-more {
+            background: none; border: none; color: var(--accent);
+            font-weight: 700; font-size: 13px; margin-top: 5px; cursor: pointer;
+            display: none;
+        }
+
+        .episodes-section { margin-top: 20px; }
+        .season-selector {
+            background: #222; color: #fff; border: 1px solid #444;
+            padding: 10px; border-radius: 4px; width: 100%;
+            font-size: 15px; font-weight: 600; margin-bottom: 20px;
+            outline: none;
+        }
+
+        .episode-item {
+            display: flex; align-items: center; gap: 15px;
+            padding: 12px 0; border-bottom: 1px solid #222;
+        }
+        .ep-thumb {
+            width: 120px; height: 70px; border-radius: 4px;
+            background: #111; object-fit: cover; flex-shrink: 0;
+        }
+        .ep-info { flex: 1; }
+        .ep-title { font-size: 14px; font-weight: 600; margin-bottom: 4px; color: #fff; }
+        .ep-duration { font-size: 12px; color: var(--text-muted); }
+        .ep-play { font-size: 20px; color: #fff; opacity: 0.8; }
+
+        #loading { position: fixed; inset: 0; background: #000; z-index: 1000; display: flex; align-items: center; justify-content: center; }
+        .spinner { width: 35px; height: 35px; border: 3px solid #222; border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+    <div id="loading"><div class="spinner"></div></div>
+
+    <header>
+        <a href="javascript:history.back()" class="back-btn"><i class="fa-solid fa-arrow-left"></i></a>
+    </header>
+
+    <div id="serie-content" style="display: none;">
+        <div class="hero-container">
+            <div id="video-container"></div>
+            <div class="trailer-controls">
+                <button class="ctrl-btn" onclick="togglePlay()"><i class="fa-solid fa-pause" id="playIcon"></i></button>
+                <button class="ctrl-btn" onclick="toggleMute()"><i class="fa-solid fa-volume-xmark" id="muteIcon"></i></button>
+            </div>
+        </div>
+        
+        <div class="content">
+            <div class="serie-header">
+                <img src="" alt="" class="poster" id="serie-poster" onerror="this.src='https://via.placeholder.com/110x160?text=Pobre+'">
+                <div class="serie-info-main">
+                    <h1 class="title" id="serie-title">...</h1>
+                    <div class="meta">
+                        <span class="rating"><i class="fa-solid fa-star"></i> <span id="serie-rating">0.0</span></span>
+                        <span id="serie-year">0000</span>
+                        <span id="serie-seasons-count">0 Temporadas</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="actions">
+                <button class="btn btn-share" onclick="shareSerie()"><i class="fa-solid fa-share-nodes"></i> Compartilhar</button>
+                <button class="btn btn-list"><i class="fa-solid fa-plus"></i> Minha Lista</button>
+            </div>
+
+            <div class="plot-container">
+                <h2 class="section-title">Sinopse</h2>
+                <p class="plot" id="serie-plot">...</p>
+                <button class="btn-more" id="btn-more" onclick="togglePlot()">Ver mais</button>
+            </div>
+
+            <div class="episodes-section">
+                <select class="season-selector" id="season-select" onchange="changeSeason(this.value)">
+                </select>
+                <div id="episodes-list">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = "https://filmesrave.com/api/proxy?username=ApiLiberadaUsers&password=69576xAo9H";
+        const SERIES_VIDEO_BASE = "http://zeroum.blog/series/ApiLiberadaUsers/69576xAo9H/";
+        let player, isMuted = true, isPlaying = true, youtubeReady = false;
+        let currentSeriesId = null;
+        let seasonsData = {};
+        let serieCover = "";
+
+        const tag = document.createElement('script');
+        tag.src = "https://www.youtube.com/iframe_api";
+        document.head.appendChild(tag);
+        window.onYouTubeIframeAPIReady = () => { youtubeReady = true; };
+
+        async function init() {
+            const urlParams = new URLSearchParams(window.location.search);
+            currentSeriesId = urlParams.get('id');
+
+            if (!currentSeriesId) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}&action=get_series_info&series_id=${currentSeriesId}`);
+                const data = await response.json();
+                
+                const info = data.info;
+                seasonsData = data.episodes;
+                serieCover = info.cover;
+
+                if (!info) throw new Error("Erro");
+
+                document.getElementById('serie-poster').src = info.cover;
+                document.getElementById('serie-title').innerText = info.name;
+                document.getElementById('serie-rating').innerText = info.rating || "N/A";
+                document.getElementById('serie-year').innerText = info.releaseDate || "N/A";
+                
+                const seasonKeys = Object.keys(seasonsData);
+                document.getElementById('serie-seasons-count').innerText = `${seasonKeys.length} Temporada${seasonKeys.length > 1 ? 's' : ''}`;
+                
+                const plotEl = document.getElementById('serie-plot');
+                plotEl.innerText = info.plot || "Sinopse não disponível.";
+                
+                // Verifica se precisa do botão "Ver mais"
+                setTimeout(() => {
+                    if (plotEl.scrollHeight > plotEl.clientHeight) {
+                        document.getElementById('btn-more').style.display = 'block';
+                    }
+                }, 100);
+
+                const select = document.getElementById('season-select');
+                seasonKeys.forEach(key => {
+                    const opt = document.createElement('option');
+                    opt.value = key;
+                    opt.innerText = `Temporada ${key}`;
+                    select.appendChild(opt);
+                });
+
+                if (seasonKeys.length > 0) changeSeason(seasonKeys[0]);
+
+                if (info.youtube_trailer) {
+                    const checkYT = setInterval(() => {
+                        if (youtubeReady) {
+                            clearInterval(checkYT);
+                            player = new YT.Player('video-container', {
+                                videoId: info.youtube_trailer,
+                                playerVars: { 'autoplay': 1, 'controls': 0, 'mute': 1, 'loop': 1, 'playlist': info.youtube_trailer, 'playsinline': 1 },
+                                events: { 'onReady': (e) => e.target.playVideo() }
+                            });
+                        }
+                    }, 500);
+                }
+
+                document.getElementById('serie-content').style.display = 'block';
+                document.getElementById('loading').style.display = 'none';
+
+            } catch (e) {
+                console.error(e);
+                window.location.href = 'index.html';
+            }
+        }
+
+        function changeSeason(seasonNum) {
+            const list = document.getElementById('episodes-list');
+            list.innerHTML = '';
+            const episodes = seasonsData[seasonNum];
+
+            episodes.forEach(ep => {
+                const item = document.createElement('div');
+                item.className = 'episode-item';
+                item.onclick = () => {
+                    const videoUrl = `${SERIES_VIDEO_BASE}${ep.id}.mp4`;
+                    window.open(videoUrl, '_blank');
+                };
+                item.innerHTML = `
+                    <img src="${serieCover}" class="ep-thumb" onerror="this.src='https://via.placeholder.com/120x70?text=Episódio'">
+                    <div class="ep-info">
+                        <div class="ep-title">${ep.title}</div>
+                        <div class="ep-duration">${ep.info.duration || '45 min'}</div>
+                    </div>
+                    <i class="fa-solid fa-play ep-play"></i>
+                `;
+                list.appendChild(item);
+            });
+        }
+
+        function togglePlot() {
+            const plot = document.getElementById('serie-plot');
+            const btn = document.getElementById('btn-more');
+            if (plot.classList.contains('expanded')) {
+                plot.classList.remove('expanded');
+                btn.innerText = "Ver mais";
+            } else {
+                plot.classList.add('expanded');
+                btn.innerText = "Ver menos";
+            }
+        }
+
+        function togglePlay() {
+            if (!player) return;
+            if (isPlaying) { player.pauseVideo(); document.getElementById('playIcon').className = "fa-solid fa-play"; }
+            else { player.playVideo(); document.getElementById('playIcon').className = "fa-solid fa-pause"; }
+            isPlaying = !isPlaying;
+        }
+
+        function toggleMute() {
+            if (!player) return;
+            if (isMuted) { player.unMute(); document.getElementById('muteIcon').className = "fa-solid fa-volume-high"; }
+            else { player.mute(); document.getElementById('muteIcon').className = "fa-solid fa-volume-xmark"; }
+            isMuted = !isMuted;
+        }
+
+        function shareSerie() {
+            if (navigator.share) {
+                navigator.share({
+                    title: document.getElementById('serie-title').innerText,
+                    text: 'Olha essa série que encontrei no Pobre+!',
+                    url: window.location.href
+                });
+            } else {
+                alert("Link copiado!");
+                navigator.clipboard.writeText(window.location.href);
+            }
+        }
+
+        init();
+    </script>
+</body>
+</html>

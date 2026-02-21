@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Início - PKFilmes</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* CONFIGURAÇÕES GLOBAIS E CORES */
+        :root {
+            --bg: #0b0b0b;
+            --surface: #1a1a1a;
+            --accent: #8a2be2;
+            --accent-light: #a855f7;
+            --text-main: #ffffff;
+            --text-dim: #a0a0a0;
+            --nav-bg: rgba(11, 11, 11, 0.8);
+            --card-radius: 8px;
+            --transition: all 0.3s ease;
+        }
+        
+        /* BLOQUEIO DE SELEÇÃO E ESTILOS BASE */
+        * { 
+            box-sizing: border-box; 
+            margin: 0; 
+            padding: 0; 
+            -webkit-tap-highlight-color: transparent; 
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+        }
+        
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            padding-bottom: 90px;
+            overflow-x: hidden;
+        }
+
+        /* CABEÇALHO (HEADER) */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            padding: 20px;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.9) 0%, transparent 100%);
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        header.scrolled {
+            background: var(--bg);
+            padding: 10px 20px;
+        }
+
+        .logo-container {
+            font-size: 28px;
+            font-weight: 900;
+            letter-spacing: -1px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+        }
+
+        .logo-pk { color: #ffffff; }
+        .logo-filmes { color: var(--accent); }
+
+        /* FILTROS DE NAVEGAÇÃO */
+        .nav-filters {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+            justify-content: center;
+        }
+
+        .filter-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .filter-btn.active {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: white;
+        }
+
+        /* BANNER PRINCIPAL (HERO) */
+        .hero {
+            position: relative;
+            width: 100%;
+            height: 70vh;
+            display: flex;
+            align-items: flex-end;
+            padding: 0 20px 40px 20px;
+            overflow: hidden;
+            background: #000;
+        }
+
+        .hero-media {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        .hero-media img, .hero-media iframe {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border: none;
+            pointer-events: none;
+        }
+
+        .hero-media::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to top, var(--bg) 10%, rgba(11,11,11,0.2) 50%, transparent 100%);
+            z-index: 2;
+        }
+
+        .hero-content {
+            position: relative;
+            max-width: 600px;
+            z-index: 10;
+        }
+
+        .hero-logo {
+            max-width: 240px;
+            max-height: 100px;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        .hero-title-fallback {
+            font-size: 36px;
+            font-weight: 800;
+            margin-bottom: 15px;
+            line-height: 1;
+        }
+
+        .hero-btns {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            border: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: var(--transition);
+        }
+
+        .btn-play { background: white; color: black; }
+        .btn-control { 
+            background: rgba(255,255,255,0.2); 
+            color: white; 
+            backdrop-filter: blur(10px);
+            width: 40px;
+            height: 40px;
+            padding: 0;
+            justify-content: center;
+            border-radius: 50%;
+        }
+
+        /* SEÇÃO CONTINUAR ASSISTINDO */
+        .continue-watching-section {
+            margin: 25px 0; /* Alinhamento vertical com outras seções */
+            position: relative;
+        }
+
+        /* Estilo do Card Continuar Assistindo */
+        .continue-card {
+            min-width: 280px; /* Largura conforme imagem de referência */
+            max-width: 280px;
+            background: var(--surface);
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+            flex-shrink: 0;
+            transition: var(--transition);
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .continue-card:hover {
+            transform: scale(1.02);
+            border-color: var(--accent);
+        }
+
+        .continue-thumb {
+            width: 100%;
+            height: 157px; /* Aspect ratio 16:9 aprox */
+            background-size: cover;
+            background-position: center;
+            position: relative;
+        }
+
+        .continue-thumb::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 40%);
+        }
+
+        /* Botão de Remover do Firebase */
+        .continue-remove {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 28px;
+            height: 28px;
+            background: rgba(0,0,0,0.6);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            z-index: 10;
+            font-size: 12px;
+            border: 1px solid rgba(255,255,255,0.2);
+            transition: var(--transition);
+        }
+
+        .continue-remove:hover {
+            background: #ff4b4b;
+            border-color: #ff4b4b;
+        }
+
+        .continue-info {
+            padding: 12px;
+        }
+
+        .continue-title-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 4px;
+        }
+
+        .continue-name {
+            font-size: 15px;
+            font-weight: 700;
+            color: white;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 70%;
+        }
+
+        .continue-meta {
+            font-size: 12px;
+            color: var(--text-dim);
+            font-weight: 600;
+        }
+
+        .continue-ep-name {
+            font-size: 13px;
+            color: var(--text-dim);
+            margin-bottom: 12px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Barra de Progresso do Card */
+        .continue-progress-container {
+            width: 100%;
+            height: 4px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .continue-progress-bar {
+            height: 100%;
+            background: var(--accent);
+            border-radius: 2px;
+        }
+
+        /* ESTILO MODO VISITANTE (BLUR) */
+        .continue-watching-section.visitor-blur .scroll-container {
+            filter: blur(10px);
+            pointer-events: none;
+        }
+
+        .visitor-overlay {
+            position: absolute;
+            inset: 0;
+            z-index: 50;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0,0,0,0.4);
+            text-align: center;
+            padding: 20px;
+        }
+
+        .visitor-overlay p {
+            color: white;
+            font-weight: 700;
+            margin-bottom: 15px;
+            font-size: 16px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+        }
+
+        .btn-visitor-login {
+            background: var(--accent);
+            color: white;
+            padding: 10px 25px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 14px;
+            box-shadow: 0 4px 15px rgba(138, 43, 226, 0.4);
+        }
+
+        /* SEÇÕES DE CATEGORIAS */
+        .section { margin-bottom: 30px; }
+        .section-header { padding: 0 20px; margin-bottom: 15px; }
+        .section-title { font-size: 18px; font-weight: 800; color: white; }
+        
+        .scroll-container { 
+            display: flex; 
+            overflow-x: auto; 
+            padding: 0 20px; 
+            gap: 15px; /* Espaçamento entre cards */
+            scrollbar-width: none; 
+        }
+        .scroll-container::-webkit-scrollbar { display: none; }
+
+        .card { 
+            min-width: 115px; 
+            border-radius: var(--card-radius); 
+            overflow: hidden; 
+            transition: var(--transition); 
+            cursor: pointer; 
+        }
+        .card:hover { transform: scale(1.05); z-index: 2; }
+        .card-thumb { width: 100%; aspect-ratio: 2/3; position: relative; }
+        .card-thumb img { width: 100%; height: 100%; object-fit: cover; }
+
+        /* MODAL DE CATEGORIAS/GÊNEROS */
+        .modal-categories {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.95);
+            z-index: 2000;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 100px;
+            overflow-y: auto;
+        }
+        .modal-categories.active { display: flex; }
+        .modal-close { position: absolute; top: 30px; right: 30px; font-size: 30px; color: white; cursor: pointer; }
+        .category-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; padding: 20px; width: 100%; max-width: 500px; }
+        .category-item { background: var(--surface); padding: 20px; border-radius: 15px; text-align: center; font-weight: 700; cursor: pointer; transition: var(--transition); border: 1px solid rgba(255,255,255,0.05); }
+        .category-item:hover { background: var(--accent); border-color: white; transform: translateY(-5px); }
+
+        /* NAVEGAÇÃO INFERIOR */
+        .nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 75px;
+            background: var(--nav-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 1000;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            padding-bottom: 10px;
+        }
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: var(--text-dim);
+            text-decoration: none;
+            font-size: 10px;
+            font-weight: 600;
+            gap: 5px;
+            transition: var(--transition);
+        }
+        .nav-item i { font-size: 20px; }
+        .nav-item.active { color: var(--accent); }
+        .nav-profile { width: 24px; height: 24px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; color: white; font-size: 12px; }
+
+        /* SKELETON LOADING */
+        .skeleton { background: linear-gradient(90deg, #1a1a1a 25%, #2a2a2a 50%, #1a1a1a 75%); background-size: 200% 100%; animation: loading 1.5s infinite; }
+        @keyframes loading { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+
+        /* POP-UP DE ANÚNCIO (PROMO) */
+        #promo-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            z-index: 9999;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .promo-card {
+            background: linear-gradient(145deg, #1a1a1a, #0d0d0d);
+            width: 100%;
+            max-width: 420px;
+            border-radius: 24px;
+            padding: 40px 30px;
+            text-align: center;
+            position: relative;
+            border: 1px solid rgba(138, 43, 226, 0.3);
+            box-shadow: 0 30px 60px rgba(0,0,0,0.8), 0 0 20px rgba(138, 43, 226, 0.2);
+            animation: popIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes popIn { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .promo-title { font-size: 26px; font-weight: 900; margin-bottom: 15px; color: white; background: linear-gradient(to right, #fff, var(--accent-light)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .promo-btn { width: 100%; background: var(--accent); color: white; padding: 18px; border-radius: 12px; font-weight: 800; font-size: 16px; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 10px; transition: all 0.3s ease; box-shadow: 0 10px 20px rgba(138, 43, 226, 0.3); }
+        .promo-close { position: absolute; top: 15px; right: 15px; width: 35px; height: 35px; background: rgba(255,255,255,0.1); color: white; border-radius: 50%; display: none; justify-content: center; align-items: center; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <!-- CABEÇALHO -->
+    <header id="main-header">
+        <a href="início.html" class="logo-container">
+            <span class="logo-pk">PK</span><span class="logo-filmes">FILMES</span>
+        </a>
+        <div class="nav-filters">
+            <button class="filter-btn active" onclick="setFilter('all', this)">Tudo</button>
+            <button class="filter-btn" onclick="setFilter('filme', this)">Filmes</button>
+            <button class="filter-btn" onclick="setFilter('serie', this)">Séries</button>
+            <button class="filter-btn" onclick="toggleCategories()"><i class="fa-solid fa-grip"></i> Gêneros</button>
+        </div>
+    </header>
+
+    <!-- MODAL DE GÊNEROS -->
+    <div class="modal-categories" id="modal-categories">
+        <div class="modal-close" onclick="toggleCategories()"><i class="fa-solid fa-xmark"></i></div>
+        <div class="category-list" id="category-grid"></div>
+    </div>
+
+    <!-- POP-UP DE ANÚNCIO (EDITÁVEL) -->
+    <div id="promo-overlay">
+        <div class="promo-card">
+            <!-- Botão Fechar (Aparece após o tempo do timer) -->
+            <div class="promo-close" id="promo-close-btn" onclick="closePromo()"><i class="fa-solid fa-xmark"></i></div>
+            
+            <span class="promo-icon">🎬</span>
+            
+            <!-- Título do Anúncio -->
+            <h2 class="promo-title">APRENDA A CRIAR SEU PRÓPRIO APP</h2>
+            
+            <div class="promo-text-box">
+                <!-- Descrição do Anúncio -->
+                <p class="promo-text" id="promo-desc">Domine o desenvolvimento de aplicativos de streaming como este e transforme sua carreira.</p>
+                <!-- Texto de Destaque -->
+                <span class="promo-highlight" id="promo-tag">VAGAS LIMITADAS - 60% OFF</span>
+            </div>
+            
+
+	            <!-- BOTÃO DE AÇÃO (Mude o href para a sua URL) -->
+            <a href="https://pay.kiwify.com.br/M9YhK6Y" target="_blank" class="promo-btn" id="promo-link">
+                GARANTIR MINHA VAGA <i class="fa-solid fa-rocket"></i>
+            </a>
+            
+            <!-- Contador Regressivo -->
+            <div class="timer-badge" id="promo-timer">Liberando em 8s</div>
+        </div>
+    </div>
+
+    <main>
+        <!-- SKELETON (CARREGAMENTO) -->
+        <div id="loading-skeleton">
+            <div class="hero skeleton"></div>
+            <div class="section" style="padding: 20px;">
+                <div class="skeleton" style="width: 200px; height: 20px; margin-bottom: 15px;"></div>
+                <div style="display: flex; gap: 10px;">
+                    <div class="skeleton" style="width: 110px; height: 165px; border-radius: 8px;"></div>
+                    <div class="skeleton" style="width: 110px; height: 165px; border-radius: 8px;"></div>
+                    <div class="skeleton" style="width: 110px; height: 165px; border-radius: 8px;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CONTEÚDO PRINCIPAL -->
+        <div id="real-content" style="display: none;">
+            <section class="hero" id="hero-section">
+                <div class="hero-media" id="hero-media-container"></div>
+                <div class="hero-content" id="hero-content-area"></div>
+            </section>
+            
+            <!-- ÁREA ONDE O "CONTINUAR ASSISTINDO" SERÁ INJETADO -->
+            <div id="continue-watching-wrapper"></div>
+
+            <!-- ÁREA DAS CATEGORIAS AUTOMÁTICAS -->
+            <div id="content-sections"></div>
+        </div>
+    </main>
+
+    <!-- BARRA DE NAVEGAÇÃO INFERIOR -->
+    <nav class="nav">
+        <a href="início.html" class="nav-item active"><i class="fa-solid fa-house"></i><span>Início</span></a>
+        <a href="buscar.html" class="nav-item"><i class="fa-solid fa-magnifying-glass"></i><span>Buscar</span></a>
+        <a href="ranking.html" class="nav-item"><i class="fa-solid fa-crown"></i><span>Ranking</span></a>
+        <a href="perfil.html" class="nav-item"><div class="nav-profile" id="user-profile-icon"><i class="fa-solid fa-user"></i></div><span>Perfil</span></a>
+    </nav>
+
+    <!-- FIREBASE E LÓGICA DO SISTEMA -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, get, child, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+        // CONFIGURAÇÃO DO FIREBASE (NÃO ALTERAR SE ESTIVER FUNCIONANDO)
+        const firebaseConfig = {
+            apiKey: "AIzaSyBIQSqbbN-adfJjONc0pmTY4PZahwk6a6w",
+            authDomain: "nupcine.firebaseapp.com",
+            databaseURL: "https://nupcine-default-rtdb.firebaseio.com",
+            projectId: "nupcine",
+            storageBucket: "nupcine.appspot.com",
+            messagingSenderId: "602295443044",
+            appId: "1:602295443044:web:af618627a1dbe5b142c971",
+            measurementId: "G-YD3TPSJTCF"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const auth = getAuth(app);
+
+        const API_URL = "https://pkfilmes-tau.vercel.app/filmes/series";
+        let allData = [];
+        let currentFilter = 'all';
+        let currentGenre = null;
+        let isMuted = true;
+        let isPaused = false;
+        let trailerTimeout = null;
+        let currentUser = null;
+        let isVisitor = localStorage.getItem('visitorMode') === 'true';
+
+        // NOMES CRIATIVOS PARA AS CATEGORIAS
+        const categoryNames = {
+            "Comédia": ["Comédia para morrer de rir", "Risadas sem controle", "Humor que cura o dia"],
+            "Ação": ["Ação sem freio", "Explosão atrás de explosão", "Adrenalina pura"],
+            "Terror": ["Terror pra perder o sono", "Medo em alta definição", "Pesadelos garantidos"],
+            "Aventura": ["Aventura além dos limites", "Jornada épica", "Explorando o impossível"],
+            "Drama": ["Drama que toca a alma", "Histórias intensas", "Emoção sem filtro"],
+            "Animação": ["Magia em movimento", "Diversão animada", "Mundos animados"],
+            "Romance": ["Romance de aquecer o coração", "Histórias de amor inesquecíveis", "Paixão em cena"]
+        };
+
+        /* --- FUNÇÕES GLOBAIS --- */
+
+        // Filtrar por Tudo, Filmes ou Séries
+        window.setFilter = (type, btn) => {
+            currentFilter = type;
+            currentGenre = null;
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            renderPage();
+        };
+
+        // Filtrar por Gênero
+        window.setGenre = (genre) => {
+            currentGenre = genre;
+            toggleCategories();
+            renderPage();
+        };
+
+        // Abrir/Fechar Modal de Gêneros
+        window.toggleCategories = () => {
+            document.getElementById('modal-categories').classList.toggle('active');
+        };
+
+        // Fechar Pop-up de Anúncio
+        window.closePromo = () => {
+            document.getElementById('promo-overlay').style.display = 'none';
+        };
+
+        // Monitorar Estado de Login do Usuário
+        onAuthStateChanged(auth, (user) => {
+            currentUser = user;
+            if (user) isVisitor = false;
+            init();
+        });
+
+        // Inicializar a Página
+        async function init() {
+            try {
+                const res = await fetch(API_URL);
+                allData = await res.json();
+                
+                // Extrair gêneros únicos para o modal
+                const genres = new Set();
+                allData.forEach(item => {
+                    if (item.generos) {
+                        item.generos.split(',').forEach(g => {
+                            const genre = g.trim();
+                            if (genre !== 'Talk' && genre !== 'Kids') genres.add(genre);
+                        });
+                    }
+                });
+
+                // Renderizar lista de gêneros no modal
+                const grid = document.getElementById('category-grid');
+                grid.innerHTML = '<div class="category-item" onclick="setGenre(null)">Todos os Gêneros</div>';
+                Array.from(genres).sort().forEach(g => {
+                    grid.innerHTML += `<div class="category-item" onclick="setGenre('${g}')">${g}</div>`;
+                });
+
+                renderPage();
+                document.getElementById('loading-skeleton').style.display = 'none';
+                document.getElementById('real-content').style.display = 'block';
+                startPromo();
+            } catch (e) { console.error("Erro na inicialização:", e); }
+        }
+
+        // Renderizar todo o conteúdo da página
+        async function renderPage() {
+            let filtered = allData;
+            if (currentFilter !== 'all') filtered = filtered.filter(i => i.tipo === currentFilter);
+            if (currentGenre) filtered = filtered.filter(i => i.generos && i.generos.includes(currentGenre));
+
+            if (filtered.length === 0) return;
+
+            // Banner Aleatório
+            const heroItem = filtered[Math.floor(Math.random() * filtered.length)];
+            renderHero(heroItem);
+
+            // 1. Renderizar Continuar Assistindo (Sempre no Topo)
+            await renderContinueWatching();
+
+            // 2. Renderizar Outras Seções
+            const container = document.getElementById('content-sections');
+            container.innerHTML = '';
+
+            const activeGenres = {};
+            filtered.forEach(item => {
+                if (item.generos) {
+                    item.generos.split(',').forEach(g => {
+                        const genre = g.trim();
+                        if (genre !== 'Talk' && genre !== 'Kids') {
+                            if (!activeGenres[genre]) activeGenres[genre] = [];
+                            activeGenres[genre].push(item);
+                        }
+                    });
+                }
+            });
+
+            let genreKeys = Object.keys(activeGenres);
+            genreKeys.sort(() => Math.random() - 0.5);
+            
+            genreKeys.forEach(genre => {
+                const displayNames = categoryNames[genre] || [`Tudo de ${genre}`];
+                const randomTitle = displayNames[Math.floor(Math.random() * displayNames.length)];
+                container.appendChild(createSection(randomTitle, activeGenres[genre].sort(() => Math.random() - 0.5).slice(0, 12)));
+            });
+        }
+
+        /* --- SISTEMA CONTINUAR ASSISTINDO --- */
+
+        async function renderContinueWatching() {
+            const wrapper = document.getElementById('continue-watching-wrapper');
+            wrapper.innerHTML = '';
+
+            const section = document.createElement('div');
+            section.className = 'continue-watching-section';
+            if (isVisitor) section.classList.add('visitor-blur');
+
+            section.innerHTML = `
+                <div class="section-header"><h2 class="section-title">Continuar Assistindo</h2></div>
+                <div class="scroll-container" id="continue-list"></div>
+            `;
+
+            // Overlay para visitantes
+            if (isVisitor) {
+                section.innerHTML += `
+                    <div class="visitor-overlay">
+                        <p>Você está no modo visitante</p>
+                        <a href="onboarding.html" class="btn-visitor-login">Login</a>
+                    </div>
+                `;
+            }
+
+            wrapper.appendChild(section);
+            const listContainer = section.querySelector('#continue-list');
+
+            if (!isVisitor && currentUser) {
+                const dbRef = ref(db);
+                const snapshot = await get(child(dbRef, `users/${currentUser.uid}/progress`));
+                
+                if (snapshot.exists()) {
+                    const progressData = snapshot.val();
+                    const sortedKeys = Object.keys(progressData).sort((a, b) => progressData[b].date - progressData[a].date);
+                    
+                    const seriesGroups = {};
+                    const finalItems = [];
+
+                    for (const key of sortedKeys) {
+                        const item = progressData[key];
+                        if (item.season && item.episode) {
+                            if (!seriesGroups[item.contentId]) {
+                                seriesGroups[item.contentId] = item;
+                                finalItems.push({ ...item, key });
+                            }
+                        } else {
+                            finalItems.push({ ...item, key });
+                        }
+                    }
+
+                    for (const item of finalItems) {
+                        const card = await createContinueCard(item);
+                        if (card) listContainer.appendChild(card);
+                    }
+                } else {
+                    wrapper.innerHTML = ''; // Esconde se não houver progresso
+                }
+            } else if (isVisitor) {
+                // Cards de exemplo borrados para o modo visitante
+                for (let i = 0; i < 3; i++) {
+                    const mockCard = document.createElement('div');
+                    mockCard.className = 'continue-card';
+                    mockCard.innerHTML = `<div class="continue-thumb" style="background-color: #333"></div><div class="continue-info"><div class="continue-name">••••••••</div></div>`;
+                    listContainer.appendChild(mockCard);
+                }
+            }
+        }
+
+        // Criar o card individual com dados da API + Firebase
+        async function createContinueCard(data) {
+            try {
+                const res = await fetch(`https://pkapi-six.vercel.app/page/detalhes_ID?id=${data.contentId}`);
+                const details = await res.json();
+                
+                const card = document.createElement('div');
+                card.className = 'continue-card';
+                
+                let thumb = details.banner || details.capa;
+                let title = details.titulo;
+                let meta = details.generos ? details.generos.split(',')[0] : '';
+                let epInfo = '';
+                let link = `detalhes.html?id=${data.contentId}`;
+
+                if (data.season && data.episode) {
+                    const ep = details.episodios.find(e => e.temporada == data.season && e.episodio == data.episode);
+                    if (ep) {
+                        thumb = ep.capa || thumb;
+                        epInfo = ep.nome;
+                        meta = `T${data.season} EP${data.episode}`;
+                        link = `player.html?id=${data.contentId}&season=${data.season}&ep=${data.episode}`;
+                    }
+                } else {
+                    link = `player.html?id=${data.contentId}`;
+                }
+
+                const progress = (data.time / data.duration) * 100;
+
+                card.innerHTML = `
+                    <div class="continue-remove" onclick="event.stopPropagation(); removeFromFirebase('${data.key}')">
+                        <i class="fa-solid fa-xmark"></i>
+                    </div>
+                    <div class="continue-thumb" style="background-image: url('${thumb}')" onclick="window.location.href='${link}'"></div>
+                    <div class="continue-info" onclick="window.location.href='${link}'">
+                        <div class="continue-title-row">
+                            <span class="continue-name">${title}</span>
+                            <span class="continue-meta">${meta}</span>
+                        </div>
+                        ${epInfo ? `<div class="continue-ep-name">${epInfo}</div>` : ''}
+                        <div class="continue-progress-container">
+                            <div class="continue-progress-bar" style="width: ${progress}%"></div>
+                        </div>
+                    </div>
+                `;
+                return card;
+            } catch (e) { return null; }
+        }
+
+        // Remover item do Firebase
+        window.removeFromFirebase = async (key) => {
+            if (!currentUser) return;
+            try {
+                await remove(ref(db, `users/${currentUser.uid}/progress/${key}`));
+                renderContinueWatching();
+            } catch (e) { console.error("Erro ao remover:", e); }
+        };
+
+        /* --- LÓGICA DO BANNER (HERO) --- */
+
+        function renderHero(item) {
+            const mediaContainer = document.getElementById('hero-media-container');
+            const contentArea = document.getElementById('hero-content-area');
+            clearTimeout(trailerTimeout);
+            
+            mediaContainer.innerHTML = `<img src="${item.banner || item.capa}" id="hero-static-img">`;
+            
+            contentArea.innerHTML = `
+                ${item.logo ? `<img src="${item.logo}" class="hero-logo" alt="${item.titulo}">` : `<h1 class="hero-title-fallback">${item.titulo}</h1>`}
+                <div class="hero-btns">
+                    <button class="btn btn-play" onclick="window.location.href='detalhes.html?id=${item.id}'">
+                        <i class="fa-solid fa-play"></i> Assistir
+                    </button>
+                    <!-- Botões de Controle do Trailer -->
+                    <button class="btn btn-control" id="hero-play-pause" onclick="toggleHeroPlayPause(this)">
+                        <i class="fa-solid fa-pause"></i>
+                    </button>
+                    <button class="btn btn-control" id="hero-mute" onclick="toggleHeroMute(this)">
+                        <i class="fa-solid fa-volume-xmark"></i>
+                    </button>
+                </div>
+            `;
+
+            if (item.trailer_id) {
+                trailerTimeout = setTimeout(() => startTrailer(item.trailer_id), 5000);
+            }
+        }
+
+        function startTrailer(id) {
+            const container = document.getElementById('hero-media-container');
+            // Adicionado id youtube-player para os controles funcionarem
+            container.innerHTML = `<iframe id="youtube-player" src="https://www.youtube.com/embed/${id}?autoplay=1&mute=1&controls=0&loop=1&playlist=${id}&enablejsapi=1" allow="autoplay"></iframe>`;
+            isMuted = true;
+            isPaused = false;
+        }
+
+        // FUNÇÃO CORRIGIDA: Mute/Unmute do Trailer
+        window.toggleHeroMute = (btn) => {
+            const iframe = document.getElementById('youtube-player');
+            if (!iframe) return;
+            isMuted = !isMuted;
+            const command = isMuted ? 'mute' : 'unMute';
+            iframe.contentWindow.postMessage(JSON.stringify({ event: 'command', func: command }), '*');
+            btn.innerHTML = isMuted ? '<i class="fa-solid fa-volume-xmark"></i>' : '<i class="fa-solid fa-volume-high"></i>';
+        };
+
+        // FUNÇÃO CORRIGIDA: Play/Pause do Trailer
+        window.toggleHeroPlayPause = (btn) => {
+            const iframe = document.getElementById('youtube-player');
+            if (!iframe) return;
+            isPaused = !isPaused;
+            const command = isPaused ? 'pauseVideo' : 'playVideo';
+            iframe.contentWindow.postMessage(JSON.stringify({ event: 'command', func: command }), '*');
+            btn.innerHTML = isPaused ? '<i class="fa-solid fa-play"></i>' : '<i class="fa-solid fa-pause"></i>';
+        };
+
+        /* --- UTILITÁRIOS --- */
+
+        function createSection(title, items) {
+            const section = document.createElement('div');
+            section.className = 'section';
+            section.innerHTML = `
+                <div class="section-header"><h2 class="section-title">${title}</h2></div>
+                <div class="scroll-container">
+                    ${items.map(item => `
+                        <div class="card" onclick="window.location.href='detalhes.html?id=${item.id}'">
+                            <div class="card-thumb"><img src="${item.capa || item.banner}" alt="${item.titulo}" loading="lazy"></div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            return section;
+        }
+
+        // Lógica do Pop-up de Anúncio
+        function startPromo() {
+            setTimeout(() => {
+                const overlay = document.getElementById('promo-overlay');
+                overlay.style.display = 'flex';
+                let seconds = 8; // TEMPO PARA LIBERAR O BOTÃO FECHAR
+                const timerText = document.getElementById('promo-timer');
+                const closeBtn = document.getElementById('promo-close-btn');
+                const interval = setInterval(() => {
+                    seconds--;
+                    timerText.innerText = `Liberando em ${seconds}s`;
+                    if (seconds <= 0) {
+                        clearInterval(interval);
+                        timerText.style.display = 'none';
+                        closeBtn.style.display = 'flex';
+                    }
+                }, 1000);
+            }, 2000); // TEMPO PARA APARECER O ANÚNCIO APÓS ABRIR O APP
+        }
+
+        window.addEventListener('scroll', () => {
+            document.getElementById('main-header').classList.toggle('scrolled', window.scrollY > 50);
+        });
+    </script>
+</body>
+</html>
+

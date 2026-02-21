@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Crie seu Perfil - PKFilmes</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --bg: #040714;
+            --accent: #8a2be2; /* Roxo padrão do site */
+            --text-main: #f9f9f9;
+            --text-gray: #a3a3a3;
+            --input-bg: #31343e;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            font-family: 'Avenir-World', sans-serif, Arial;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-bottom: 120px;
+        }
+
+        header {
+            width: 100%;
+            padding: 20px 4%;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.7) 10%, transparent);
+            position: fixed;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            justify-content: center;
+        }
+        .logo { font-size: 28px; font-weight: 900; color: #fff; }
+        .logo span { color: var(--accent); }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            margin-top: 80px;
+            padding: 0 20px;
+            text-align: center;
+        }
+
+        h1 { font-size: 32px; font-weight: bold; margin-bottom: 40px; color: #fff; }
+
+        /* Profile Section */
+        .profile-setup {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+        
+        .avatar-main-container {
+            position: relative;
+            width: 130px;
+            height: 130px;
+            cursor: pointer;
+        }
+        .avatar-main {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            overflow: hidden;
+            background: var(--input-bg);
+            border: 3px solid var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .avatar-main img { width: 100%; height: 100%; object-fit: cover; }
+        .avatar-main i { font-size: 40px; color: var(--text-gray); }
+        
+        .add-badge {
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+            background: var(--accent);
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 3px solid var(--bg);
+            color: #fff;
+            font-size: 18px;
+        }
+
+        /* Avatar Carousel */
+        .avatar-carousel-title {
+            font-size: 14px;
+            color: var(--text-gray);
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .avatar-carousel {
+            width: 100%;
+            display: flex;
+            gap: 15px;
+            overflow-x: auto;
+            padding: 10px 5px;
+            scrollbar-width: none;
+            margin-bottom: 30px;
+        }
+        .avatar-carousel::-webkit-scrollbar { display: none; }
+        .avatar-item {
+            min-width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            overflow: hidden;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+        .avatar-item img { width: 100%; height: 100%; object-fit: cover; }
+        .avatar-item.selected { border-color: var(--accent); transform: scale(1.1); }
+
+        /* Form Section */
+        .info-form {
+            width: 100%;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            text-align: left;
+        }
+        .input-group { display: flex; flex-direction: column; gap: 6px; }
+        .input-group.full { grid-column: span 2; }
+        label { color: var(--text-gray); font-size: 13px; font-weight: bold; text-transform: uppercase; }
+        input, select, textarea {
+            background: var(--input-bg);
+            border: 1px solid transparent;
+            border-radius: 8px;
+            padding: 14px;
+            color: #fff;
+            font-size: 15px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        input:focus, select:focus, textarea:focus { border-color: var(--accent); }
+        textarea { height: 80px; resize: none; }
+
+        /* Selection Sections */
+        .section-header {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin: 50px 0 20px;
+            text-align: left;
+        }
+        .section-title {
+            font-size: 20px;
+            font-weight: bold;
+            border-left: 4px solid var(--accent);
+            padding-left: 15px;
+            color: #fff;
+        }
+        .search-box {
+            width: 100%;
+            position: relative;
+        }
+        .search-box i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-gray);
+        }
+        .search-box input {
+            width: 100%;
+            padding-left: 45px;
+            background: var(--input-bg);
+        }
+
+        .grid-selection {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+        .movie-card {
+            aspect-ratio: 2/3;
+            border-radius: 8px;
+            overflow: hidden;
+            cursor: pointer;
+            position: relative;
+            border: 3px solid transparent;
+            transition: all 0.2s;
+            background: #1a1d29;
+        }
+        .movie-card img { width: 100%; height: 100%; object-fit: cover; }
+        .movie-card.selected { border-color: var(--accent); transform: scale(0.95); }
+        .movie-card.selected::after {
+            content: '✓';
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: var(--accent);
+            color: #fff;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: bold;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+        }
+
+        /* Floating Action Button */
+        .save-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, var(--bg) 80%, transparent);
+            padding: 20px 24px 40px;
+            display: none; /* Hidden by default */
+            justify-content: center;
+            z-index: 200;
+        }
+        .save-bar.active { display: flex; }
+        .btn-save {
+            width: 100%;
+            max-width: 400px;
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            padding: 16px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 20px rgba(138, 43, 226, 0.4);
+        }
+
+        #file-input { display: none; }
+
+        .selection-counter {
+            font-size: 13px;
+            color: var(--text-gray);
+            margin-top: 5px;
+        }
+        .selection-counter span.ready { color: #00ff00; }
+
+        @media (max-width: 600px) {
+            .info-form { grid-template-columns: 1fr; }
+            .input-group.full { grid-column: span 1; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo">PK<span>FILMES</span></div>
+    </header>
+
+    <div class="container">
+        <h1>Crie seu perfil</h1>
+
+        <div class="profile-setup">
+            <div class="avatar-main-container" id="avatar-trigger">
+                <div class="avatar-main">
+                    <img id="current-avatar" style="display:none;">
+                    <i id="avatar-placeholder" class="fa-solid fa-user-plus"></i>
+                </div>
+                <div class="add-badge"><i class="fa-solid fa-camera"></i></div>
+            </div>
+            <input type="file" id="file-input" accept="image/*">
+            
+            <div class="avatar-carousel-title">Ou escolha um avatar</div>
+            <div class="avatar-carousel" id="avatar-carousel"></div>
+
+            <div class="info-form">
+                <div class="input-group full">
+                    <label>Nome de Exibição *</label>
+                    <input type="text" id="username" placeholder="Como quer ser chamado?">
+                </div>
+                <div class="input-group full">
+                    <label>Biografia</label>
+                    <textarea id="bio" placeholder="Conte um pouco sobre você..."></textarea>
+                </div>
+                <div class="input-group">
+                    <label>Sexo (Opcional)</label>
+                    <select id="gender">
+                        <option value="">Não informado</option>
+                        <option value="Masculino">Masculino</option>
+                        <option value="Feminino">Feminino</option>
+                        <option value="Outro">Outro</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label>Idade (Opcional)</label>
+                    <input type="number" id="age" placeholder="Sua idade">
+                </div>
+            </div>
+        </div>
+
+        <div class="section-header">
+            <div class="section-title">Filmes Favoritos *</div>
+            <div class="selection-counter" id="movie-counter">Selecione pelo menos 3 conteúdos (<span>0</span>/3)</div>
+            <div class="search-box">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" id="movie-search" placeholder="Pesquisar filmes ou séries...">
+            </div>
+        </div>
+        <div class="grid-selection" id="movie-grid"></div>
+
+    </div>
+
+    <div class="save-bar" id="save-bar">
+        <button class="btn-save" id="btn-save">Criar Perfil</button>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBIQSqbbN-adfJjONc0pmTY4PZahwk6a6w",
+            authDomain: "nupcine.firebaseapp.com",
+            databaseURL: "https://nupcine-default-rtdb.firebaseio.com",
+            projectId: "nupcine",
+            storageBucket: "nupcine.appspot.com",
+            messagingSenderId: "602295443044",
+            appId: "1:602295443044:web:af618627a1dbe5b142c971",
+            measurementId: "G-YD3TPSJTCF"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+
+        const avatares = [
+            "https://ssdwzyavcsrthnzrlnah.supabase.co/storage/v1/object/public/pobre-cdn/avatares/AAAABZ1XomGA7SaDOQ4wXcU_JkyHqZjzPBZHjD57kLtUwYOKtYm8MXX7OU54kg_zQT_fRWvUDj3QTq5ZVXfSeo5q2mTT-uOSnPxfJQ.png",
+            "https://ssdwzyavcsrthnzrlnah.supabase.co/storage/v1/object/public/pobre-cdn/avatares/AAAABSVuaRMZJYHVSS-A6mHbFs1KZpVxF67leY38IQJYQMY5nC99dgdFnZalgEYQaQr4yG4xXsRVDTSFL6kFc26grlW3tuHxAttxRQ.png",
+            "https://ssdwzyavcsrthnzrlnah.supabase.co/storage/v1/object/public/pobre-cdn/avatares/AAAABRmAGr6IfBsLUqVC5b5vAPH4AqPnZJhpK4x_FGwzcsE1CNWdQahtGd1EuvSlhaHtgHOfl9cVB3B_MLge3z1hGXS6-ZodPgLuwA.png",
+            "https://ssdwzyavcsrthnzrlnah.supabase.co/storage/v1/object/public/pobre-cdn/avatares/AAAABR4y4OZuSOr0Fl_Hn5bs2h2vY8n3kkaldrPZXWKmxfwaYCD_-pRHTWMjktFdE_55hEfHvXJ5-GbsOI6vpHk4VWtOm7vlUk0HLw.png",
+            "https://ssdwzyavcsrthnzrlnah.supabase.co/storage/v1/object/public/pobre-cdn/avatares/AAAABXoLelDL6U5LX3V0DnD5RQJUcqZ7sa3Q8kEc_ugRJjp9Ty6LSDtZmLRR_8BEtyX31fLF3N-v2bNonlyT539NWzugcd85a58tmw.png",
+            "https://ssdwzyavcsrthnzrlnah.supabase.co/storage/v1/object/public/pobre-cdn/avatares/AAAABeyp17TGqfrOWVjlbSQRq_m7bHelqFM7Ivc_LeqVbi6TFDgEoAQhiPEWE4s8NyljVImhf-MI9CZG5jFLrei8CmXPc1-IF0E7eA.png",
+            "https://ssdwzyavcsrthnzrlnah.supabase.co/storage/v1/object/public/pobre-cdn/avatares/AAAABTvoBFzb1knsKBMoSlyQroS8gzoiPyNTJY4SlzjMBlAAcR52hcwAhYxCRcjVq5pjXr9l5MXsON6CcSDmLF6u1tuo36sPY-duaA.png",
+            "https://ssdwzyavcsrthnzrlnah.supabase.co/storage/v1/object/public/pobre-cdn/avatares/AAAABbqMdRIV-LdKjQ6_PaTO59PwXRSrZ9m4ohnfCJng2bMVxgdTPRQ1dDOSBjzvU1Vb7Q3sd3fC4eFKOhUMN1Xq7K-33EwpK4OE6A.png",
+            "https://ssdwzyavcsrthnzrlnah.supabase.co/storage/v1/object/public/pobre-cdn/avatares/AAAABXhHduGbLlqdYUSrcfLTCBgoL3N75A3EA38LKGaR7Mrh_nrLXXuodshYn-jU521mqgEtFR-nZeoxJ3ALgtk4emnnveAjH3r5QA.png",
+            "https://ssdwzyavcsrthnzrlnah.supabase.co/storage/v1/object/public/pobre-cdn/avatares/AAAABQCkijoDPDbZaQKRjYyb-IJNH6_1iqUYazsPKOaJYxbTi2mt9f0U79wYn6mBv7xMfoTP0tds2-nIZ_YqazLRbM68jUI4oHtxHw.png"
+        ];
+
+        let selectedAvatar = null;
+        let selectedMovies = [];
+        let allMovies = [];
+        let currentUser = null;
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) currentUser = user;
+            else window.location.href = 'onboarding_replica.html';
+        });
+
+        // Render Avatar Carousel
+        const avatarCarousel = document.getElementById('avatar-carousel');
+        avatares.forEach(url => {
+            const item = document.createElement('div');
+            item.className = 'avatar-item';
+            item.innerHTML = `<img src="${url}">`;
+            item.onclick = () => {
+                document.querySelectorAll('.avatar-item').forEach(i => i.classList.remove('selected'));
+                item.classList.add('selected');
+                selectedAvatar = url;
+                updateMainAvatar(url);
+                validateForm();
+            };
+            avatarCarousel.appendChild(item);
+        });
+
+        function updateMainAvatar(url) {
+            const img = document.getElementById('current-avatar');
+            const placeholder = document.getElementById('avatar-placeholder');
+            img.src = url;
+            img.style.display = 'block';
+            placeholder.style.display = 'none';
+        }
+
+        // File Upload
+        const fileInput = document.getElementById('file-input');
+        document.getElementById('avatar-trigger').onclick = () => fileInput.click();
+        fileInput.onchange = (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    selectedAvatar = event.target.result;
+                    updateMainAvatar(selectedAvatar);
+                    document.querySelectorAll('.avatar-item').forEach(i => i.classList.remove('selected'));
+                    validateForm();
+                };
+                reader.readAsDataURL(file);
+            }
+        };
+
+        // Fetch Movies
+        fetch("https://pkapi-six.vercel.app/filmes/series").then(r => r.json()).then(data => {
+            allMovies = data;
+            renderMovies();
+        });
+
+        function renderMovies(filter = '') {
+            const grid = document.getElementById('movie-grid');
+            grid.innerHTML = '';
+            const filtered = allMovies.filter(m => m.titulo.toLowerCase().includes(filter.toLowerCase()));
+            filtered.slice(0, 21).forEach(movie => {
+                const card = document.createElement('div');
+                card.className = 'movie-card';
+                if (selectedMovies.includes(String(movie.id))) card.classList.add('selected');
+                card.innerHTML = `<img src="${movie.capa}">`;
+                card.onclick = () => {
+                    const id = String(movie.id);
+                    if (selectedMovies.includes(id)) {
+                        selectedMovies = selectedMovies.filter(i => i !== id);
+                        card.classList.remove('selected');
+                    } else {
+                        selectedMovies.push(id);
+                        card.classList.add('selected');
+                    }
+                    updateMovieCounter();
+                    validateForm();
+                };
+                grid.appendChild(card);
+            });
+        }
+
+        document.getElementById('movie-search').oninput = (e) => renderMovies(e.target.value);
+
+        function updateMovieCounter() {
+            const counter = document.querySelector('#movie-counter span');
+            counter.innerText = selectedMovies.length;
+            if (selectedMovies.length >= 3) counter.classList.add('ready');
+            else counter.classList.remove('ready');
+        }
+
+        // Form Validation
+        const usernameInput = document.getElementById('username');
+        usernameInput.oninput = validateForm;
+
+        function validateForm() {
+            const isUsernameOk = usernameInput.value.trim().length > 0;
+            const isAvatarOk = selectedAvatar !== null;
+            const isMoviesOk = selectedMovies.length >= 3;
+
+            const saveBar = document.getElementById('save-bar');
+            if (isUsernameOk && isAvatarOk && isMoviesOk) {
+                saveBar.classList.add('active');
+            } else {
+                saveBar.classList.remove('active');
+            }
+        }
+
+        // Save Profile
+        document.getElementById('btn-save').onclick = async () => {
+            if (!currentUser) return;
+            
+            const btn = document.getElementById('btn-save');
+            btn.innerText = "CRIANDO PERFIL...";
+            btn.disabled = true;
+
+            const userData = {
+                uid: currentUser.uid,
+                email: currentUser.email,
+                username: usernameInput.value.trim(),
+                bio: document.getElementById('bio').value,
+                gender: document.getElementById('gender').value,
+                age: document.getElementById('age').value,
+                profilePhoto: selectedAvatar,
+                favoriteMovies: selectedMovies,
+                level: 1,
+                xp: 0,
+                Premium: "off",
+                verificado: false,
+                createdAt: new Date().toISOString().split('.')[0]
+            };
+
+            try {
+                await set(ref(db, 'users/' + currentUser.uid), userData);
+                window.location.href = 'index.html';
+            } catch (e) {
+                alert("Erro ao salvar perfil: " + e.message);
+                btn.innerText = "CRIAR PERFIL";
+                btn.disabled = false;
+            }
+        };
+    </script>
+</body>
+</html>
