@@ -49,9 +49,10 @@
         .seekbar-preview.active { display: flex; flex-direction: column; align-items: center; }
         .seekbar-preview img { width: 100px; height: 60px; object-fit: cover; border-radius: 4px; margin-bottom: 6px; }
         .seekbar-preview-time { font-size: 12px; color: #fff; font-weight: bold; }
-        .seekbar-container { width: 100%; height: 5px; background: rgba(255,255,255,0.2); position: relative; border-radius: 2px; cursor: pointer; }
-        .seekbar-fill { width: 0%; height: 100%; background: var(--accent); border-radius: 2px; }
-        .seekbar-handle { position: absolute; right: -8px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; background: #fff; border-radius: 50%; box-shadow: 0 0 10px rgba(0,0,0,0.5); }
+        
+        .seekbar-container { width: 100%; height: 5px; background: rgba(255,255,255,0.2); position: relative; border-radius: 2px; cursor: pointer; display: flex; align-items: center; }
+        .seekbar-fill { height: 100%; background: var(--accent); border-radius: 2px; position: relative; display: flex; align-items: center; justify-content: flex-end; }
+        .seekbar-handle { width: 16px; height: 16px; background: #fff; border-radius: 50%; box-shadow: 0 0 10px rgba(0,0,0,0.5); margin-right: -8px; }
 
         .bottom-actions { display: flex; justify-content: space-between; align-items: center; }
         .actions-left, .actions-right { display: flex; align-items: center; gap: 35px; }
@@ -74,22 +75,22 @@
         .ad-timer-circle svg { position: absolute; top: 0; left: 0; width: 55px; height: 55px; transform: rotate(-90deg); }
         .ad-timer-circle circle { fill: none; stroke: var(--accent); stroke-width: 3; stroke-dasharray: 160; stroke-dashoffset: 0; transition: stroke-dashoffset 1s linear; }
 
-        /* EPISÓDIOS */
+        /* EPISÓDIOS - CARDS COMPACTOS */
         .episodes-overlay { position: fixed; inset: 0; background: rgba(4, 7, 20, 0.95); z-index: 400; display: none; flex-direction: column; padding: 35px 0; backdrop-filter: blur(10px); }
         .episodes-overlay.active { display: flex; }
         .episodes-header { padding: 0 50px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
         .episodes-header h2 { font-size: 24px; color: #fff; }
         .episodes-close-btn { background: none; border: none; color: #fff; font-size: 26px; cursor: pointer; padding: 8px; }
-        .episodes-list { display: flex; overflow-x: auto; gap: 18px; padding: 0 50px; scrollbar-width: thin; }
-        .ep-card { min-width: 260px; background: rgba(255,255,255,0.05); border-radius: 12px; overflow: hidden; cursor: pointer; border: 2px solid transparent; transition: 0.3s; flex-shrink: 0; }
+        .episodes-list { display: flex; overflow-x: auto; gap: 15px; padding: 0 50px; scrollbar-width: thin; }
+        .ep-card { min-width: 200px; background: rgba(255,255,255,0.05); border-radius: 12px; overflow: hidden; cursor: pointer; border: 2px solid transparent; transition: 0.3s; flex-shrink: 0; }
         .ep-card:hover { transform: scale(1.05); background: rgba(255,255,255,0.1); }
         .ep-card.active { border-color: var(--accent); background: rgba(0, 114, 210, 0.1); }
-        .ep-thumb { width: 100%; height: 150px; background-size: cover; background-position: center; }
-        .ep-info { padding: 12px; }
-        .ep-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
-        .ep-title { font-size: 14px; color: #fff; font-weight: 600; flex: 1; }
-        .ep-meta { font-size: 11px; color: var(--accent); font-weight: bold; margin-left: 8px; white-space: nowrap; }
-        .ep-desc { font-size: 12px; color: #aaa; line-height: 1.3; height: 36px; overflow: hidden; }
+        .ep-thumb { width: 100%; height: 115px; background-size: cover; background-position: center; }
+        .ep-info { padding: 10px; }
+        .ep-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 5px; }
+        .ep-title { font-size: 13px; color: #fff; font-weight: 600; flex: 1; line-height: 1.2; }
+        .ep-meta { font-size: 10px; color: var(--accent); font-weight: bold; margin-left: 6px; white-space: nowrap; }
+        .ep-desc { font-size: 11px; color: #aaa; line-height: 1.2; height: 32px; overflow: hidden; }
     </style>
 </head>
 <body>
@@ -177,6 +178,7 @@
         const playPauseBtn = document.getElementById('play-pause-btn');
         const seekbarFill = document.getElementById('seekbar-fill');
         const seekbarWrapper = document.getElementById('seekbar-wrapper');
+        const seekbarContainer = document.getElementById('seekbar-container');
         const seekbarPreview = document.getElementById('seekbar-preview');
         const previewImg = document.getElementById('preview-img');
         const previewTime = document.getElementById('preview-time');
@@ -226,8 +228,7 @@
                 screen.orientation.lock('landscape').catch(()=>{});
             }
         }
-
-        function setupPlayer() {
+	        function setupPlayer() {
             video.addEventListener('timeupdate', updateProgress);
             video.addEventListener('play', () => { playPauseBtn.innerHTML = '<i class="fa-solid fa-pause"></i>'; lastAdTimestamp = Date.now(); });
             video.addEventListener('pause', () => { playPauseBtn.innerHTML = '<i class="fa-solid fa-play"></i>'; });
@@ -245,14 +246,14 @@
             const handleSeek = (e) => {
                 if (isLocked || adActive) return;
                 const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-                const rect = seekbarWrapper.querySelector('.seekbar-container').getBoundingClientRect();
+                const rect = seekbarContainer.getBoundingClientRect();
                 let pos = (clientX - rect.left) / rect.width;
                 pos = Math.max(0, Math.min(1, pos));
                 video.currentTime = pos * video.duration;
                 updatePreviewUI(pos);
             };
 
-            seekbarWrapper.onmousedown = seekbarWrapper.ontouchstart = (e) => {
+            seekbarContainer.onmousedown = seekbarContainer.ontouchstart = (e) => {
                 isDragging = true;
                 seekbarPreview.classList.add('active');
                 handleSeek(e);
@@ -292,6 +293,7 @@
                 }
             }
         }
+
         function loadContent() {
             if (currentItem.tipo === 'serie') {
                 const ep = currentItem.episodios.find(e => e.temporada == currentSeason && e.episodio == currentEp);
