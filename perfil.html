@@ -349,7 +349,6 @@
             color: var(--accent);
             transform: translateX(4px);
         }
-
         /* BOTÕES */
         .btn {
             padding: 12px 24px;
@@ -715,7 +714,7 @@
             </div>
         </div>
 
-	        <!-- CONTEÚDO PRINCIPAL -->
+        <!-- CONTEÚDO PRINCIPAL -->
         <div class="profile-content">
 
             <!-- ESTATÍSTICAS -->
@@ -812,6 +811,19 @@
                                 <i class="fa-solid fa-chevron-right"></i>
                             </div>
                         </div>
+                        <div class="item" onclick="document.getElementById('import-file-input').click()">
+                            <div class="item-icon">
+                                <i class="fa-solid fa-upload"></i>
+                            </div>
+                            <div class="item-info">
+                                <div class="item-title">Importar Dados</div>
+                                <div class="item-subtitle">Restaure seus dados de um arquivo JSON</div>
+                            </div>
+                            <div class="item-action">
+                                <i class="fa-solid fa-chevron-right"></i>
+                            </div>
+                        </div>
+                        <input type="file" id="import-file-input" accept=".json" style="display: none;" onchange="handleFileImport(event)">
                         <div class="item" onclick="openStorageModal()">
                             <div class="item-icon">
                                 <i class="fa-solid fa-database"></i>
@@ -854,7 +866,6 @@
 
         </div>
     </div>
-
     <!-- NAVEGAÇÃO INFERIOR -->
     <nav class="nav">
         <a href="início.html" class="nav-item"><i class="fa-solid fa-house"></i><span>Início</span></a>
@@ -883,6 +894,32 @@
             <div class="modal-footer">
                 <button class="btn btn-secondary" onclick="closeClearDataModal()">Cancelar</button>
                 <button class="btn btn-danger" onclick="confirmClearData()">Limpar Tudo</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Importação -->
+    <div class="modal" id="import-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Importar Dados?</h2>
+                <button class="modal-close" onclick="closeImportModal()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-message">
+                    Tem certeza que deseja importar esses dados? Os dados existentes serão substituídos.
+                </div>
+                <div class="modal-warning">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    Isso substituirá: histórico de visualização, vídeos curtidos e todas as preferências atuais.
+                </div>
+                <div class="items-list" id="import-preview" style="margin-top: 15px;">
+                    <!-- Pré-visualização será inserida aqui -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeImportModal()">Cancelar</button>
+                <button class="btn btn-primary" onclick="confirmImportData()">Importar</button>
             </div>
         </div>
     </div>
@@ -1144,7 +1181,8 @@
             document.getElementById('storage-watching').innerText = watchingSize + ' KB';
             document.getElementById('storage-total').innerText = totalSize + ' KB';
         }
-	        // EXPORTAR DADOS
+
+        // EXPORTAR DADOS
         function exportData() {
             const data = {
                 liked: Array.from(likedTrailers),
@@ -1164,7 +1202,113 @@
             showToast('Dados exportados com sucesso!', 'success');
         }
 
-        // TOAST
+        // IMPORTAR DADOS
+        let pendingImportData = null;
+
+        function handleFileImport(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const importedData = JSON.parse(e.target.result);
+                    
+                    if (!importedData.liked || !Array.isArray(importedData.liked) || 
+                        !importedData.progress || !Array.isArray(importedData.progress)) {
+                        showToast('Formato de arquivo invalido!', 'error');
+                        return;
+                    }
+
+                    pendingImportData = importedData;
+                    showImportPreview(importedData);
+                    document.getElementById('import-modal').classList.add('active');
+                } catch (error) {
+                    showToast('Erro ao ler o arquivo JSON!', 'error');
+                    console.error('Erro ao importar:', error);
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = '';
+        }
+
+        function showImportPreview(data) {
+            const preview = document.getElementById('import-preview');
+            const likedCount = data.liked ? data.liked.length : 0;
+            const progressCount = data.progress ? data.progress.length : 0;
+            const completedCount = data.progress ? data.progress.filter(p => p.progress >= 95).length : 0;
+            const watchingCount = data.progress ? data.progress.filter(p => p.progress > 0 && p.progress < 95).length : 0;
+
+            preview.innerHTML = `
+                <div class="item">
+                    <div class="item-icon" style="background: rgba(138, 43, 226, 0.2); color: var(--accent);">
+                        <i class="fa-solid fa-heart"></i>
+                    </div>
+                    <div class="item-info">
+                        <div class="item-title">Videos Curtidos</div>
+                        <div class="item-subtitle">${likedCount} item(ns)</div>
+                    </div>
+                </div>
+                <div class="item">
+                    <div class="item-icon" style="background: rgba(52, 211, 153, 0.2); color: #34d399;">
+                        <i class="fa-solid fa-play"></i>
+                    </div>
+                    <div class="item-info">
+                        <div class="item-title">Assistindo</div>
+                        <div class="item-subtitle">${watchingCount} item(ns)</div>
+                    </div>
+                </div>
+                <div class="item">
+                    <div class="item-icon" style="background: rgba(59, 130, 246, 0.2); color: #3b82f6;">
+                        <i class="fa-solid fa-check-circle"></i>
+                    </div>
+                    <div class="item-info">
+                        <div class="item-title">Concluidos</div>
+                        <div class="item-subtitle">${completedCount} item(ns)</div>
+                    </div>
+                </div>
+                <div class="item">
+                    <div class="item-icon" style="background: rgba(251, 146, 60, 0.2); color: #fb923c;">
+                        <i class="fa-solid fa-database"></i>
+                    </div>
+                    <div class="item-info">
+                        <div class="item-title">Total de Registros</div>
+                        <div class="item-subtitle">${progressCount} item(ns)</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function confirmImportData() {
+            if (!pendingImportData) return;
+
+            try {
+                if (pendingImportData.liked && Array.isArray(pendingImportData.liked)) {
+                    localStorage.setItem(LIKED_TRAILERS_KEY, JSON.stringify(pendingImportData.liked));
+                    likedTrailers = new Set(pendingImportData.liked);
+                }
+
+                if (pendingImportData.progress && Array.isArray(pendingImportData.progress)) {
+                    localStorage.setItem(USER_PROGRESS_KEY, JSON.stringify(pendingImportData.progress));
+                    userProgress = pendingImportData.progress;
+                }
+
+                pendingImportData = null;
+                renderProfile();
+                closeImportModal();
+                showToast('Dados importados com sucesso!', 'success');
+            } catch (error) {
+                showToast('Erro ao importar dados!', 'error');
+                console.error('Erro ao confirmar importacao:', error);
+            }
+        }
+
+        function closeImportModal() {
+            document.getElementById('import-modal').classList.remove('active');
+            pendingImportData = null;
+        }
+
+	        // TOAST
         function showToast(message, type = 'success') {
             const toast = document.createElement('div');
             toast.className = `toast ${type}`;
@@ -1179,6 +1323,10 @@
         // FECHAR MODAIS AO CLICAR FORA
         document.getElementById('clear-data-modal').addEventListener('click', (e) => {
             if (e.target.id === 'clear-data-modal') closeClearDataModal();
+        });
+
+        document.getElementById('import-modal').addEventListener('click', (e) => {
+            if (e.target.id === 'import-modal') closeImportModal();
         });
 
         document.getElementById('storage-modal').addEventListener('click', (e) => {
