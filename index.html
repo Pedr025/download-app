@@ -150,15 +150,23 @@
         .hero-logo {
             max-width: 240px;
             max-height: 100px;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
             display: block;
         }
 
         .hero-title-fallback {
             font-size: 36px;
             font-weight: 800;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
             line-height: 1;
+        }
+
+        .hero-genres {
+            font-size: 14px;
+            color: var(--text-dim);
+            margin-bottom: 20px;
+            font-weight: 600;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
         }
 
         .hero-btns {
@@ -194,13 +202,12 @@
 
         /* SEÇÃO CONTINUAR ASSISTINDO */
         .continue-watching-section {
-            margin: 25px 0; /* Alinhamento vertical com outras seções */
+            margin: 25px 0;
             position: relative;
         }
 
-        /* Estilo do Card Continuar Assistindo */
         .continue-card {
-            min-width: 280px; /* Largura conforme imagem de referência */
+            min-width: 280px;
             max-width: 280px;
             background: var(--surface);
             border-radius: 12px;
@@ -218,7 +225,7 @@
 
         .continue-thumb {
             width: 100%;
-            height: 157px; /* Aspect ratio 16:9 aprox */
+            height: 157px;
             background-size: cover;
             background-position: center;
             position: relative;
@@ -231,7 +238,6 @@
             background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 40%);
         }
 
-        /* Botão de Remover do Firebase */
         .continue-remove {
             position: absolute;
             top: 10px;
@@ -292,7 +298,6 @@
             text-overflow: ellipsis;
         }
 
-        /* Barra de Progresso do Card */
         .continue-progress-container {
             width: 100%;
             height: 4px;
@@ -307,7 +312,6 @@
             border-radius: 2px;
         }
 
-        /* ESTILO MODO VISITANTE (BLUR) */
         .continue-watching-section.visitor-blur .scroll-container {
             filter: blur(10px);
             pointer-events: none;
@@ -352,46 +356,162 @@
         
         .scroll-container { 
             display: flex; 
-            overflow-x: auto; 
             gap: 12px; 
-            padding: 0 20px; 
+            overflow-x: auto; 
+            padding: 0 20px 10px 20px; 
             scrollbar-width: none; 
         }
         .scroll-container::-webkit-scrollbar { display: none; }
 
-        .card { 
-            min-width: 115px; 
-            border-radius: var(--card-radius); 
-            overflow: hidden; 
-            transition: var(--transition); 
-            cursor: pointer; 
+        .card {
+            min-width: 110px;
+            max-width: 110px;
+            flex-shrink: 0;
+            cursor: pointer;
+            transition: var(--transition);
         }
-        .card:hover { transform: scale(1.05); z-index: 2; }
-        .card-thumb { width: 100%; aspect-ratio: 2/3; position: relative; }
-        .card-thumb img { width: 100%; height: 100%; object-fit: cover; }
 
-        /* MODAL DE CATEGORIAS/GÊNEROS */
-        .modal-categories {
-            position: fixed;
-            top: 0;
-            left: 0;
+        .card:active { transform: scale(0.95); }
+
+        .card-thumb {
+            width: 100%;
+            aspect-ratio: 2/3;
+            border-radius: var(--card-radius);
+            overflow: hidden;
+            background: var(--surface);
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .card-thumb img {
             width: 100%;
             height: 100%;
+            object-fit: cover;
+        }
+
+        /* MODAL DE CATEGORIAS */
+        .modal-categories {
+            position: fixed;
+            inset: 0;
             background: rgba(0,0,0,0.95);
             z-index: 2000;
             display: none;
             flex-direction: column;
-            align-items: center;
-            padding-top: 100px;
+            padding: 40px 20px;
             overflow-y: auto;
         }
-        .modal-categories.active { display: flex; }
-        .modal-close { position: absolute; top: 30px; right: 30px; font-size: 30px; color: white; cursor: pointer; }
-        .category-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; padding: 20px; width: 100%; max-width: 500px; }
-        .category-item { background: var(--surface); padding: 20px; border-radius: 15px; text-align: center; font-weight: 700; cursor: pointer; transition: var(--transition); border: 1px solid rgba(255,255,255,0.05); }
-        .category-item:hover { background: var(--accent); border-color: white; transform: translateY(-5px); }
 
-        /* NAVEGAÇÃO INFERIOR */
+        .modal-categories.active { display: flex; }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .modal-title { font-size: 24px; font-weight: 800; }
+        .close-modal { font-size: 24px; cursor: pointer; }
+
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .category-item {
+            background: var(--surface);
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            font-weight: 700;
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: var(--transition);
+        }
+
+        .category-item:active { background: var(--accent); border-color: var(--accent); }
+
+        /* SKELETON LOADING */
+        .skeleton {
+            background: linear-gradient(90deg, #1a1a1a 25%, #252525 50%, #1a1a1a 75%);
+            background-size: 200% 100%;
+            animation: skeleton-loading 1.5s infinite;
+        }
+
+        @keyframes skeleton-loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        /* POP-UP DE ANÚNCIO (PROMO) */
+        .promo-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(8px);
+            z-index: 3000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .promo-card {
+            background: #121212;
+            width: 100%;
+            max-width: 350px;
+            border-radius: 20px;
+            overflow: hidden;
+            position: relative;
+            border: 1px solid rgba(138, 43, 226, 0.3);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            animation: slideUp 0.5s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .promo-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 32px;
+            height: 32px;
+            background: rgba(0,0,0,0.5);
+            color: white;
+            border-radius: 50%;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            z-index: 10;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .promo-banner {
+            width: 100%;
+            height: 180px;
+            background: url('https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?q=80&w=1000&auto=format&fit=crop') center/cover;
+            position: relative;
+        }
+
+        .promo-banner::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, #121212, transparent);
+        }
+
+        .promo-content { padding: 25px; text-align: center; }
+        .promo-title { font-size: 22px; font-weight: 900; margin-bottom: 10px; color: white; }
+        .promo-text { color: #a0a0a0; font-size: 14px; line-height: 1.5; margin-bottom: 20px; }
+        .promo-highlight { display: inline-block; background: var(--accent); color: white; padding: 5px 15px; border-radius: 20px; font-size: 12px; font-weight: 800; margin-bottom: 20px; }
+        .promo-btn { display: block; background: white; color: black; text-decoration: none; padding: 15px; border-radius: 12px; font-weight: 800; font-size: 14px; transition: var(--transition); }
+        .promo-btn:active { transform: scale(0.98); }
+        .timer-badge { margin-top: 15px; font-size: 12px; color: #666; font-weight: 600; }
+
+        /* NAV INFERIOR */
         .nav {
             position: fixed;
             bottom: 0;
@@ -400,75 +520,35 @@
             height: 75px;
             background: var(--nav-bg);
             backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
             display: flex;
             justify-content: space-around;
             align-items: center;
+            padding: 0 10px;
             z-index: 1000;
             border-top: 1px solid rgba(255,255,255,0.05);
-            padding-bottom: 10px;
         }
+
         .nav-item {
             display: flex;
             flex-direction: column;
             align-items: center;
+            gap: 5px;
             color: var(--text-dim);
             text-decoration: none;
             font-size: 10px;
             font-weight: 600;
-            gap: 5px;
             transition: var(--transition);
+            flex: 1;
         }
+
         .nav-item i { font-size: 20px; }
         .nav-item.active { color: var(--accent); }
-        .nav-profile { width: 24px; height: 24px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; color: white; font-size: 12px; }
-
-        /* SKELETON LOADING */
-        .skeleton { background: linear-gradient(90deg, #1a1a1a 25%, #2a2a2a 50%, #1a1a1a 75%); background-size: 200% 100%; animation: loading 1.5s infinite; }
-        @keyframes loading { from { background-position: 200% 0; } to { background-position: -200% 0; } }
-
-        /* POP-UP DE ANÚNCIO (PROMO) */
-        #promo-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            z-index: 9999;
-            display: none;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-        .promo-card {
-            background: linear-gradient(145deg, #1a1a1a, #0d0d0d);
-            width: 100%;
-            max-width: 420px;
-            border-radius: 24px;
-            padding: 40px 30px;
-            text-align: center;
-            position: relative;
-            border: 1px solid rgba(138, 43, 226, 0.3);
-            box-shadow: 0 30px 60px rgba(0,0,0,0.8), 0 0 20px rgba(138, 43, 226, 0.2);
-            animation: popIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-        @keyframes popIn { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        .promo-title { font-size: 26px; font-weight: 900; margin-bottom: 15px; color: white; background: linear-gradient(to right, #fff, var(--accent-light)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .promo-btn { width: 100%; background: var(--accent); color: white; padding: 18px; border-radius: 12px; font-weight: 800; font-size: 16px; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 10px; transition: all 0.3s ease; box-shadow: 0 10px 20px rgba(138, 43, 226, 0.3); }
-        .promo-close { position: absolute; top: 15px; right: 15px; width: 35px; height: 35px; background: rgba(255,255,255,0.1); color: white; border-radius: 50%; display: none; justify-content: center; align-items: center; cursor: pointer; }
-        .promo-text-box { margin-bottom: 25px; }
-        .promo-text { color: var(--text-dim); font-size: 15px; line-height: 1.6; margin-bottom: 10px; }
-        .promo-highlight { color: var(--accent-light); font-weight: 800; font-size: 13px; letter-spacing: 1px; }
-        .promo-icon { font-size: 50px; margin-bottom: 20px; display: block; }
-        .timer-badge { margin-top: 15px; font-size: 12px; color: #666; font-weight: 600; }
+        .nav-profile { width: 24px; height: 24px; border-radius: 50%; background: #333; display: flex; justify-content: center; align-items: center; overflow: hidden; }
+        .nav-profile img { width: 100%; height: 100%; object-fit: cover; }
     </style>
 </head>
 <body>
 
-    <!-- CABEÇALHO -->
     <header id="main-header">
         <a href="início.html" class="logo-container">
             <span class="logo-pk">PK</span><span class="logo-filmes">FILMES</span>
@@ -477,44 +557,39 @@
             <button class="filter-btn active" onclick="setFilter('all', this)">Tudo</button>
             <button class="filter-btn" onclick="setFilter('filme', this)">Filmes</button>
             <button class="filter-btn" onclick="setFilter('serie', this)">Séries</button>
-            <button class="filter-btn" onclick="toggleCategories()"><i class="fa-solid fa-grip"></i> Gêneros</button>
+            <button class="filter-btn" onclick="toggleCategories()"><i class="fa-solid fa-layer-group"></i> Gêneros</button>
         </div>
     </header>
 
     <!-- MODAL DE GÊNEROS -->
     <div class="modal-categories" id="modal-categories">
-        <div class="modal-close" onclick="toggleCategories()"><i class="fa-solid fa-xmark"></i></div>
-        <div class="category-list" id="category-grid"></div>
-    </div>
-
-    <!-- POP-UP DE ANÚNCIO (EDITÁVEL) -->
-    <div id="promo-overlay">
-        <div class="promo-card">
-            <!-- Botão Fechar (Aparece após o tempo do timer) -->
-            <div class="promo-close" id="promo-close-btn" onclick="closePromo()"><i class="fa-solid fa-xmark"></i></div>
-            
-            <span class="promo-icon">🎬</span>
-            
-            <!-- Título do Anúncio -->
-            <h2 class="promo-title">APRENDA A CRIAR SEU PRÓPRIO APP</h2>
-            
-            <div class="promo-text-box">
-                <!-- Descrição do Anúncio -->
-                <p class="promo-text" id="promo-desc">Domine o desenvolvimento de aplicativos de streaming como este e transforme sua carreira.</p>
-                <!-- Texto de Destaque -->
-                <span class="promo-highlight" id="promo-tag">VAGAS LIMITADAS - 60% OFF</span>
-            </div>
-            
-            <!-- BOTÃO DE AÇÃO (Mude o href para a sua URL) -->
-            <a href="https://pay.kiwify.com.br/M9YhK6Y" target="_blank" class="promo-btn" id="promo-link">
-                GARANTIR MINHA VAGA <i class="fa-solid fa-rocket"></i>
-            </a>
-            
-            <!-- Contador Regressivo -->
-            <div class="timer-badge" id="promo-timer">Liberando em 8s</div>
+        <div class="modal-header">
+            <h2 class="modal-title">Gêneros</h2>
+            <i class="fa-solid fa-xmark close-modal" onclick="toggleCategories()"></i>
+        </div>
+        <div class="category-grid" id="category-grid">
+            <!-- Injetado via JS -->
         </div>
     </div>
 
+    <!-- POP-UP DE ANÚNCIO -->
+    <div class="promo-overlay" id="promo-overlay">
+        <div class="promo-card">
+            <div class="promo-close" id="promo-close-btn" onclick="closePromo()">
+                <i class="fa-solid fa-xmark"></i>
+            </div>
+            <div class="promo-banner" id="promo-img"></div>
+            <div class="promo-content">
+                <h3 class="promo-title" id="promo-title">Aprenda a Criar Apps!</h3>
+                <p class="promo-text" id="promo-desc">Domine o desenvolvimento de aplicativos de streaming como este e transforme sua carreira.</p>
+                <span class="promo-highlight" id="promo-tag">VAGAS LIMITADAS - 60% OFF</span>
+                <a href="https://pay.kiwify.com.br/M9YhK6Y" target="_blank" class="promo-btn" id="promo-link">
+                    GARANTIR MINHA VAGA <i class="fa-solid fa-rocket"></i>
+                </a>
+                <div class="timer-badge" id="promo-timer">Liberando em 8s</div>
+            </div>
+        </div>
+    </div>
     <main>
         <!-- SKELETON (CARREGAMENTO) -->
         <div id="loading-skeleton">
@@ -543,6 +618,7 @@
             <div id="content-sections"></div>
         </div>
     </main>
+
     <!-- BARRA DE NAVEGAÇÃO INFERIOR -->
     <nav class="nav">
         <a href="início.html" class="nav-item active"><i class="fa-solid fa-house"></i><span>Início</span></a>
@@ -557,7 +633,7 @@
         import { getDatabase, ref, get, child, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-        // CONFIGURAÇÃO DO FIREBASE (NÃO ALTERAR SE ESTIVER FUNCIONANDO)
+        // CONFIGURAÇÃO DO FIREBASE
         const firebaseConfig = {
             apiKey: "AIzaSyBIQSqbbN-adfJjONc0pmTY4PZahwk6a6w",
             authDomain: "nupcine.firebaseapp.com",
@@ -575,7 +651,7 @@
 
         // Proxy para evitar erros de CORS
         const PROXY_URL = "https://api.allorigins.win/raw?url=";
-        const BASE_API_URL = "https://pkapi-omega.vercel.app/filmes/series";
+        const BASE_API_URL = "https://pkfilmes.pages.dev/movies_data.json";
         const API_URL = PROXY_URL + encodeURIComponent(BASE_API_URL);
         
         let allData = [];
@@ -600,7 +676,6 @@
 
         /* --- FUNÇÕES GLOBAIS --- */
 
-        // Filtrar por Tudo, Filmes ou Séries
         window.setFilter = (type, btn) => {
             currentFilter = type;
             currentGenre = null;
@@ -609,55 +684,45 @@
             renderPage();
         };
 
-        // Filtrar por Gênero
         window.setGenre = (genre) => {
             currentGenre = genre;
             toggleCategories();
             renderPage();
         };
 
-        // Abrir/Fechar Modal de Gêneros
         window.toggleCategories = () => {
             document.getElementById('modal-categories').classList.toggle('active');
         };
 
-        // Fechar Pop-up de Anúncio
         window.closePromo = () => {
             document.getElementById('promo-overlay').style.display = 'none';
         };
 
-        // Monitorar Estado de Login do Usuário
         onAuthStateChanged(auth, (user) => {
             currentUser = user;
             if (user) isVisitor = false;
             init();
         });
 
-        // Inicializar a Página
         async function init() {
             try {
-                console.log("Iniciando fetch da API via Proxy...");
-                // Tenta primeiro com o proxy, se falhar tenta direto
+                console.log("Iniciando fetch da API...");
                 let res;
                 try {
                     res = await fetch(API_URL);
                     if (!res.ok) throw new Error("Proxy falhou");
                 } catch (proxyErr) {
-                    console.warn("Proxy falhou, tentando direto...");
                     res = await fetch(BASE_API_URL);
                 }
 
                 if (!res.ok) throw new Error(`Erro HTTP: ${res.status}`);
                 
                 allData = await res.json();
-                console.log("Dados carregados:", allData.length);
                 
                 if (!Array.isArray(allData)) {
-                    console.error("Dados da API não são um array:", allData);
                     allData = [];
                 }
 
-                // Extrair gêneros únicos para o modal
                 const genres = new Set();
                 allData.forEach(item => {
                     if (item.generos) {
@@ -668,7 +733,6 @@
                     }
                 });
 
-                // Renderizar lista de gêneros no modal
                 const grid = document.getElementById('category-grid');
                 if (grid) {
                     grid.innerHTML = '<div class="category-item" onclick="setGenre(null)">Todos os Gêneros</div>';
@@ -694,7 +758,6 @@
             }
         }
 
-        // Renderizar todo o conteúdo da página
         async function renderPage() {
             let filtered = allData;
             if (currentFilter !== 'all') filtered = filtered.filter(i => i.tipo === currentFilter);
@@ -706,14 +769,11 @@
                 return;
             }
 
-            // Banner Aleatório
             const heroItem = filtered[Math.floor(Math.random() * filtered.length)];
             renderHero(heroItem);
 
-            // 1. Renderizar Continuar Assistindo (Sempre no Topo)
             await renderContinueWatching();
 
-            // 2. Renderizar Outras Seções
             const container = document.getElementById('content-sections');
             if (!container) return;
             container.innerHTML = '';
@@ -737,7 +797,7 @@
             genreKeys.forEach(genre => {
                 const displayNames = categoryNames[genre] || [`Tudo de ${genre}`];
                 const randomTitle = displayNames[Math.floor(Math.random() * displayNames.length)];
-                container.appendChild(createSection(randomTitle, activeGenres[genre].sort(() => Math.random() - 0.5).slice(0, 12)));
+                container.appendChild(createSection(randomTitle, activeGenres[genre]));
             });
         }
 
@@ -757,7 +817,6 @@
                 <div class="scroll-container" id="continue-list"></div>
             `;
 
-            // Overlay para visitantes
             if (isVisitor) {
                 section.innerHTML += `
                     <div class="visitor-overlay">
@@ -799,14 +858,13 @@
                             if (card) listContainer.appendChild(card);
                         }
                     } else {
-                        wrapper.innerHTML = ''; // Esconde se não houver progresso
+                        wrapper.innerHTML = '';
                     }
                 } catch (e) {
                     console.error("Erro ao carregar progresso:", e);
                     wrapper.innerHTML = '';
                 }
             } else if (isVisitor) {
-                // Cards de exemplo borrados para o modo visitante
                 for (let i = 0; i < 3; i++) {
                     const mockCard = document.createElement('div');
                     mockCard.className = 'continue-card';
@@ -816,22 +874,10 @@
             }
         }
 
-        // Criar o card individual com dados da API + Firebase
         async function createContinueCard(data) {
             try {
-                const detailsUrl = `https://pkapi-omega.vercel.app/page/detalhes_ID?id=${data.contentId}`;
-                const proxiedDetailsUrl = PROXY_URL + encodeURIComponent(detailsUrl);
-                
-                let res;
-                try {
-                    res = await fetch(proxiedDetailsUrl);
-                    if (!res.ok) throw new Error("Proxy falhou");
-                } catch (e) {
-                    res = await fetch(detailsUrl);
-                }
-
-                if (!res.ok) return null;
-                const details = await res.json();
+                const details = allData.find(i => i.id == data.contentId);
+                if (!details) return null;
                 
                 const card = document.createElement('div');
                 card.className = 'continue-card';
@@ -876,7 +922,6 @@
             } catch (e) { return null; }
         }
 
-        // Remover item do Firebase
         window.removeFromFirebase = async (key) => {
             if (!currentUser) return;
             try {
@@ -898,11 +943,11 @@
             
             contentArea.innerHTML = `
                 ${item.logo ? `<img src="${item.logo}" class="hero-logo" alt="${item.titulo}">` : `<h1 class="hero-title-fallback">${item.titulo}</h1>`}
+                <div class="hero-genres">${item.generos || ''}</div>
                 <div class="hero-btns">
                     <button class="btn btn-play" onclick="window.location.href='detalhes.html?id=${item.id}'">
                         <i class="fa-solid fa-play"></i> Assistir
                     </button>
-                    <!-- Botões de Controle do Trailer -->
                     <button class="btn btn-control" id="hero-play-pause" onclick="toggleHeroPlayPause(this)">
                         <i class="fa-solid fa-pause"></i>
                     </button>
