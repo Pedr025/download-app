@@ -2,193 +2,939 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Meu Perfil - PKFilmes</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="theme-color" content="#000000">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Perfil - PKFilmes</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root {
-            --bg: #0b0b0b;
+            --bg: #000;
             --surface: #1a1a1a;
+            --surface-light: #2a2a2a;
             --accent: #8a2be2;
             --accent-light: #a855f7;
             --text-main: #ffffff;
             --text-dim: #a0a0a0;
-            --nav-bg: rgba(11, 11, 11, 0.8);
-            --card-radius: 12px;
+            --text-dimmer: #707070;
+            --nav-bg: rgba(0, 0, 0, 0.8);
             --transition: all 0.3s ease;
+            --border-color: rgba(255, 255, 255, 0.1);
         }
-        
-        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; user-select: none; -webkit-user-select: none; }
-        body { background-color: var(--bg); color: var(--text-main); font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; padding-bottom: 100px; overflow-x: hidden; }
 
-        /* HEADER */
-        header { position: fixed; top: 0; left: 0; right: 0; z-index: 1000; padding: 15px 20px; background: var(--bg); border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center; }
-        .header-title { font-size: 18px; font-weight: 800; color: white; text-transform: uppercase; letter-spacing: 1px; }
+        * { 
+            box-sizing: border-box; 
+            margin: 0; 
+            padding: 0; 
+            -webkit-tap-highlight-color: transparent; 
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
 
-        /* PROFILE HEADER */
-        .profile-header { display: flex; flex-direction: column; align-items: center; padding: 100px 20px 30px; gap: 15px; background: linear-gradient(to bottom, rgba(138, 43, 226, 0.15) 0%, transparent 100%); }
-        .avatar-container { position: relative; width: 110px; height: 110px; cursor: pointer; transition: var(--transition); }
-        .avatar-container:active { transform: scale(0.95); }
-        .profile-avatar { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 3px solid var(--accent); box-shadow: 0 0 25px rgba(138, 43, 226, 0.4); }
-        .edit-badge { position: absolute; bottom: 5px; right: 5px; background: var(--accent); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 3px solid var(--bg); font-size: 12px; color: white; }
+        html {
+            -webkit-text-size-adjust: 100%;
+            -ms-text-size-adjust: 100%;
+        }
 
-        /* STATUS XP */
-        .status-container { background: var(--surface); border: 1px solid rgba(255,255,255,0.05); border-radius: 20px; margin: 0 20px 25px; display: flex; justify-content: space-around; align-items: center; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
-        .status-item { flex: 1; text-align: center; display: flex; flex-direction: column; gap: 5px; }
-        .status-label { font-size: 11px; font-weight: 700; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px; }
-        .status-value { color: var(--accent-light); font-size: 18px; font-weight: 900; }
-        .status-divider { width: 1px; height: 35px; background: rgba(255,255,255,0.1); }
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            overflow-x: hidden;
+            min-height: 100vh;
+            padding-bottom: 100px;
+        }
 
-        /* SECTIONS */
-        .section { padding: 0 0 30px 20px; }
-        .section-title { font-size: 18px; font-weight: 800; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; color: white; }
-        .section-title::before { content: ''; width: 4px; height: 18px; background: var(--accent); border-radius: 2px; }
+        /* CONTAINER PRINCIPAL */
+        .profile-container {
+            max-width: 100%;
+            width: 100vw;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: linear-gradient(135deg, #000 0%, #1a0033 50%, #000 100%);
+            position: relative;
+            z-index: 1;
+        }
 
-        /* HORIZONTAL SCROLL */
-        .scroll-container { display: flex; gap: 12px; overflow-x: auto; padding-right: 20px; scrollbar-width: none; -ms-overflow-style: none; }
-        .scroll-container::-webkit-scrollbar { display: none; }
+        /* HEADER DO PERFIL */
+        .profile-header {
+            padding: 40px 20px 30px;
+            background: linear-gradient(to bottom, rgba(138, 43, 226, 0.15) 0%, transparent 100%);
+            border-bottom: 1px solid var(--border-color);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
 
-        /* CONTINUE WATCHING CARDS (REPLICANDO INÍCIO) */
-        .continue-card { min-width: 220px; width: 220px; background: var(--surface); border-radius: var(--card-radius); overflow: hidden; position: relative; border: 1px solid rgba(255,255,255,0.05); flex-shrink: 0; }
-        .continue-thumb { width: 100%; height: 120px; background-size: cover; background-position: center; position: relative; cursor: pointer; }
-        .continue-info { padding: 12px; cursor: pointer; }
-        .continue-title-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
-        .continue-name { font-size: 13px; font-weight: 800; color: white; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 70%; }
-        .continue-meta { font-size: 10px; font-weight: 700; color: var(--accent-light); background: rgba(138, 43, 226, 0.15); padding: 2px 6px; border-radius: 4px; }
-        .continue-progress-container { width: 100%; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; margin-top: 8px; overflow: hidden; }
-        .continue-progress-bar { height: 100%; background: var(--accent); box-shadow: 0 0 10px var(--accent); }
-        .continue-remove { position: absolute; top: 8px; right: 8px; width: 24px; height: 24px; background: rgba(0,0,0,0.6); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 10px; z-index: 10; cursor: pointer; }
+        .profile-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(138, 43, 226, 0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
 
-        /* FAVORITE CARDS */
-        .card { min-width: 110px; width: 110px; aspect-ratio: 2/3; border-radius: var(--card-radius); overflow: hidden; background: var(--surface); flex-shrink: 0; border: 1px solid rgba(255,255,255,0.05); cursor: pointer; }
-        .card img { width: 100%; height: 100%; object-fit: cover; }
+        .profile-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-light) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 50px;
+            margin: 0 auto 20px;
+            box-shadow: 0 8px 32px rgba(138, 43, 226, 0.3);
+            border: 3px solid var(--accent);
+            position: relative;
+            z-index: 2;
+        }
 
-        /* ACCOUNT BUTTONS */
-        .account-actions { padding: 0 20px 30px; display: flex; flex-direction: column; gap: 12px; }
-        .action-btn { background: var(--surface); border: 1px solid rgba(255,255,255,0.05); color: white; padding: 16px; border-radius: 15px; display: flex; align-items: center; justify-content: space-between; text-decoration: none; font-size: 14px; font-weight: 700; transition: var(--transition); }
-        .action-btn i { color: var(--accent); font-size: 18px; }
-        .action-btn .btn-info { display: flex; align-items: center; gap: 12px; }
-        .action-btn .btn-value { font-size: 12px; color: var(--text-dim); font-weight: 500; }
-        
-        .delete-btn { background: rgba(229, 9, 20, 0.05); border: 1px solid rgba(229, 9, 20, 0.2); color: #ff4d4d; margin-top: 10px; }
-        .delete-btn i { color: #ff4d4d; }
+        .profile-name {
+            font-size: 28px;
+            font-weight: 800;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, var(--text-main) 0%, var(--accent-light) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
 
-        /* BANNER CURSO */
-        .premium-banner { background: linear-gradient(135deg, var(--accent) 0%, #4b0082 100%); padding: 25px 20px; border-radius: 20px; margin: 0 20px 30px; text-align: center; box-shadow: 0 15px 35px rgba(138, 43, 226, 0.3); cursor: pointer; }
-        .premium-banner h3 { font-size: 20px; font-weight: 900; margin-bottom: 8px; text-transform: uppercase; }
-        .premium-banner p { font-size: 13px; opacity: 0.9; margin-bottom: 18px; line-height: 1.4; }
-        .premium-banner button { background: white; color: var(--accent); border: none; padding: 12px 35px; border-radius: 30px; font-weight: 800; font-size: 14px; text-transform: uppercase; }
+        .profile-status {
+            font-size: 14px;
+            color: var(--text-dim);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
 
-        /* SOCIAL */
-        .social-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 0 20px 30px; }
-        .social-item { background: var(--surface); border: 1px solid rgba(255,255,255,0.05); color: white; padding: 15px; border-radius: 15px; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 13px; font-weight: 700; }
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: #00ff00;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
 
-        /* VISITOR BLUR OVERLAY */
-        #visitor-overlay { position: fixed; top: 0; left: 0; width: 100%; height: calc(100% - 75px); background: rgba(0,0,0,0.7); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); z-index: 1500; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 40px; text-align: center; }
-        .visitor-icon { font-size: 50px; color: var(--accent); margin-bottom: 20px; }
-        .visitor-title { font-size: 22px; font-weight: 900; color: white; margin-bottom: 15px; }
-        .visitor-text { font-size: 15px; color: var(--text-dim); margin-bottom: 30px; line-height: 1.5; }
-        .btn-login { background: var(--accent); color: white; border: none; padding: 16px 50px; border-radius: 35px; font-weight: 800; font-size: 16px; box-shadow: 0 10px 25px rgba(138, 43, 226, 0.4); cursor: pointer; text-transform: uppercase; }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
 
-        /* NAV */
-        .nav { position: fixed; bottom: 0; left: 0; right: 0; height: 75px; background: var(--nav-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); display: flex; justify-content: space-around; z-index: 2000; border-top: 1px solid rgba(255,255,255,0.05); padding-bottom: 10px; }
-        .nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-dim); text-decoration: none; font-size: 10px; font-weight: 600; gap: 5px; flex: 1; }
+        /* CONTEÚDO PRINCIPAL */
+        .profile-content {
+            flex: 1;
+            padding: 30px 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        /* SEÇÕES */
+        .section {
+            background: var(--surface);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            transition: var(--transition);
+        }
+
+        .section:hover {
+            border-color: rgba(138, 43, 226, 0.3);
+            box-shadow: 0 12px 48px rgba(138, 43, 226, 0.15);
+        }
+
+        .section-header {
+            padding: 20px;
+            background: linear-gradient(to right, rgba(138, 43, 226, 0.1) 0%, transparent 100%);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .section-header i {
+            font-size: 20px;
+            color: var(--accent);
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .section-subtitle {
+            font-size: 12px;
+            color: var(--text-dim);
+            margin-left: auto;
+        }
+
+        .section-body {
+            padding: 20px;
+        }
+
+        /* CARDS DE VÍDEO */
+        .video-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+        }
+
+        .video-card {
+            position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: var(--transition);
+            background: var(--surface-light);
+            border: 1px solid var(--border-color);
+            aspect-ratio: 9/13;
+            group: 1;
+        }
+
+        .video-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            border-color: var(--accent);
+            box-shadow: 0 12px 32px rgba(138, 43, 226, 0.25);
+        }
+
+        .video-card-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            background: linear-gradient(135deg, var(--surface-light) 0%, var(--surface) 100%);
+        }
+
+        .video-card-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, transparent 50%);
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 12px;
+            opacity: 0;
+            transition: var(--transition);
+        }
+
+        .video-card:hover .video-card-overlay {
+            opacity: 1;
+        }
+
+        .video-card-title {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 6px;
+            line-height: 1.2;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .video-card-info {
+            font-size: 10px;
+            color: var(--text-dim);
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .video-card-progress {
+            width: 100%;
+            height: 2px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 1px;
+            overflow: hidden;
+            margin-top: 6px;
+        }
+
+        .video-card-progress-bar {
+            height: 100%;
+            background: var(--accent);
+            border-radius: 1px;
+            transition: width 0.3s ease;
+        }
+
+        .video-card-empty {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 12px;
+            color: var(--text-dim);
+            font-size: 14px;
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .video-card-empty i {
+            font-size: 40px;
+            opacity: 0.5;
+        }
+
+        /* LISTA DE ITENS */
+        .items-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .item:hover {
+            background: rgba(138, 43, 226, 0.1);
+            border-color: var(--accent);
+        }
+
+        .item-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-light) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            flex-shrink: 0;
+        }
+
+        .item-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .item-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 4px;
+        }
+
+        .item-subtitle {
+            font-size: 12px;
+            color: var(--text-dim);
+        }
+
+        .item-action {
+            font-size: 18px;
+            color: var(--text-dim);
+            transition: var(--transition);
+        }
+
+        .item:hover .item-action {
+            color: var(--accent);
+            transform: translateX(4px);
+        }
+
+        /* BOTÕES */
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            width: 100%;
+            justify-content: center;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-light) 100%);
+            color: white;
+            box-shadow: 0 8px 24px rgba(138, 43, 226, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(138, 43, 226, 0.4);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: rgba(255,255,255,0.05);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.1);
+            border-color: var(--accent);
+        }
+
+        .btn-danger {
+            background: rgba(255, 59, 48, 0.1);
+            color: #ff3b30;
+            border: 1px solid rgba(255, 59, 48, 0.3);
+        }
+
+        .btn-danger:hover {
+            background: rgba(255, 59, 48, 0.2);
+            border-color: #ff3b30;
+        }
+
+        /* STATS */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 12px;
+        }
+
+        .stat-card {
+            background: rgba(138, 43, 226, 0.1);
+            border: 1px solid rgba(138, 43, 226, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            transition: var(--transition);
+        }
+
+        .stat-card:hover {
+            background: rgba(138, 43, 226, 0.2);
+            border-color: var(--accent);
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--accent);
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--text-dim);
+            font-weight: 600;
+        }
+
+        /* ABOUT SECTION */
+        .about-content {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .about-text {
+            font-size: 14px;
+            line-height: 1.6;
+            color: var(--text-dim);
+        }
+
+        .about-credits {
+            background: rgba(138, 43, 226, 0.05);
+            border: 1px solid rgba(138, 43, 226, 0.2);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .credits-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 12px;
+        }
+
+        .credits-text {
+            font-size: 13px;
+            color: var(--text-dim);
+            line-height: 1.6;
+        }
+
+        .credits-highlight {
+            color: var(--accent);
+            font-weight: 700;
+        }
+
+        /* MODAL */
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--surface);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 30px;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--text-main);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-dim);
+            font-size: 24px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .modal-close:hover {
+            color: var(--text-main);
+        }
+
+        .modal-body {
+            margin-bottom: 20px;
+        }
+
+        .modal-message {
+            font-size: 14px;
+            color: var(--text-dim);
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .modal-warning {
+            background: rgba(255, 59, 48, 0.1);
+            border: 1px solid rgba(255, 59, 48, 0.3);
+            border-radius: 10px;
+            padding: 15px;
+            font-size: 13px;
+            color: #ff3b30;
+            margin-bottom: 15px;
+        }
+
+        .modal-footer {
+            display: flex;
+            gap: 12px;
+        }
+
+        .modal-footer .btn {
+            flex: 1;
+        }
+
+        /* NAVEGAÇÃO */
+        .nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 70px;
+            background: var(--nav-bg);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            z-index: 1000;
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            color: var(--text-dim);
+            text-decoration: none;
+            font-size: 10px;
+            font-weight: 600;
+            transition: color 0.2s ease;
+            flex: 1;
+        }
+
         .nav-item i { font-size: 20px; }
         .nav-item.active { color: var(--accent); }
-        .nav-profile { width: 24px; height: 24px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; color: white; font-size: 12px; overflow: hidden; border: 1px solid var(--accent); }
+        .nav-profile { width: 24px; height: 24px; border-radius: 50%; background: #333; display: flex; justify-content: center; align-items: center; overflow: hidden; }
         .nav-profile img { width: 100%; height: 100%; object-fit: cover; }
 
-        .skeleton { background: #1a1a1a; border-radius: 12px; animation: pulse 1.5s infinite; }
-        @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 0.8; } 100% { opacity: 0.5; } }
+        /* RESPONSIVO */
+        @media (max-width: 768px) {
+            .profile-header {
+                padding: 30px 15px 20px;
+            }
+
+            .profile-content {
+                padding: 20px 10px;
+                gap: 20px;
+            }
+
+            .video-grid {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .section-header {
+                padding: 15px;
+            }
+
+            .section-body {
+                padding: 15px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .profile-name {
+                font-size: 22px;
+            }
+
+            .video-grid {
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+                gap: 10px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .modal-content {
+                padding: 20px;
+            }
+        }
+
+        /* LOADING */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(138, 43, 226, 0.2);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* TOAST */
+        .toast {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--surface);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 15px 20px;
+            color: var(--text-main);
+            font-size: 14px;
+            z-index: 3000;
+            animation: slideUp 0.3s ease;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+        }
+
+        .toast.success {
+            border-color: rgba(52, 211, 153, 0.3);
+            background: rgba(52, 211, 153, 0.1);
+            color: #34d399;
+        }
+
+        .toast.error {
+            border-color: rgba(255, 59, 48, 0.3);
+            background: rgba(255, 59, 48, 0.1);
+            color: #ff3b30;
+        }
     </style>
 </head>
 <body>
 
-    <div id="visitor-overlay">
-        <div class="visitor-icon"><i class="fa-solid fa-user-secret"></i></div>
-        <h2 class="visitor-title">Modo Visitante</h2>
-        <p class="visitor-text">Faça login para salvar seu progresso, favoritar filmes e ganhar XP!</p>
-        <button class="btn-login" onclick="window.location.href='onboarding.html'">Fazer Login</button>
+    <div class="profile-container">
+        <!-- HEADER -->
+        <div class="profile-header">
+            <div class="profile-avatar">
+                <i class="fa-solid fa-user"></i>
+            </div>
+            <h1 class="profile-name">Meu Perfil</h1>
+            <div class="profile-status">
+                <span class="status-dot"></span>
+                <span>Online</span>
+            </div>
+        </div>
+
+	        <!-- CONTEÚDO PRINCIPAL -->
+        <div class="profile-content">
+
+            <!-- ESTATÍSTICAS -->
+            <div class="section">
+                <div class="section-header">
+                    <i class="fa-solid fa-chart-line"></i>
+                    <span class="section-title">Estatísticas</span>
+                </div>
+                <div class="section-body">
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-value" id="stat-liked">0</div>
+                            <div class="stat-label">Curtidos</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="stat-watching">0</div>
+                            <div class="stat-label">Assistindo</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="stat-completed">0</div>
+                            <div class="stat-label">Concluídos</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="stat-hours">0h</div>
+                            <div class="stat-label">Tempo Total</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VÍDEOS CURTIDOS -->
+            <div class="section">
+                <div class="section-header">
+                    <i class="fa-solid fa-heart"></i>
+                    <span class="section-title">Vídeos Curtidos</span>
+                    <span class="section-subtitle" id="liked-count">0</span>
+                </div>
+                <div class="section-body">
+                    <div class="video-grid" id="liked-videos">
+                        <div class="video-card-empty">
+                            <i class="fa-solid fa-heart-broken"></i>
+                            <span>Nenhum vídeo curtido ainda</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CONTINUAR ASSISTINDO -->
+            <div class="section">
+                <div class="section-header">
+                    <i class="fa-solid fa-play"></i>
+                    <span class="section-title">Continuar Assistindo</span>
+                    <span class="section-subtitle" id="watching-count">0</span>
+                </div>
+                <div class="section-body">
+                    <div class="video-grid" id="watching-videos">
+                        <div class="video-card-empty">
+                            <i class="fa-solid fa-circle-play"></i>
+                            <span>Comece a assistir algo novo</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- GERENCIAMENTO DE DADOS -->
+            <div class="section">
+                <div class="section-header">
+                    <i class="fa-solid fa-sliders"></i>
+                    <span class="section-title">Gerenciamento de Dados</span>
+                </div>
+                <div class="section-body">
+                    <div class="items-list">
+                        <div class="item" onclick="openClearDataModal()">
+                            <div class="item-icon">
+                                <i class="fa-solid fa-trash"></i>
+                            </div>
+                            <div class="item-info">
+                                <div class="item-title">Limpar Dados do Site</div>
+                                <div class="item-subtitle">Remove histórico e preferências locais</div>
+                            </div>
+                            <div class="item-action">
+                                <i class="fa-solid fa-chevron-right"></i>
+                            </div>
+                        </div>
+                        <div class="item" onclick="exportData()">
+                            <div class="item-icon">
+                                <i class="fa-solid fa-download"></i>
+                            </div>
+                            <div class="item-info">
+                                <div class="item-title">Exportar Dados</div>
+                                <div class="item-subtitle">Baixe seus dados em formato JSON</div>
+                            </div>
+                            <div class="item-action">
+                                <i class="fa-solid fa-chevron-right"></i>
+                            </div>
+                        </div>
+                        <div class="item" onclick="openStorageModal()">
+                            <div class="item-icon">
+                                <i class="fa-solid fa-database"></i>
+                            </div>
+                            <div class="item-info">
+                                <div class="item-title">Informações de Armazenamento</div>
+                                <div class="item-subtitle" id="storage-info">Calculando...</div>
+                            </div>
+                            <div class="item-action">
+                                <i class="fa-solid fa-chevron-right"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SOBRE -->
+            <div class="section">
+                <div class="section-header">
+                    <i class="fa-solid fa-circle-info"></i>
+                    <span class="section-title">Sobre</span>
+                </div>
+                <div class="section-body">
+                    <div class="about-content">
+                        <div class="about-text">
+                            PKFilmes é uma plataforma de streaming moderna e intuitiva, desenvolvida para oferecer a melhor experiência de visualização de filmes e séries. Com uma interface limpa e responsiva, você pode desfrutar de seus conteúdos favoritos em qualquer dispositivo.
+                        </div>
+                        <div class="about-credits">
+                            <div class="credits-title">Desenvolvido por</div>
+                            <div class="credits-text">
+                                <span class="credits-highlight">WaveLyDevelop</span> + <span class="credits-highlight">PKFILMES</span>
+                            </div>
+                            <div class="credits-text" style="margin-top: 12px; font-size: 12px;">
+                                Versão 1.0.0 • 2026
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
     </div>
 
-    <header>
-        <div class="header-title" id="user-name-header">MEU PERFIL</div>
-    </header>
-
-    <div class="profile-header">
-        <div class="avatar-container" id="avatar-click">
-            <img src="https://via.placeholder.com/150" class="profile-avatar" id="profile-avatar-img">
-            <div class="edit-badge"><i class="fa-solid fa-pencil"></i></div>
-        </div>
-    </div>
-
-    <main>
-        <div class="status-container">
-            <div class="status-item">
-                <span class="status-label">Experiência</span>
-                <span class="status-value" id="user-xp">0 XP</span>
-            </div>
-            <div class="status-divider"></div>
-            <div class="status-item">
-                <span class="status-label">Nível Atual</span>
-                <span class="status-value" id="user-level">Nível 1</span>
-            </div>
-        </div>
-
-        <div class="section" id="continue-section">
-            <h2 class="section-title">Continuar assistindo</h2>
-            <div class="scroll-container" id="continue-list">
-                <div class="continue-card skeleton" style="height: 180px;"></div>
-            </div>
-        </div>
-
-        <div class="section" id="favorites-section">
-            <h2 class="section-title">Meus favoritos</h2>
-            <div class="scroll-container" id="favorites-list">
-                <div class="card skeleton"></div>
-                <div class="card skeleton"></div>
-                <div class="card skeleton"></div>
-            </div>
-        </div>
-
-        <div class="account-actions">
-            <div class="action-btn">
-                <div class="btn-info"><i class="fa-solid fa-envelope"></i><span>E-mail</span></div>
-                <span class="btn-value" id="user-email-display">carregando...</span>
-            </div>
-            <button class="action-btn delete-btn" id="delete-account-btn">
-                <div class="btn-info"><i class="fa-solid fa-user-xmark"></i><span>Excluir Conta</span></div>
-                <i class="fa-solid fa-chevron-right" style="font-size: 12px; opacity: 0.5;"></i>
-            </button>
-        </div>
-
-        <div class="premium-banner" onclick="window.location.href='https://filmesrave.com/curso.html'">
-            <h3>Crie seu próprio Site</h3>
-            <p>Estamos entregando um site igual a este, totalmente grátis!</p>
-            <button>Começar Agora</button>
-        </div>
-
-        <div class="social-grid">
-            <a href="https://www.instagram.com/pkfilmes" class="social-item"><i class="fa-brands fa-instagram"></i> Instagram</a>
-            <a href="https://chat.whatsapp.com/K9co3Mm8SX8KCCpaHoAXOq?mode=gi_c" class="social-item"><i class="fa-brands fa-whatsapp"></i> Grupo 1</a>
- 	    <a href="https://chat.whatsapp.com/LG8ZPekuM751OnVsHo3ydb?mode=gi_c" class="social-item"><i class="fa-brands fa-whatsapp"></i> Grupo 2</a>        
-
-	</div>
-    </main>
-
+    <!-- NAVEGAÇÃO INFERIOR -->
     <nav class="nav">
-        <a href="index.html" class="nav-item"><i class="fa-solid fa-house"></i><span>Início</span></a>
+        <a href="início.html" class="nav-item"><i class="fa-solid fa-house"></i><span>Início</span></a>
         <a href="buscar.html" class="nav-item"><i class="fa-solid fa-magnifying-glass"></i><span>Buscar</span></a>
-        <a href="novidades.html" class="nav-item"><i class="fa-solid fa-crown"></i><span>Ranking</span></a>
-        <a href="perfil.html" class="nav-item active">
-            <div class="nav-profile" id="nav-profile-icon"><i class="fa-solid fa-user"></i></div>
-            <span>Perfil</span>
-        </a>
+        <a href="novidades.html" class="nav-item"><i class="fa-solid fa-wand-magic-sparkles"></i><span>Novidades</span></a>
+        <a href="perfil.html" class="nav-item active"><div class="nav-profile"><i class="fa-solid fa-user"></i></div><span>Perfil</span></a>
     </nav>
+
+    <!-- MODAIS -->
+    <!-- Modal de Limpeza de Dados -->
+    <div class="modal" id="clear-data-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Limpar Dados do Site?</h2>
+                <button class="modal-close" onclick="closeClearDataModal()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-message">
+                    Tem certeza que deseja limpar todos os dados do site? Esta ação não pode ser desfeita.
+                </div>
+                <div class="modal-warning">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    Isso removerá: histórico de visualização, vídeos curtidos, preferências e todos os dados armazenados localmente.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeClearDataModal()">Cancelar</button>
+                <button class="btn btn-danger" onclick="confirmClearData()">Limpar Tudo</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Armazenamento -->
+    <div class="modal" id="storage-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Informações de Armazenamento</h2>
+                <button class="modal-close" onclick="closeStorageModal()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="items-list">
+                    <div class="item">
+                        <div class="item-icon" style="background: rgba(138, 43, 226, 0.2); color: var(--accent);">
+                            <i class="fa-solid fa-heart"></i>
+                        </div>
+                        <div class="item-info">
+                            <div class="item-title">Vídeos Curtidos</div>
+                            <div class="item-subtitle" id="storage-liked">0 KB</div>
+                        </div>
+                    </div>
+                    <div class="item">
+                        <div class="item-icon" style="background: rgba(52, 211, 153, 0.2); color: #34d399;">
+                            <i class="fa-solid fa-play"></i>
+                        </div>
+                        <div class="item-info">
+                            <div class="item-title">Histórico de Visualização</div>
+                            <div class="item-subtitle" id="storage-watching">0 KB</div>
+                        </div>
+                    </div>
+                    <div class="item">
+                        <div class="item-icon" style="background: rgba(59, 130, 246, 0.2); color: #3b82f6;">
+                            <i class="fa-solid fa-database"></i>
+                        </div>
+                        <div class="item-info">
+                            <div class="item-title">Total Armazenado</div>
+                            <div class="item-subtitle" id="storage-total">0 KB</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeStorageModal()">Fechar</button>
+            </div>
+        </div>
+    </div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signOut, deleteUser } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getDatabase, ref, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getDatabase, ref, get, child } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBIQSqbbN-adfJjONc0pmTY4PZahwk6a6w",
@@ -205,151 +951,243 @@
         const auth = getAuth(app);
         const db = getDatabase(app);
 
-        onAuthStateChanged(auth, (user) => {
-            const isVisitor = localStorage.getItem('isVisitor') === 'true';
+        onAuthStateChanged(auth, async (user) => {
             if (user) {
-                document.getElementById('visitor-overlay').style.display = 'none';
-                document.getElementById('user-email-display').textContent = user.email || 'Não informado';
-                setupProfileListener(user.uid);
-            } else if (isVisitor) {
-                document.getElementById('visitor-overlay').style.display = 'flex';
-                document.getElementById('user-email-display').textContent = 'Visitante';
-            } else {
-                window.location.href = 'onboarding.html';
+                const navProfileIcon = document.querySelector('.nav-profile');
+                const snapshot = await get(child(ref(db), `users/${user.uid}/profile`));
+                const profileData = snapshot.exists() ? snapshot.val() : {};
+                const photoUrl = profileData.profilePhoto || user.photoURL;
+                if (photoUrl) {
+                    navProfileIcon.innerHTML = `<img src="${photoUrl}" alt="Perfil">`;
+                }
             }
         });
+    </script>
 
-        function setupProfileListener(uid) {
-            const userRef = ref(db, `users/${uid}`);
-            onValue(userRef, (snapshot) => {
-                if (snapshot.exists()) {
-                    const data = snapshot.val();
-                    document.getElementById('user-name-header').textContent = (data.username || 'MEU PERFIL').toUpperCase();
-                    document.getElementById('user-xp').textContent = `${data.xp || 0} XP`;
-                    document.getElementById('user-level').textContent = `Nível ${data.level || 1}`;
-                    if (data.profilePhoto) {
-                        document.getElementById('profile-avatar-img').src = data.profilePhoto;
-                        document.getElementById('nav-profile-icon').innerHTML = `<img src="${data.profilePhoto}">`;
-                    }
-                    renderContinueWatching(data.progress, uid);
-                    renderFavorites(data.favoriteMovies);
-                }
-            });
-        }
+    <script>
+        'use strict';
 
-        async function renderContinueWatching(progress, uid) {
-            const container = document.getElementById('continue-list');
-            if (!progress) {
-                document.getElementById('continue-section').style.display = 'none';
-                return;
-            }
-            document.getElementById('continue-section').style.display = 'block';
-            container.innerHTML = '';
-            const sortedKeys = Object.keys(progress).sort((a, b) => (progress[b].date || 0) - (progress[a].date || 0));
-            for (const key of sortedKeys) {
-                const item = progress[key];
-                const card = await createContinueCard(item, key, uid);
-                if (card) container.appendChild(card);
-            }
-        }
+        const API_URL = "https://pkfilmes.pages.dev/movies_data.json";
+        const LIKED_TRAILERS_KEY = 'pkfilmes_liked_trailers';
+        const USER_PROGRESS_KEY = 'user_progress';
 
-        async function createContinueCard(data, key, uid) {
+        let allMovies = [];
+        let likedTrailers = new Set();
+        let userProgress = [];
+
+        // INICIALIZAR
+        async function init() {
             try {
-                const res = await fetch(`https://pkapi-six.vercel.app/page/detalhes_ID?id=${data.contentId}`);
-                const details = await res.json();
-                const card = document.createElement('div');
-                card.className = 'continue-card';
-                let thumb = details.banner || details.capa;
-                let title = details.titulo;
-                let meta = details.generos ? details.generos.split(',')[0] : '';
-                let link = `detalhes.html?id=${data.contentId}`;
-                if (data.season && data.episode) {
-                    const ep = details.episodios.find(e => e.temporada == data.season && e.episodio == data.episode);
-                    if (ep) {
-                        thumb = ep.capa || thumb;
-                        meta = `T${data.season} EP${data.episode}`;
-                        link = `player.html?id=${data.contentId}&season=${data.season}&ep=${data.episode}`;
-                    }
-                } else {
-                    link = `player.html?id=${data.contentId}`;
-                }
-                const progressPercent = (data.time / data.duration) * 100;
-                card.innerHTML = `
-                    <div class="continue-remove" onclick="event.stopPropagation(); window.removeProgress('${key}', '${uid}')">
-                        <i class="fa-solid fa-xmark"></i>
-                    </div>
-                    <div class="continue-thumb" style="background-image: url('${thumb}')" onclick="window.location.href='${link}'"></div>
-                    <div class="continue-info" onclick="window.location.href='${link}'">
-                        <div class="continue-title-row">
-                            <span class="continue-name">${title}</span>
-                            <span class="continue-meta">${meta}</span>
-                        </div>
-                        <div class="continue-progress-container">
-                            <div class="continue-progress-bar" style="width: ${progressPercent}%"></div>
-                        </div>
+                loadLikedTrailers();
+                loadUserProgress();
+                const response = await fetch(API_URL);
+                allMovies = await response.json();
+                renderProfile();
+                updateStorageInfo();
+            } catch (error) {
+                console.error("Erro ao carregar dados:", error);
+            }
+        }
+
+        // CARREGAR CURTIDAS
+        function loadLikedTrailers() {
+            try {
+                const stored = localStorage.getItem(LIKED_TRAILERS_KEY);
+                likedTrailers = new Set(stored ? JSON.parse(stored) : []);
+            } catch (e) {
+                console.error('Erro ao carregar curtidas:', e);
+                likedTrailers = new Set();
+            }
+        }
+
+        // CARREGAR PROGRESSO
+        function loadUserProgress() {
+            try {
+                const stored = localStorage.getItem(USER_PROGRESS_KEY);
+                userProgress = stored ? JSON.parse(stored) : [];
+            } catch (e) {
+                console.error('Erro ao carregar progresso:', e);
+                userProgress = [];
+            }
+        }
+
+        // RENDERIZAR PERFIL
+        function renderProfile() {
+            renderLikedVideos();
+            renderWatchingVideos();
+            updateStats();
+        }
+
+        // RENDERIZAR VÍDEOS CURTIDOS
+        function renderLikedVideos() {
+            const container = document.getElementById('liked-videos');
+            const likedMovies = allMovies.filter(m => likedTrailers.has(String(m.id)));
+            
+            document.getElementById('liked-count').innerText = likedMovies.length;
+
+            if (likedMovies.length === 0) {
+                container.innerHTML = `
+                    <div class="video-card-empty">
+                        <i class="fa-solid fa-heart-broken"></i>
+                        <span>Nenhum vídeo curtido ainda</span>
                     </div>
                 `;
-                return card;
-            } catch (e) { return null; }
-        }
-
-        window.removeProgress = async (key, uid) => {
-            if (confirm('Remover este item do seu histórico?')) {
-                await remove(ref(db, `users/${uid}/progress/${key}`));
-            }
-        };
-
-        async function renderFavorites(favorites) {
-            const container = document.getElementById('favorites-list');
-            if (!favorites) {
-                document.getElementById('favorites-section').style.display = 'none';
                 return;
             }
-            document.getElementById('favorites-section').style.display = 'block';
-            container.innerHTML = '';
-            const favoriteIds = Object.values(favorites);
-            for (const id of favoriteIds) {
-                try {
-                    const res = await fetch(`https://pkapi-six.vercel.app/page/detalhes_ID?id=${id}`);
-                    const details = await res.json();
-                    const card = document.createElement('div');
-                    card.className = 'card';
-                    card.onclick = () => window.location.href = `detalhes.html?id=${id}`;
-                    card.innerHTML = `<img src="${details.capa || details.banner}" alt="${details.titulo}">`;
-                    container.appendChild(card);
-                } catch (e) {}
-            }
+
+            container.innerHTML = likedMovies.map(movie => `
+                <div class="video-card" onclick="window.location.href='detalhes.html?id=${movie.id}'">
+                    <img src="${movie.capa}" alt="${movie.titulo}" class="video-card-image">
+                    <div class="video-card-overlay">
+                        <div class="video-card-title">${movie.titulo}</div>
+                        <div class="video-card-info">
+                            <span><i class="fa-solid fa-star"></i> ${movie.avaliacao || 'N/A'}</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
         }
 
-        document.getElementById('delete-account-btn').onclick = async () => {
-            if (confirm('ATENÇÃO: Isso excluirá permanentemente sua conta e todos os seus dados. Deseja continuar?')) {
-                const user = auth.currentUser;
-                if (user) {
-                    try {
-                        await remove(ref(db, `users/${user.uid}`));
-                        await deleteUser(user);
-                        localStorage.removeItem('isVisitor');
-                        window.location.href = 'onboarding.html';
-                    } catch (e) {
-                        alert('Para excluir sua conta, você precisa ter feito login recentemente. Saia e entre novamente para realizar esta ação.');
-                    }
-                }
-            }
-        };
+        // RENDERIZAR CONTINUAR ASSISTINDO
+        function renderWatchingVideos() {
+            const container = document.getElementById('watching-videos');
+            const watchingMovies = userProgress
+                .filter(p => p.progress > 0 && p.progress < 95)
+                .map(p => {
+                    const movie = allMovies.find(m => String(m.id) === String(p.id));
+                    return movie ? { ...movie, progress: p.progress } : null;
+                })
+                .filter(m => m !== null)
+                .sort((a, b) => b.progress - a.progress);
 
-        document.getElementById('avatar-click').onclick = () => {
-            const newUrl = prompt("Insira a URL da nova foto de perfil:");
-            if (newUrl && auth.currentUser) {
-                update(ref(db, `users/${auth.currentUser.uid}`), { profilePhoto: newUrl });
-            }
-        };
+            document.getElementById('watching-count').innerText = watchingMovies.length;
 
-        document.getElementById('logout-btn').onclick = () => {
-            signOut(auth).then(() => {
-                localStorage.removeItem('isVisitor');
-                window.location.href = 'onboarding.html';
-            });
-        };
+            if (watchingMovies.length === 0) {
+                container.innerHTML = `
+                    <div class="video-card-empty">
+                        <i class="fa-solid fa-circle-play"></i>
+                        <span>Comece a assistir algo novo</span>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = watchingMovies.map(movie => `
+                <div class="video-card" onclick="window.location.href='player.html?id=${movie.id}'">
+                    <img src="${movie.capa}" alt="${movie.titulo}" class="video-card-image">
+                    <div class="video-card-progress">
+                        <div class="video-card-progress-bar" style="width: ${movie.progress}%"></div>
+                    </div>
+                    <div class="video-card-overlay">
+                        <div class="video-card-title">${movie.titulo}</div>
+                        <div class="video-card-info">
+                            <span>${Math.round(movie.progress)}% assistido</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // ATUALIZAR ESTATÍSTICAS
+        function updateStats() {
+            const completed = userProgress.filter(p => p.progress >= 95).length;
+            const watching = userProgress.filter(p => p.progress > 0 && p.progress < 95).length;
+            const liked = likedTrailers.size;
+            
+            // Calcular tempo total (estimativa: 2h por filme)
+            const totalHours = Math.round(userProgress.length * 2);
+
+            document.getElementById('stat-liked').innerText = liked;
+            document.getElementById('stat-watching').innerText = watching;
+            document.getElementById('stat-completed').innerText = completed;
+            document.getElementById('stat-hours').innerText = totalHours + 'h';
+        }
+
+        // MODAIS
+        function openClearDataModal() {
+            document.getElementById('clear-data-modal').classList.add('active');
+        }
+
+        function closeClearDataModal() {
+            document.getElementById('clear-data-modal').classList.remove('active');
+        }
+
+        function confirmClearData() {
+            localStorage.removeItem(LIKED_TRAILERS_KEY);
+            localStorage.removeItem(USER_PROGRESS_KEY);
+            likedTrailers = new Set();
+            userProgress = [];
+            renderProfile();
+            closeClearDataModal();
+            showToast('Todos os dados foram limpos!', 'success');
+        }
+
+        function openStorageModal() {
+            updateStorageInfo();
+            document.getElementById('storage-modal').classList.add('active');
+        }
+
+        function closeStorageModal() {
+            document.getElementById('storage-modal').classList.remove('active');
+        }
+
+        function updateStorageInfo() {
+            const likedData = JSON.stringify(Array.from(likedTrailers));
+            const watchingData = JSON.stringify(userProgress);
+            
+            const likedSize = (new Blob([likedData]).size / 1024).toFixed(2);
+            const watchingSize = (new Blob([watchingData]).size / 1024).toFixed(2);
+            const totalSize = (parseFloat(likedSize) + parseFloat(watchingSize)).toFixed(2);
+
+            document.getElementById('storage-info').innerText = totalSize + ' KB';
+            document.getElementById('storage-liked').innerText = likedSize + ' KB';
+            document.getElementById('storage-watching').innerText = watchingSize + ' KB';
+            document.getElementById('storage-total').innerText = totalSize + ' KB';
+        }
+	        // EXPORTAR DADOS
+        function exportData() {
+            const data = {
+                liked: Array.from(likedTrailers),
+                progress: userProgress,
+                exportDate: new Date().toISOString()
+            };
+
+            const dataStr = JSON.stringify(data, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `pkfilmes-dados-${Date.now()}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+
+            showToast('Dados exportados com sucesso!', 'success');
+        }
+
+        // TOAST
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerText = message;
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+
+        // FECHAR MODAIS AO CLICAR FORA
+        document.getElementById('clear-data-modal').addEventListener('click', (e) => {
+            if (e.target.id === 'clear-data-modal') closeClearDataModal();
+        });
+
+        document.getElementById('storage-modal').addEventListener('click', (e) => {
+            if (e.target.id === 'storage-modal') closeStorageModal();
+        });
+
+        // INICIAR
+        window.onload = init;
     </script>
+
 </body>
 </html>
