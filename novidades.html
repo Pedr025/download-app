@@ -481,7 +481,6 @@
     </style>
 </head>
 <body>
-
     <div id="swipe-tutorial">
         <div class="tutorial-icon"><i class="fa-solid fa-hand-pointer"></i></div>
         <h2 class="tutorial-text">Role para baixo para ver mais novidades!</h2>
@@ -522,7 +521,8 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getDatabase, ref, get, child } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-	        const firebaseConfig = {
+
+        const firebaseConfig = {
             apiKey: "AIzaSyBIQSqbbN-adfJjONc0pmTY4PZahwk6a6w",
             authDomain: "nupcine.firebaseapp.com",
             databaseURL: "https://nupcine-default-rtdb.firebaseio.com",
@@ -554,6 +554,7 @@
         'use strict';
 
         const API_URL = "https://pkfilmes.pages.dev/movies_data.json";
+        const LIKED_TRAILERS_KEY = 'pkfilmes_liked_trailers';
         let allMovies = [];
         let filteredMovies = [];
         let currentActiveIndex = 0;
@@ -562,6 +563,27 @@
         let seekbarInterval = null;
         let renderRAF = null;
         let scrollListener = null;
+        let likedTrailers = new Set();
+
+        // CARREGAR CURTIDAS DO LOCALSTORAGE
+        function loadLikedTrailers() {
+            try {
+                const stored = localStorage.getItem(LIKED_TRAILERS_KEY);
+                likedTrailers = new Set(stored ? JSON.parse(stored) : []);
+            } catch (e) {
+                console.error('Erro ao carregar curtidas:', e);
+                likedTrailers = new Set();
+            }
+        }
+
+        // SALVAR CURTIDAS NO LOCALSTORAGE
+        function saveLikedTrailers() {
+            try {
+                localStorage.setItem(LIKED_TRAILERS_KEY, JSON.stringify(Array.from(likedTrailers)));
+            } catch (e) {
+                console.error('Erro ao salvar curtidas:', e);
+            }
+        }
 
         // POOL DE OBJETOS PARA REDUZIR GC
         const statePool = [];
@@ -630,6 +652,7 @@
                 section.className = 'video-section inactive';
                 section.setAttribute('data-index', index);
                 section.setAttribute('data-trailer', movie.trailer_id);
+                section.setAttribute('data-movie-id', movie.id);
                 
                 section.innerHTML = `
                     <div class="video-wrapper" id="player-container-${index}"></div>
@@ -642,8 +665,8 @@
                             </button>
                         </div>
                         <div class="side-actions">
-                            <div class="action-btn" onclick="toggleLike(${index})">
-                                <div class="action-icon" id="like-icon-${index}"><i class="fa-solid fa-heart"></i></div>
+                            <div class="action-btn" onclick="toggleLike(${index}, '${movie.id}')">
+                                <div class="action-icon" id="like-icon-${index}" data-movie-id="${movie.id}"><i class="fa-solid fa-heart"></i></div>
                                 <span class="action-label">Curtir</span>
                             </div>
                             <div class="action-btn" onclick="togglePlayPause(${index})">
@@ -682,6 +705,10 @@
                         
                         if (!videoStates[index]) {
                             videoStates[index] = createState();
+                            const movieId = entry.target.getAttribute('data-movie-id');
+                            if (likedTrailers.has(movieId)) {
+                                videoStates[index].liked = true;
+                            }
                         }
                         
                         const cacheKey = `iframe-${index}`;
@@ -714,10 +741,13 @@
             if (playIcon) playIcon.innerHTML = state.isPaused ? '<i class="fa-solid fa-play"></i>' : '<i class="fa-solid fa-pause"></i>';
             if (muteIcon) muteIcon.innerHTML = state.isMuted ? '<i class="fa-solid fa-volume-xmark"></i>' : '<i class="fa-solid fa-volume-high"></i>';
             if (likeIcon) {
-                if (state.liked) {
+                const movieId = likeIcon.getAttribute('data-movie-id');
+                if (likedTrailers.has(movieId)) {
                     likeIcon.classList.add('liked');
+                    state.liked = true;
                 } else {
                     likeIcon.classList.remove('liked');
+                    state.liked = false;
                 }
             }
         }
@@ -740,8 +770,15 @@
             updateUI(index);
         };
 
-        window.toggleLike = (index) => {
-            videoStates[index].liked = !videoStates[index].liked;
+        window.toggleLike = (index, movieId) => {
+            if (likedTrailers.has(movieId)) {
+                likedTrailers.delete(movieId);
+                videoStates[index].liked = false;
+            } else {
+                likedTrailers.add(movieId);
+                videoStates[index].liked = true;
+            }
+            saveLikedTrailers();
             updateUI(index);
         };
 
@@ -779,7 +816,10 @@
             setInterval(() => window.gc(), 30000);
         }
 
-        window.onload = init;
+        window.onload = () => {
+            loadLikedTrailers();
+            init();
+        };
     </script>
 </body>
 </html>
