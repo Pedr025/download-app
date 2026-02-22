@@ -503,7 +503,8 @@
                 <!-- Texto de Destaque -->
                 <span class="promo-highlight" id="promo-tag">VAGAS LIMITADAS - 60% OFF</span>
             </div>
-                        <!-- BOTÃO DE AÇÃO (Mude o href para a sua URL) -->
+            
+            <!-- BOTÃO DE AÇÃO (Mude o href para a sua URL) -->
             <a href="https://pay.kiwify.com.br/M9YhK6Y" target="_blank" class="promo-btn" id="promo-link">
                 GARANTIR MINHA VAGA <i class="fa-solid fa-rocket"></i>
             </a>
@@ -541,7 +542,6 @@
             <div id="content-sections"></div>
         </div>
     </main>
-
     <!-- BARRA DE NAVEGAÇÃO INFERIOR -->
     <nav class="nav">
         <a href="início.html" class="nav-item active"><i class="fa-solid fa-house"></i><span>Início</span></a>
@@ -631,35 +631,52 @@
         // Inicializar a Página
         async function init() {
             try {
+                console.log("Iniciando fetch da API...");
                 const res = await fetch(API_URL);
-                allData = await res.json();
+                if (!res.ok) throw new Error(`Erro HTTP: ${res.status}`);
                 
+                allData = await res.json();
+                console.log("Dados carregados:", allData.length);
+                
+                if (!Array.isArray(allData)) {
+                    console.error("Dados da API não são um array:", allData);
+                    allData = [];
+                }
+
                 // Extrair gêneros únicos para o modal
                 const genres = new Set();
                 allData.forEach(item => {
                     if (item.generos) {
                         item.generos.split(',').forEach(g => {
                             const genre = g.trim();
-                            if (genre !== 'Talk' && genre !== 'Kids') genres.add(genre);
+                            if (genre && genre !== 'Talk' && genre !== 'Kids') genres.add(genre);
                         });
                     }
                 });
 
                 // Renderizar lista de gêneros no modal
                 const grid = document.getElementById('category-grid');
-                grid.innerHTML = '<div class="category-item" onclick="setGenre(null)">Todos os Gêneros</div>';
-                Array.from(genres).sort().forEach(g => {
-                    grid.innerHTML += `<div class="category-item" onclick="setGenre('${g}')">${g}</div>`;
-                });
+                if (grid) {
+                    grid.innerHTML = '<div class="category-item" onclick="setGenre(null)">Todos os Gêneros</div>';
+                    Array.from(genres).sort().forEach(g => {
+                        grid.innerHTML += `<div class="category-item" onclick="setGenre('${g}')">${g}</div>`;
+                    });
+                }
 
                 renderPage();
-                document.getElementById('loading-skeleton').style.display = 'none';
-                document.getElementById('real-content').style.display = 'block';
+                
+                const skeleton = document.getElementById('loading-skeleton');
+                const content = document.getElementById('real-content');
+                if (skeleton) skeleton.style.display = 'none';
+                if (content) content.style.display = 'block';
+                
                 startPromo();
             } catch (e) { 
                 console.error("Erro na inicialização:", e);
-                document.getElementById('loading-skeleton').style.display = 'none';
-                document.getElementById('real-content').style.display = 'block';
+                const skeleton = document.getElementById('loading-skeleton');
+                const content = document.getElementById('real-content');
+                if (skeleton) skeleton.style.display = 'none';
+                if (content) content.style.display = 'block';
             }
         }
 
@@ -669,7 +686,11 @@
             if (currentFilter !== 'all') filtered = filtered.filter(i => i.tipo === currentFilter);
             if (currentGenre) filtered = filtered.filter(i => i.generos && i.generos.includes(currentGenre));
 
-            if (filtered.length === 0) return;
+            if (filtered.length === 0) {
+                const container = document.getElementById('content-sections');
+                if (container) container.innerHTML = '<p style="text-align:center; padding:20px; color:var(--text-dim);">Nenhum conteúdo encontrado.</p>';
+                return;
+            }
 
             // Banner Aleatório
             const heroItem = filtered[Math.floor(Math.random() * filtered.length)];
@@ -680,6 +701,7 @@
 
             // 2. Renderizar Outras Seções
             const container = document.getElementById('content-sections');
+            if (!container) return;
             container.innerHTML = '';
 
             const activeGenres = {};
@@ -687,7 +709,7 @@
                 if (item.generos) {
                     item.generos.split(',').forEach(g => {
                         const genre = g.trim();
-                        if (genre !== 'Talk' && genre !== 'Kids') {
+                        if (genre && genre !== 'Talk' && genre !== 'Kids') {
                             if (!activeGenres[genre]) activeGenres[genre] = [];
                             activeGenres[genre].push(item);
                         }
@@ -709,6 +731,7 @@
 
         async function renderContinueWatching() {
             const wrapper = document.getElementById('continue-watching-wrapper');
+            if (!wrapper) return;
             wrapper.innerHTML = '';
 
             const section = document.createElement('div');
@@ -734,34 +757,39 @@
             const listContainer = section.querySelector('#continue-list');
 
             if (!isVisitor && currentUser) {
-                const dbRef = ref(db);
-                const snapshot = await get(child(dbRef, `users/${currentUser.uid}/progress`));
-                
-                if (snapshot.exists()) {
-                    const progressData = snapshot.val();
-                    const sortedKeys = Object.keys(progressData).sort((a, b) => progressData[b].date - progressData[a].date);
+                try {
+                    const dbRef = ref(db);
+                    const snapshot = await get(child(dbRef, `users/${currentUser.uid}/progress`));
                     
-                    const seriesGroups = {};
-                    const finalItems = [];
+                    if (snapshot.exists()) {
+                        const progressData = snapshot.val();
+                        const sortedKeys = Object.keys(progressData).sort((a, b) => progressData[b].date - progressData[a].date);
+                        
+                        const seriesGroups = {};
+                        const finalItems = [];
 
-                    for (const key of sortedKeys) {
-                        const item = progressData[key];
-                        if (item.season && item.episode) {
-                            if (!seriesGroups[item.contentId]) {
-                                seriesGroups[item.contentId] = item;
+                        for (const key of sortedKeys) {
+                            const item = progressData[key];
+                            if (item.season && item.episode) {
+                                if (!seriesGroups[item.contentId]) {
+                                    seriesGroups[item.contentId] = item;
+                                    finalItems.push({ ...item, key });
+                                }
+                            } else {
                                 finalItems.push({ ...item, key });
                             }
-                        } else {
-                            finalItems.push({ ...item, key });
                         }
-                    }
 
-                    for (const item of finalItems) {
-                        const card = await createContinueCard(item);
-                        if (card) listContainer.appendChild(card);
+                        for (const item of finalItems) {
+                            const card = await createContinueCard(item);
+                            if (card) listContainer.appendChild(card);
+                        }
+                    } else {
+                        wrapper.innerHTML = ''; // Esconde se não houver progresso
                     }
-                } else {
-                    wrapper.innerHTML = ''; // Esconde se não houver progresso
+                } catch (e) {
+                    console.error("Erro ao carregar progresso:", e);
+                    wrapper.innerHTML = '';
                 }
             } else if (isVisitor) {
                 // Cards de exemplo borrados para o modo visitante
@@ -778,6 +806,7 @@
         async function createContinueCard(data) {
             try {
                 const res = await fetch(`https://pkapi-omega.vercel.app/page/detalhes_ID?id=${data.contentId}`);
+                if (!res.ok) return null;
                 const details = await res.json();
                 
                 const card = document.createElement('div');
@@ -789,7 +818,7 @@
                 let epInfo = '';
                 let link = `detalhes.html?id=${data.contentId}`;
 
-                if (data.season && data.episode) {
+                if (data.season && data.episode && details.episodios) {
                     const ep = details.episodios.find(e => e.temporada == data.season && e.episodio == data.episode);
                     if (ep) {
                         thumb = ep.capa || thumb;
@@ -837,6 +866,8 @@
         function renderHero(item) {
             const mediaContainer = document.getElementById('hero-media-container');
             const contentArea = document.getElementById('hero-content-area');
+            if (!mediaContainer || !contentArea) return;
+            
             clearTimeout(trailerTimeout);
             
             mediaContainer.innerHTML = `<img src="${item.banner || item.capa}" id="hero-static-img">`;
@@ -864,6 +895,7 @@
 
         function startTrailer(id) {
             const container = document.getElementById('hero-media-container');
+            if (!container) return;
             container.innerHTML = `<iframe id="youtube-player" src="https://www.youtube.com/embed/${id}?autoplay=1&mute=1&controls=0&loop=1&playlist=${id}&enablejsapi=1" allow="autoplay"></iframe>`;
             isMuted = true;
             isPaused = false;
