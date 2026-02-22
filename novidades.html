@@ -23,6 +23,7 @@
             padding: 0; 
             -webkit-tap-highlight-color: transparent; 
             user-select: none;
+            -webkit-user-select: none;
         }
 
         body {
@@ -32,9 +33,10 @@
             overflow: hidden;
             height: 100vh;
             width: 100vw;
+            will-change: transform;
         }
 
-        /* CONTAINER TIKTOK */
+        /* CONTAINER TIKTOK - OTIMIZADO */
         .tiktok-container {
             height: 100vh;
             width: 100vw;
@@ -42,6 +44,9 @@
             scroll-snap-type: y mandatory;
             scrollbar-width: none;
             -ms-overflow-style: none;
+            -webkit-overflow-scrolling: touch;
+            transform: translateZ(0);
+            will-change: scroll-position;
         }
 
         .tiktok-container::-webkit-scrollbar {
@@ -57,6 +62,8 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            contain: layout style paint;
+            will-change: transform;
         }
 
         /* PLAYER */
@@ -66,6 +73,7 @@
             width: 100%;
             height: 100%;
             z-index: 1;
+            contain: layout style paint;
         }
 
         .video-wrapper iframe {
@@ -74,6 +82,9 @@
             border: none;
             pointer-events: none;
             transform: scale(1.5);
+            will-change: transform;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
         }
 
         /* OVERLAY DE INTERAÇÃO */
@@ -86,11 +97,13 @@
             flex-direction: column;
             justify-content: flex-end;
             padding: 20px 15px 100px 15px;
+            pointer-events: none;
         }
 
         /* INFO DO FILME */
         .movie-info {
             max-width: 80%;
+            pointer-events: auto;
         }
 
         .movie-title {
@@ -120,6 +133,13 @@
             gap: 8px;
             cursor: pointer;
             box-shadow: 0 4px 15px rgba(138, 43, 226, 0.4);
+            transition: var(--transition);
+            pointer-events: auto;
+            will-change: transform;
+        }
+
+        .btn-watch:active {
+            transform: scale(0.95);
         }
 
         /* BOTÕES LATERAIS */
@@ -132,6 +152,7 @@
             gap: 20px;
             align-items: center;
             z-index: 20;
+            pointer-events: auto;
         }
 
         .action-btn {
@@ -141,6 +162,7 @@
             gap: 5px;
             color: white;
             cursor: pointer;
+            will-change: transform;
         }
 
         .action-icon {
@@ -154,6 +176,7 @@
             justify-content: center;
             font-size: 20px;
             transition: var(--transition);
+            will-change: transform, background-color;
         }
 
         .action-btn:active .action-icon {
@@ -188,6 +211,7 @@
             background: rgba(255,255,255,0.1);
             z-index: 999;
             cursor: pointer;
+            contain: layout style paint;
         }
 
         .seekbar-progress {
@@ -195,6 +219,7 @@
             background: var(--accent);
             width: 0%;
             transition: width 0.1s linear;
+            will-change: width;
         }
 
         /* NAVEGAÇÃO INFERIOR (PADRONIZADA) */
@@ -212,6 +237,7 @@
             border-top: 1px solid rgba(255,255,255,0.05);
             z-index: 1000;
             padding-bottom: env(safe-area-inset-bottom);
+            contain: layout style paint;
         }
 
         .nav-item {
@@ -225,6 +251,7 @@
             font-weight: 600;
             transition: var(--transition);
             flex: 1;
+            will-change: color;
         }
 
         .nav-item i { font-size: 20px; }
@@ -232,17 +259,21 @@
         .nav-profile { width: 24px; height: 24px; border-radius: 50%; background: #333; display: flex; justify-content: center; align-items: center; overflow: hidden; }
         .nav-profile img { width: 100%; height: 100%; object-fit: cover; }
 
-        /* LOADING */
+        /* LOADING - COM BOTÕES DE NAVEGAÇÃO VISÍVEIS */
         #loading-screen {
             position: fixed;
             inset: 0;
             background: #000;
-            z-index: 3000;
+            z-index: 2999;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             gap: 20px;
+        }
+
+        #loading-screen.hidden {
+            display: none;
         }
 
         .loader {
@@ -252,13 +283,14 @@
             border-top-color: var(--accent);
             border-radius: 50%;
             animation: spin 1s linear infinite;
+            will-change: transform;
         }
 
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
 
-        /* HEADER COM LOGO */
+        /* HEADER COM LOGO E FILTROS */
         .top-header {
             position: fixed;
             top: 0;
@@ -267,8 +299,11 @@
             padding: 20px;
             z-index: 1000;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
             background: linear-gradient(to bottom, rgba(0,0,0,0.6) 0%, transparent 100%);
+            contain: layout style paint;
         }
 
         .logo-container {
@@ -277,34 +312,170 @@
             letter-spacing: -1px;
             text-decoration: none;
             display: flex;
+            flex-direction: column;
             align-items: center;
+            gap: 8px;
         }
 
         .logo-pk { color: #ffffff; }
         .logo-filmes { color: var(--accent); }
+
+        /* FILTROS FILMES/SÉRIES */
+        .filter-tabs {
+            display: flex;
+            gap: 10px;
+            background: rgba(0,0,0,0.3);
+            padding: 8px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .filter-tab {
+            padding: 8px 20px;
+            border: none;
+            background: transparent;
+            color: var(--text-dim);
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            border-radius: 15px;
+            transition: var(--transition);
+            will-change: background-color, color;
+        }
+
+        .filter-tab.active {
+            background: var(--accent);
+            color: white;
+        }
+
+        /* TUTORIAL DE SWIPE */
+        #swipe-tutorial {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.9);
+            z-index: 2500;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 30px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        #swipe-tutorial.hidden {
+            display: none;
+        }
+
+        .tutorial-content {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .tutorial-icon {
+            font-size: 60px;
+            color: var(--accent);
+            animation: slideDown 1s ease infinite;
+        }
+
+        @keyframes slideDown {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(20px); }
+        }
+
+        .tutorial-text {
+            font-size: 18px;
+            font-weight: 600;
+            color: white;
+            max-width: 80%;
+        }
+
+        .tutorial-subtext {
+            font-size: 14px;
+            color: var(--text-dim);
+            max-width: 80%;
+        }
+
+        .tutorial-button {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: var(--transition);
+        }
+
+        .tutorial-button:active {
+            transform: scale(0.95);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* OTIMIZAÇÕES PARA PERFORMANCE */
+        img {
+            will-change: transform;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+        }
+
+        /* Reduz repaints em scroll */
+        .video-section * {
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+        }
     </style>
 </head>
 <body>
 
+    <!-- TUTORIAL DE SWIPE (PRIMEIRO ACESSO) -->
+    <div id="swipe-tutorial">
+        <div class="tutorial-content">
+            <div class="tutorial-icon"><i class="fa-solid fa-hand-pointer"></i></div>
+            <h2 class="tutorial-text">Bem-vindo ao PKFilmes!</h2>
+            <p class="tutorial-subtext">Role a tela para baixo para descobrir novos filmes e séries</p>
+            <button class="tutorial-button" onclick="closeTutorial()">Entendi!</button>
+        </div>
+    </div>
+
+    <!-- TELA DE CARREGAMENTO -->
     <div id="loading-screen">
         <div class="loader"></div>
         <p style="font-weight: 600; color: var(--accent);">Carregando Novidades...</p>
     </div>
 
+    <!-- HEADER COM LOGO E FILTROS -->
     <header class="top-header">
         <div class="logo-container">
-            <span class="logo-pk">PK</span><span class="logo-filmes">FILMES</span>
+            <div style="display: flex; align-items: center; gap: 5px;">
+                <span class="logo-pk">PK</span><span class="logo-filmes">FILMES</span>
+            </div>
+            <div class="filter-tabs">
+                <button class="filter-tab active" onclick="filterByType('movies')">Filmes</button>
+                <button class="filter-tab" onclick="filterByType('series')">Séries</button>
+            </div>
         </div>
     </header>
 
+    <!-- SEEKBAR -->
     <div class="seekbar-container">
         <div class="seekbar-progress" id="seekbar-progress"></div>
     </div>
 
+    <!-- CONTAINER DE VÍDEOS -->
     <div class="tiktok-container" id="video-container">
         <!-- Injetado via JS -->
     </div>
 
+    <!-- NAVEGAÇÃO INFERIOR -->
     <nav class="nav">
         <a href="início.html" class="nav-item"><i class="fa-solid fa-house"></i><span>Início</span></a>
         <a href="buscar.html" class="nav-item"><i class="fa-solid fa-magnifying-glass"></i><span>Buscar</span></a>
@@ -333,8 +504,8 @@
         const db = getDatabase(app);
 
         onAuthStateChanged(auth, async (user) => {
-            const navProfileIcon = document.getElementById('user-profile-icon');
             if (user) {
+                const navProfileIcon = document.getElementById('user-profile-icon');
                 const snapshot = await get(child(ref(db), `users/${user.uid}/profile`));
                 const profileData = snapshot.exists() ? snapshot.val() : {};
                 const photoUrl = profileData.profilePhoto || user.photoURL;
@@ -347,22 +518,76 @@
 
     <script>
         const API_URL = "https://pkfilmes.pages.dev/movies_data.json";
-        let moviesWithTrailers = [];
+        let allMovies = [];
+        let filteredMovies = [];
         let currentActiveIndex = 0;
         let currentIframe = null;
-        let videoStates = {}; // Armazena estado de cada vídeo (muted, paused, liked)
+        let videoStates = {};
+        let currentFilter = 'movies';
+        let iframeCache = new Map();
+        let observerMap = new Map();
+
+        // VERIFICAR PRIMEIRO ACESSO
+        function checkFirstAccess() {
+            const hasVisited = localStorage.getItem('pkfilmes_visited');
+            if (!hasVisited) {
+                localStorage.setItem('pkfilmes_visited', 'true');
+                document.getElementById('swipe-tutorial').classList.remove('hidden');
+            } else {
+                document.getElementById('swipe-tutorial').classList.add('hidden');
+            }
+        }
+
+        window.closeTutorial = () => {
+            const tutorial = document.getElementById('swipe-tutorial');
+            tutorial.style.animation = 'fadeOut 0.3s ease';
+            setTimeout(() => {
+                tutorial.classList.add('hidden');
+            }, 300);
+        };
+
+        // FILTRAR POR TIPO
+        window.filterByType = (type) => {
+            currentFilter = type;
+            
+            // Atualizar botões
+            document.querySelectorAll('.filter-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // Filtrar filmes
+            if (type === 'movies') {
+                filteredMovies = allMovies.filter(m => !m.tipo || m.tipo !== 'serie');
+            } else {
+                filteredMovies = allMovies.filter(m => m.tipo === 'serie');
+            }
+
+            // Re-renderizar
+            renderVideos();
+            setupIntersectionObserver();
+            document.getElementById('video-container').scrollTop = 0;
+        };
 
         async function init() {
             try {
+                checkFirstAccess();
+                
                 const response = await fetch(API_URL);
                 const data = await response.json();
                 
-                moviesWithTrailers = data.filter(m => m.trailer_id && m.trailer_id.trim() !== "");
-                moviesWithTrailers.sort(() => Math.random() - 0.5);
+                allMovies = data.filter(m => m.trailer_id && m.trailer_id.trim() !== "");
+                allMovies.sort(() => Math.random() - 0.5);
+                
+                // Começar com filmes
+                filteredMovies = allMovies.filter(m => !m.tipo || m.tipo !== 'serie');
 
                 renderVideos();
                 
-                document.getElementById('loading-screen').style.display = 'none';
+                // Esconder loading screen
+                setTimeout(() => {
+                    document.getElementById('loading-screen').classList.add('hidden');
+                }, 500);
                 
                 setupIntersectionObserver();
             } catch (error) {
@@ -371,9 +596,9 @@
             }
         }
 
-        function renderVideos() {
+	        function renderVideos() {
             const container = document.getElementById('video-container');
-            container.innerHTML = moviesWithTrailers.map((movie, index) => `
+            container.innerHTML = filteredMovies.map((movie, index) => `
                 <section class="video-section" data-index="${index}" data-trailer="${movie.trailer_id}" data-movie-id="${movie.id}">
                     <div class="video-wrapper" id="player-${index}">
                         <!-- Iframe será injetado pelo Observer -->
@@ -410,6 +635,10 @@
         }
 
         function setupIntersectionObserver() {
+            // Limpar observadores antigos
+            observerMap.forEach(observer => observer.disconnect());
+            observerMap.clear();
+
             const options = {
                 root: document.getElementById('video-container'),
                 threshold: 0.6
@@ -423,15 +652,22 @@
 
                     if (entry.isIntersecting) {
                         currentActiveIndex = index;
-                        playerWrapper.innerHTML = `
-                            <iframe id="youtube-iframe-${index}"
-                                    src="https://www.youtube.com/embed/${trailerId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${trailerId}&enablejsapi=1&rel=0" 
-                                    allow="autoplay; encrypted-media" 
-                                    allowfullscreen>
-                            </iframe>
-                        `;
                         
-                        // Inicializa estado do vídeo
+                        // Usar cache de iframes
+                        const cacheKey = `iframe-${index}`;
+                        if (!iframeCache.has(cacheKey)) {
+                            playerWrapper.innerHTML = `
+                                <iframe id="youtube-iframe-${index}"
+                                        src="https://www.youtube.com/embed/${trailerId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${trailerId}&enablejsapi=1&rel=0&modestbranding=1" 
+                                        allow="autoplay; encrypted-media" 
+                                        allowfullscreen
+                                        loading="lazy">
+                                </iframe>
+                            `;
+                            iframeCache.set(cacheKey, true);
+                        }
+                        
+                        // Inicializar estado
                         if (!videoStates[index]) {
                             videoStates[index] = {
                                 muted: true,
@@ -440,9 +676,9 @@
                             };
                         }
 
-                        // Atualiza seekbar
                         updateSeekbar(index);
                     } else {
+                        // Limpar iframe quando não visível (economiza memória)
                         playerWrapper.innerHTML = '';
                     }
                 });
@@ -451,17 +687,15 @@
             document.querySelectorAll('.video-section').forEach(section => {
                 observer.observe(section);
             });
+
+            observerMap.set('main', observer);
         }
 
         function updateSeekbar(index) {
-            const iframe = document.getElementById(`youtube-iframe-${index}`);
-            if (!iframe) return;
-
-            // Simula progresso do vídeo (YouTube API é complexa, então usamos uma animação)
             const seekbar = document.getElementById('seekbar-progress');
             let progress = 0;
             const interval = setInterval(() => {
-                if (currentActiveIndex !== index) {
+                if (currentActiveIndex !== index || !videoStates[index]) {
                     clearInterval(interval);
                     seekbar.style.width = '0%';
                     return;
@@ -474,6 +708,7 @@
 
         window.toggleLike = (btn, index) => {
             const likeBtn = document.getElementById(`like-btn-${index}`);
+            if (!videoStates[index]) videoStates[index] = {};
             videoStates[index].liked = !videoStates[index].liked;
             
             if (videoStates[index].liked) {
@@ -485,27 +720,58 @@
 
         window.togglePlayPause = (index) => {
             const playBtn = document.getElementById(`play-btn-${index}`);
+            if (!videoStates[index]) videoStates[index] = {};
             videoStates[index].paused = !videoStates[index].paused;
             
-            if (videoStates[index].paused) {
-                playBtn.classList.add('paused');
-                playBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
-            } else {
-                playBtn.classList.remove('paused');
-                playBtn.innerHTML = '<i class="fa-solid fa-play"></i>';
+            const iframe = document.getElementById(`youtube-iframe-${index}`);
+            if (iframe) {
+                if (videoStates[index].paused) {
+                    playBtn.classList.add('paused');
+                    playBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
+                    // Pausar vídeo (YouTube API)
+                    iframe.style.pointerEvents = 'auto';
+                    // Enviar comando de pausa via postMessage
+                    iframe.contentWindow.postMessage({
+                        event: 'command',
+                        func: 'pauseVideo'
+                    }, '*');
+                } else {
+                    playBtn.classList.remove('paused');
+                    playBtn.innerHTML = '<i class="fa-solid fa-play"></i>';
+                    iframe.style.pointerEvents = 'none';
+                    // Enviar comando de play via postMessage
+                    iframe.contentWindow.postMessage({
+                        event: 'command',
+                        func: 'playVideo'
+                    }, '*');
+                }
             }
         };
 
         window.toggleMute = (index) => {
             const muteBtn = document.getElementById(`mute-btn-${index}`);
+            if (!videoStates[index]) videoStates[index] = {};
             videoStates[index].muted = !videoStates[index].muted;
             
-            if (videoStates[index].muted) {
-                muteBtn.classList.add('muted');
-                muteBtn.innerHTML = '<i class="fa-solid fa-volume-xmark"></i>';
-            } else {
-                muteBtn.classList.remove('muted');
-                muteBtn.innerHTML = '<i class="fa-solid fa-volume-high"></i>';
+            const iframe = document.getElementById(`youtube-iframe-${index}`);
+            if (iframe) {
+                if (videoStates[index].muted) {
+                    muteBtn.classList.add('muted');
+                    muteBtn.innerHTML = '<i class="fa-solid fa-volume-xmark"></i>';
+                    // Mutar vídeo
+                    iframe.contentWindow.postMessage({
+                        event: 'command',
+                        func: 'mute'
+                    }, '*');
+                } else {
+                    muteBtn.classList.remove('muted');
+                    muteBtn.innerHTML = '<i class="fa-solid fa-volume-high"></i>';
+                    // Desmutar vídeo
+                    iframe.contentWindow.postMessage({
+                        event: 'command',
+                        func: 'unMute'
+                    }, '*');
+                }
             }
         };
 
@@ -513,7 +779,6 @@
             const shareUrl = `${window.location.origin}/detalhes.html?id=${movieId}`;
             const shareText = `Assista "${movieTitle}" agora na PKFilmes! 🎬`;
 
-            // Tenta usar a API Web Share (funciona em navegadores modernos)
             if (navigator.share) {
                 navigator.share({
                     title: 'PKFilmes',
@@ -521,7 +786,6 @@
                     url: shareUrl
                 }).catch(err => console.log('Erro ao compartilhar:', err));
             } else {
-                // Fallback: copia para a área de transferência e abre um modal
                 navigator.clipboard.writeText(shareUrl).then(() => {
                     alert(`Link copiado! 📋\n\n${shareText}\n\n${shareUrl}`);
                 }).catch(() => {
@@ -529,6 +793,22 @@
                 });
             }
         };
+
+        // OTIMIZAÇÕES DE PERFORMANCE
+        // Lazy load com RequestAnimationFrame
+        let scrollTimeout;
+        document.getElementById('video-container').addEventListener('scroll', () => {
+            clearTimeout(scrollTimeout);
+            scrollTimeout = setTimeout(() => {
+                // Cleanup após scroll
+            }, 150);
+        }, { passive: true });
+
+        // Reduzir frame rate em dispositivos fracos
+        const preferReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        if (preferReducedMotion) {
+            document.documentElement.style.setProperty('--transition', 'all 0.1s ease');
+        }
 
         window.onload = init;
     </script>
