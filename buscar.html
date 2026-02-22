@@ -7,9 +7,15 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root {
-            --bg: #000;
+            --bg: #0b0b0b;
+            --surface: #1a1a1a;
             --accent: #8a2be2;
-            --gray-dark: #121212;
+            --accent-light: #a855f7;
+            --text-main: #ffffff;
+            --text-dim: #a0a0a0;
+            --nav-bg: rgba(11, 11, 11, 0.8);
+            --card-radius: 8px;
+            --transition: all 0.3s ease;
             --gray-light: #333;
         }
         
@@ -17,9 +23,9 @@
         
         body {
             background-color: var(--bg);
-            color: #fff;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            padding-bottom: 80px;
+            color: var(--text-main);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            padding-bottom: 90px;
             overflow-x: hidden;
         }
 
@@ -30,7 +36,7 @@
             left: 0;
             right: 0;
             z-index: 1000;
-            background-color: #000;
+            background-color: var(--bg);
             padding: 10px 15px;
             border-bottom: 1px solid #222;
         }
@@ -78,17 +84,52 @@
             color: #888;
         }
 
+        .mic-btn {
+            background: none;
+            border: none;
+            color: #888;
+            font-size: 16px;
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        .mic-btn.active {
+            color: var(--accent);
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
         /* Conteúdo Principal */
         main {
             margin-top: 80px;
             min-height: 100vh;
         }
 
+        .section-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+        }
+
         .section-title {
             font-size: 18px;
             font-weight: 700;
-            padding: 15px;
             color: #fff;
+        }
+
+        .clear-all-btn {
+            font-size: 12px;
+            color: var(--accent);
+            font-weight: 600;
+            cursor: pointer;
+            background: none;
+            border: none;
         }
 
         /* Pesquisas Recentes */
@@ -244,14 +285,6 @@
             border-radius: 2px;
         }
 
-        .continue-empty-msg {
-            padding: 15px;
-            text-align: center;
-            color: #888;
-            font-size: 12px;
-            font-weight: 600;
-        }
-
         /* Lista de Recomendações e Resultados */
         .list-container {
             display: flex;
@@ -336,45 +369,40 @@
             100% { background-position: 200% 0; }
         }
 
-        /* Navegação Inferior */
+        /* Navegação Inferior (Padronizada com Início) */
         .nav {
             position: fixed;
             bottom: 0;
             left: 0;
             right: 0;
-            height: 65px;
-            background: rgba(0,0,0,0.95);
+            height: 70px;
+            background: var(--nav-bg);
+            backdrop-filter: blur(10px);
             display: flex;
             justify-content: space-around;
             align-items: center;
-            border-top: 1px solid #222;
+            border-top: 1px solid rgba(255,255,255,0.05);
             z-index: 1000;
+            padding-bottom: env(safe-area-inset-bottom);
         }
 
         .nav-item {
             display: flex;
             flex-direction: column;
             align-items: center;
-            color: #888;
+            gap: 5px;
+            color: var(--text-dim);
             text-decoration: none;
             font-size: 10px;
-            gap: 4px;
+            font-weight: 600;
+            transition: var(--transition);
+            flex: 1;
         }
 
-        .nav-item.active {
-            color: #fff;
-        }
-
-        .nav-item i {
-            font-size: 20px;
-        }
-
-        .nav-profile-img {
-            width: 24px;
-            height: 24px;
-            border-radius: 4px;
-            object-fit: cover;
-        }
+        .nav-item i { font-size: 20px; }
+        .nav-item.active { color: var(--accent); }
+        .nav-profile { width: 24px; height: 24px; border-radius: 50%; background: #333; display: flex; justify-content: center; align-items: center; overflow: hidden; }
+        .nav-profile img { width: 100%; height: 100%; object-fit: cover; }
 
         /* Camada de Erro/Loading */
         #status-message {
@@ -393,7 +421,7 @@
             <div class="search-bar">
                 <i class="fa-solid fa-magnifying-glass"></i>
                 <input type="text" class="search-input" id="search-input" placeholder="Busque séries, filmes, jogos...">
-                <i class="fa-solid fa-microphone"></i>
+                <button class="mic-btn" id="mic-btn" onclick="startVoiceSearch()"><i class="fa-solid fa-microphone"></i></button>
             </div>
         </div>
     </header>
@@ -401,7 +429,10 @@
     <main id="main-content">
         <!-- Seção de Pesquisas Recentes -->
         <div id="recent-container" class="recent-searches">
-            <h2 class="section-title" style="padding: 15px 0 10px 0;">Pesquisas recentes</h2>
+            <div class="section-header-row">
+                <h2 class="section-title">Pesquisas recentes</h2>
+                <button class="clear-all-btn" onclick="clearAllRecent()">Limpar tudo</button>
+            </div>
             <div id="recent-list">
                 <!-- Itens de pesquisas recentes -->
             </div>
@@ -409,13 +440,13 @@
 
         <!-- SEÇÃO CONTINUAR ASSISTINDO -->
         <div id="continue-watching-wrapper" class="continue-watching-section">
-            <h2 class="section-title">Continuar Assistindo</h2>
+            <h2 class="section-title" style="padding: 15px;">Continuar Assistindo</h2>
             <div class="continue-scroll-container" id="continue-list">
                 <!-- Itens do continuar assistindo -->
             </div>
         </div>
 
-        <h2 id="section-title" class="section-title">Séries e filmes recomendados</h2>
+        <h2 id="section-title" class="section-title" style="padding: 15px;">Séries e filmes recomendados</h2>
         <div id="list-container" class="list-container">
             <!-- Os itens serão carregados aqui -->
             <div class="list-item"><div class="item-poster skeleton"></div><div class="item-title skeleton" style="height:14px; width:60%;"></div></div>
@@ -426,13 +457,10 @@
     </main>
 
     <nav class="nav">
-        <a href="index.html" class="nav-item"><i class="fa-solid fa-house"></i><span>Início</span></a>
+        <a href="início.html" class="nav-item"><i class="fa-solid fa-house"></i><span>Início</span></a>
         <a href="buscar.html" class="nav-item active"><i class="fa-solid fa-magnifying-glass"></i><span>Buscar</span></a>
-        <a href="novidades.html" class="nav-item"><i class="fa-solid fa-wand-magic-sparkles"></i><span>Novidades</span></a>
-        <a href="perfil.html" class="nav-item" id="nav-profile-link">
-            <div id="nav-profile-icon"><i class="fa-solid fa-user"></i></div>
-            <span>Perfil</span>
-        </a>
+        <a href="ranking.html" class="nav-item"><i class="fa-solid fa-crown"></i><span>Ranking</span></a>
+        <a href="perfil.html" class="nav-item"><div class="nav-profile" id="user-profile-icon"><i class="fa-solid fa-user"></i></div><span>Perfil</span></a>
     </nav>
 
     <!-- Firebase SDKs -->
@@ -457,7 +485,7 @@
         const db = getDatabase(app);
 
         onAuthStateChanged(auth, async (user) => {
-            const navProfileIcon = document.getElementById('nav-profile-icon');
+            const navProfileIcon = document.getElementById('user-profile-icon');
             if (user) {
                 const snapshot = await get(child(ref(db), `users/${user.uid}/profile`));
                 const profileData = snapshot.exists() ? snapshot.val() : {};
@@ -473,7 +501,6 @@
         const API_URL = "https://pkfilmes.pages.dev/movies_data.json";
         let allContent = [];
         let searchTimeout = null;
-        let currentUser = null;
 
         // Gerenciamento de Pesquisas Recentes
         const RECENT_KEY = 'pkfilmes_recent_searches';
@@ -486,17 +513,24 @@
         function saveRecentSearch(query) {
             if (!query || query.trim() === '') return;
             let recent = getRecentSearches();
+            // Remove se já existir para colocar no topo
             recent = recent.filter(s => s.toLowerCase() !== query.toLowerCase());
+            // Adiciona no topo
             recent.unshift(query);
+            // Mantém apenas as 5 últimas
             recent = recent.slice(0, 5);
             localStorage.setItem(RECENT_KEY, JSON.stringify(recent));
             renderRecentSearches();
         }
-
-        function removeRecentSearch(query) {
+	        function removeRecentSearch(query) {
             let recent = getRecentSearches();
             recent = recent.filter(s => s !== query);
             localStorage.setItem(RECENT_KEY, JSON.stringify(recent));
+            renderRecentSearches();
+        }
+
+        function clearAllRecent() {
+            localStorage.removeItem(RECENT_KEY);
             renderRecentSearches();
         }
 
@@ -532,6 +566,39 @@
             const input = document.getElementById('search-input');
             input.value = term;
             performSearch(term);
+        }
+
+        /* --- BUSCA POR VOZ --- */
+        function startVoiceSearch() {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) {
+                alert("Seu navegador não suporta busca por voz.");
+                return;
+            }
+
+            const recognition = new SpeechRecognition();
+            recognition.lang = 'pt-BR';
+            const micBtn = document.getElementById('mic-btn');
+
+            recognition.onstart = () => {
+                micBtn.classList.add('active');
+            };
+
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                document.getElementById('search-input').value = transcript;
+                performSearch(transcript);
+            };
+
+            recognition.onerror = () => {
+                micBtn.classList.remove('active');
+            };
+
+            recognition.onend = () => {
+                micBtn.classList.remove('active');
+            };
+
+            recognition.start();
         }
 
         /* --- SISTEMA CONTINUAR ASSISTINDO --- */
@@ -597,7 +664,8 @@
             localStorage.setItem('user_progress', JSON.stringify(localProgress));
             renderContinueWatching();
         };
-	        /* --- BUSCA INTELIGENTE COM FUZZY --- */
+
+        /* --- BUSCA INTELIGENTE COM FUZZY --- */
         function normalizeText(text) {
             return text.toLowerCase()
                 .normalize("NFD")
@@ -614,7 +682,6 @@
             const queryWords = q.split(' ');
             return queryWords.every(word => {
                 if (word.length < 3) return t.includes(word);
-                let matches = 0;
                 const textWords = t.split(' ');
                 return textWords.some(tWord => {
                     if (Math.abs(tWord.length - word.length) > 1) return false;
@@ -670,46 +737,30 @@
                     </div>
                 `;
                 
-                // Adicionar eventos de mouse para preview de trailer
                 if (item.trailer_id) {
                     const poster = div.querySelector('.item-poster');
                     const img = poster.querySelector('img');
                     const iframe = poster.querySelector('iframe');
-                    
                     let pressTimer = null;
                     
-                    poster.addEventListener('mousedown', () => {
+                    const startPreview = () => {
                         pressTimer = setTimeout(() => {
                             img.style.display = 'none';
                             iframe.classList.add('active');
                         }, 300);
-                    });
+                    };
                     
-                    poster.addEventListener('mouseup', () => {
+                    const stopPreview = () => {
                         clearTimeout(pressTimer);
                         img.style.display = 'block';
                         iframe.classList.remove('active');
-                    });
+                    };
                     
-                    poster.addEventListener('mouseleave', () => {
-                        clearTimeout(pressTimer);
-                        img.style.display = 'block';
-                        iframe.classList.remove('active');
-                    });
-                    
-                    // Suporte para touch em dispositivos móveis
-                    poster.addEventListener('touchstart', () => {
-                        pressTimer = setTimeout(() => {
-                            img.style.display = 'none';
-                            iframe.classList.add('active');
-                        }, 300);
-                    });
-                    
-                    poster.addEventListener('touchend', () => {
-                        clearTimeout(pressTimer);
-                        img.style.display = 'block';
-                        iframe.classList.remove('active');
-                    });
+                    poster.addEventListener('mousedown', startPreview);
+                    poster.addEventListener('mouseup', stopPreview);
+                    poster.addEventListener('mouseleave', stopPreview);
+                    poster.addEventListener('touchstart', startPreview);
+                    poster.addEventListener('touchend', stopPreview);
                 }
                 
                 container.appendChild(div);
@@ -741,8 +792,6 @@
         async function init() {
             try {
                 const response = await fetch(API_URL);
-                if (!response.ok) throw new Error(`Erro HTTP: ${response.status}`);
-                
                 allContent = await response.json();
                 
                 if (!Array.isArray(allContent)) throw new Error("Erro ao carregar dados");
@@ -754,9 +803,7 @@
 
                 document.getElementById('search-input').addEventListener('input', (e) => {
                     const query = e.target.value;
-                    
                     if (searchTimeout) clearTimeout(searchTimeout);
-                    
                     searchTimeout = setTimeout(() => {
                         performSearch(query);
                     }, 500);
