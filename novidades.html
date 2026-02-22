@@ -270,6 +270,7 @@
             align-items: center;
             justify-content: center;
             gap: 20px;
+            padding-bottom: 70px;
         }
 
         #loading-screen.hidden {
@@ -446,7 +447,7 @@
         </div>
     </div>
 
-    <!-- TELA DE CARREGAMENTO -->
+    <!-- TELA DE CARREGAMENTO COM NAVEGAÇÃO VISÍVEL -->
     <div id="loading-screen">
         <div class="loader"></div>
         <p style="font-weight: 600; color: var(--accent);">Carregando Novidades...</p>
@@ -475,7 +476,7 @@
         <!-- Injetado via JS -->
     </div>
 
-    <!-- NAVEGAÇÃO INFERIOR -->
+    <!-- NAVEGAÇÃO INFERIOR - SEMPRE VISÍVEL -->
     <nav class="nav">
         <a href="início.html" class="nav-item"><i class="fa-solid fa-house"></i><span>Início</span></a>
         <a href="buscar.html" class="nav-item"><i class="fa-solid fa-magnifying-glass"></i><span>Buscar</span></a>
@@ -596,7 +597,7 @@
             }
         }
 
-	        function renderVideos() {
+        function renderVideos() {
             const container = document.getElementById('video-container');
             container.innerHTML = filteredMovies.map((movie, index) => `
                 <section class="video-section" data-index="${index}" data-trailer="${movie.trailer_id}" data-movie-id="${movie.id}">
@@ -658,7 +659,7 @@
                         if (!iframeCache.has(cacheKey)) {
                             playerWrapper.innerHTML = `
                                 <iframe id="youtube-iframe-${index}"
-                                        src="https://www.youtube.com/embed/${trailerId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${trailerId}&enablejsapi=1&rel=0&modestbranding=1" 
+                                        src="https://www.youtube.com/embed/${trailerId}?autoplay=1&mute=0&controls=0&loop=1&playlist=${trailerId}&enablejsapi=1&rel=0&modestbranding=1" 
                                         allow="autoplay; encrypted-media" 
                                         allowfullscreen
                                         loading="lazy">
@@ -667,15 +668,17 @@
                             iframeCache.set(cacheKey, true);
                         }
                         
-                        // Inicializar estado
+                        // Inicializar estado do vídeo - COMEÇAR COM SOM LIGADO E DESPAUSADO
                         if (!videoStates[index]) {
                             videoStates[index] = {
-                                muted: true,
-                                paused: false,
+                                muted: false,        // Som LIGADO por padrão
+                                paused: false,       // Despausado por padrão
                                 liked: false
                             };
                         }
 
+                        // Atualizar ícones para refletir o estado inicial
+                        updateControlsUI(index);
                         updateSeekbar(index);
                     } else {
                         // Limpar iframe quando não visível (economiza memória)
@@ -689,6 +692,31 @@
             });
 
             observerMap.set('main', observer);
+        }
+
+        function updateControlsUI(index) {
+            const playBtn = document.getElementById(`play-btn-${index}`);
+            const muteBtn = document.getElementById(`mute-btn-${index}`);
+
+            if (!playBtn || !muteBtn) return;
+
+            // Atualizar ícone de play/pause
+            if (videoStates[index].paused) {
+                playBtn.classList.add('paused');
+                playBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
+            } else {
+                playBtn.classList.remove('paused');
+                playBtn.innerHTML = '<i class="fa-solid fa-play"></i>';
+            }
+
+            // Atualizar ícone de som/mute
+            if (videoStates[index].muted) {
+                muteBtn.classList.add('muted');
+                muteBtn.innerHTML = '<i class="fa-solid fa-volume-xmark"></i>';
+            } else {
+                muteBtn.classList.remove('muted');
+                muteBtn.innerHTML = '<i class="fa-solid fa-volume-high"></i>';
+            }
         }
 
         function updateSeekbar(index) {
@@ -728,9 +756,7 @@
                 if (videoStates[index].paused) {
                     playBtn.classList.add('paused');
                     playBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
-                    // Pausar vídeo (YouTube API)
-                    iframe.style.pointerEvents = 'auto';
-                    // Enviar comando de pausa via postMessage
+                    // Pausar vídeo
                     iframe.contentWindow.postMessage({
                         event: 'command',
                         func: 'pauseVideo'
@@ -738,8 +764,7 @@
                 } else {
                     playBtn.classList.remove('paused');
                     playBtn.innerHTML = '<i class="fa-solid fa-play"></i>';
-                    iframe.style.pointerEvents = 'none';
-                    // Enviar comando de play via postMessage
+                    // Reproduzir vídeo
                     iframe.contentWindow.postMessage({
                         event: 'command',
                         func: 'playVideo'
