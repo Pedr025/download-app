@@ -465,7 +465,7 @@
     <!-- CABEÇALHO -->
     <header id="main-header">
         <a href="início.html" class="logo-container">
-            <span class="logo-pk">PK 2026</span><span class="logo-filmes">FILMES</span>
+            <span class="logo-pk">PK</span><span class="logo-filmes">FILMES</span>
         </a>
         <div class="nav-filters">
             <button class="filter-btn active" onclick="setFilter('all', this)">Tudo</button>
@@ -569,7 +569,7 @@
         const db = getDatabase(app);
         const auth = getAuth(app);
 
-        const API_URL = "https://pkfilmes-tau.vercel.app/filmes/series";
+        const API_URL = "https://pkapi-omega.vercel.app/filmes/series";
         let allData = [];
         let currentFilter = 'all';
         let currentGenre = null;
