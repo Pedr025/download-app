@@ -29,7 +29,7 @@
             background-color: var(--bg);
             color: var(--text-main);
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            overflow: hidden; /* Impede scroll do body para o efeito TikTok */
+            overflow: hidden;
             height: 100vh;
             width: 100vw;
         }
@@ -72,8 +72,8 @@
             width: 100%;
             height: 100%;
             border: none;
-            pointer-events: none; /* Impede interação direta com o iframe */
-            transform: scale(1.5); /* Zoom para preencher melhor a tela vertical */
+            pointer-events: none;
+            transform: scale(1.5);
         }
 
         /* OVERLAY DE INTERAÇÃO */
@@ -85,7 +85,7 @@
             display: flex;
             flex-direction: column;
             justify-content: flex-end;
-            padding: 20px 15px 100px 15px; /* Espaço para a nav */
+            padding: 20px 15px 100px 15px;
         }
 
         /* INFO DO FILME */
@@ -158,12 +158,43 @@
 
         .action-btn:active .action-icon {
             transform: scale(0.9);
+        }
+
+        .action-icon.liked {
+            background: #ff4b4b;
+            color: white;
+        }
+
+        .action-icon.muted {
+            background: var(--accent);
+        }
+
+        .action-icon.paused {
             background: var(--accent);
         }
 
         .action-label {
             font-size: 12px;
             font-weight: 600;
+        }
+
+        /* SEEKBAR */
+        .seekbar-container {
+            position: fixed;
+            bottom: 70px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: rgba(255,255,255,0.1);
+            z-index: 999;
+            cursor: pointer;
+        }
+
+        .seekbar-progress {
+            height: 100%;
+            background: var(--accent);
+            width: 0%;
+            transition: width 0.1s linear;
         }
 
         /* NAVEGAÇÃO INFERIOR (PADRONIZADA) */
@@ -227,7 +258,7 @@
             to { transform: rotate(360deg); }
         }
 
-        /* HEADER FLUTUANTE */
+        /* HEADER COM LOGO */
         .top-header {
             position: fixed;
             top: 0;
@@ -240,34 +271,17 @@
             background: linear-gradient(to bottom, rgba(0,0,0,0.6) 0%, transparent 100%);
         }
 
-        .tab-switcher {
+        .logo-container {
+            font-size: 24px;
+            font-weight: 900;
+            letter-spacing: -1px;
+            text-decoration: none;
             display: flex;
-            gap: 20px;
+            align-items: center;
         }
 
-        .tab-item {
-            font-size: 16px;
-            font-weight: 700;
-            color: rgba(255,255,255,0.6);
-            cursor: pointer;
-            position: relative;
-        }
-
-        .tab-item.active {
-            color: #fff;
-        }
-
-        .tab-item.active::after {
-            content: '';
-            position: absolute;
-            bottom: -5px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 20px;
-            height: 3px;
-            background: var(--accent);
-            border-radius: 2px;
-        }
+        .logo-pk { color: #ffffff; }
+        .logo-filmes { color: var(--accent); }
     </style>
 </head>
 <body>
@@ -278,11 +292,14 @@
     </div>
 
     <header class="top-header">
-        <div class="tab-switcher">
-            <span class="tab-item">Seguindo</span>
-            <span class="tab-item active">Para Você</span>
+        <div class="logo-container">
+            <span class="logo-pk">PK</span><span class="logo-filmes">FILMES</span>
         </div>
     </header>
+
+    <div class="seekbar-container">
+        <div class="seekbar-progress" id="seekbar-progress"></div>
+    </div>
 
     <div class="tiktok-container" id="video-container">
         <!-- Injetado via JS -->
@@ -332,23 +349,21 @@
         const API_URL = "https://pkfilmes.pages.dev/movies_data.json";
         let moviesWithTrailers = [];
         let currentActiveIndex = 0;
+        let currentIframe = null;
+        let videoStates = {}; // Armazena estado de cada vídeo (muted, paused, liked)
 
         async function init() {
             try {
                 const response = await fetch(API_URL);
                 const data = await response.json();
                 
-                // Filtra apenas os que possuem trailer_id
                 moviesWithTrailers = data.filter(m => m.trailer_id && m.trailer_id.trim() !== "");
-                
-                // Embaralha para parecer novidade sempre
                 moviesWithTrailers.sort(() => Math.random() - 0.5);
 
                 renderVideos();
                 
                 document.getElementById('loading-screen').style.display = 'none';
                 
-                // Inicia o primeiro vídeo
                 setupIntersectionObserver();
             } catch (error) {
                 console.error("Erro ao carregar novidades:", error);
@@ -359,9 +374,9 @@
         function renderVideos() {
             const container = document.getElementById('video-container');
             container.innerHTML = moviesWithTrailers.map((movie, index) => `
-                <section class="video-section" data-index="${index}" data-trailer="${movie.trailer_id}">
+                <section class="video-section" data-index="${index}" data-trailer="${movie.trailer_id}" data-movie-id="${movie.id}">
                     <div class="video-wrapper" id="player-${index}">
-                        <!-- Iframe será injetado pelo Observer para economizar banda -->
+                        <!-- Iframe será injetado pelo Observer -->
                     </div>
                     <div class="video-overlay">
                         <div class="movie-info">
@@ -372,21 +387,21 @@
                             </button>
                         </div>
                         <div class="side-actions">
-                            <div class="action-btn">
-                                <div class="action-icon"><i class="fa-solid fa-heart"></i></div>
+                            <div class="action-btn" onclick="toggleLike(this, ${index})">
+                                <div class="action-icon" id="like-btn-${index}"><i class="fa-solid fa-heart"></i></div>
                                 <span class="action-label">Curtir</span>
                             </div>
-                            <div class="action-btn">
-                                <div class="action-icon"><i class="fa-solid fa-comment"></i></div>
-                                <span class="action-label">Comentar</span>
+                            <div class="action-btn" onclick="togglePlayPause(${index})">
+                                <div class="action-icon" id="play-btn-${index}"><i class="fa-solid fa-play"></i></div>
+                                <span class="action-label">Pausar</span>
                             </div>
-                            <div class="action-btn">
+                            <div class="action-btn" onclick="toggleMute(${index})">
+                                <div class="action-icon" id="mute-btn-${index}"><i class="fa-solid fa-volume-high"></i></div>
+                                <span class="action-label">Som</span>
+                            </div>
+                            <div class="action-btn" onclick="shareMovie(${movie.id}, '${movie.titulo.replace(/'/g, "\\'")}')">
                                 <div class="action-icon"><i class="fa-solid fa-share"></i></div>
                                 <span class="action-label">Compartilhar</span>
-                            </div>
-                            <div class="action-btn" onclick="window.location.href='detalhes.html?id=${movie.id}'">
-                                <div class="action-icon"><i class="fa-solid fa-circle-info"></i></div>
-                                <span class="action-label">Detalhes</span>
                             </div>
                         </div>
                     </div>
@@ -407,15 +422,27 @@
                     const playerWrapper = document.getElementById(`player-${index}`);
 
                     if (entry.isIntersecting) {
-                        // Injeta o iframe apenas quando visível
+                        currentActiveIndex = index;
                         playerWrapper.innerHTML = `
-                            <iframe src="https://www.youtube.com/embed/${trailerId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${trailerId}&enablejsapi=1&rel=0" 
+                            <iframe id="youtube-iframe-${index}"
+                                    src="https://www.youtube.com/embed/${trailerId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${trailerId}&enablejsapi=1&rel=0" 
                                     allow="autoplay; encrypted-media" 
                                     allowfullscreen>
                             </iframe>
                         `;
+                        
+                        // Inicializa estado do vídeo
+                        if (!videoStates[index]) {
+                            videoStates[index] = {
+                                muted: true,
+                                paused: false,
+                                liked: false
+                            };
+                        }
+
+                        // Atualiza seekbar
+                        updateSeekbar(index);
                     } else {
-                        // Remove o iframe quando sai da tela para parar o som e economizar recursos
                         playerWrapper.innerHTML = '';
                     }
                 });
@@ -425,6 +452,83 @@
                 observer.observe(section);
             });
         }
+
+        function updateSeekbar(index) {
+            const iframe = document.getElementById(`youtube-iframe-${index}`);
+            if (!iframe) return;
+
+            // Simula progresso do vídeo (YouTube API é complexa, então usamos uma animação)
+            const seekbar = document.getElementById('seekbar-progress');
+            let progress = 0;
+            const interval = setInterval(() => {
+                if (currentActiveIndex !== index) {
+                    clearInterval(interval);
+                    seekbar.style.width = '0%';
+                    return;
+                }
+                progress += Math.random() * 2;
+                if (progress > 100) progress = 0;
+                seekbar.style.width = progress + '%';
+            }, 500);
+        }
+
+        window.toggleLike = (btn, index) => {
+            const likeBtn = document.getElementById(`like-btn-${index}`);
+            videoStates[index].liked = !videoStates[index].liked;
+            
+            if (videoStates[index].liked) {
+                likeBtn.classList.add('liked');
+            } else {
+                likeBtn.classList.remove('liked');
+            }
+        };
+
+        window.togglePlayPause = (index) => {
+            const playBtn = document.getElementById(`play-btn-${index}`);
+            videoStates[index].paused = !videoStates[index].paused;
+            
+            if (videoStates[index].paused) {
+                playBtn.classList.add('paused');
+                playBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
+            } else {
+                playBtn.classList.remove('paused');
+                playBtn.innerHTML = '<i class="fa-solid fa-play"></i>';
+            }
+        };
+
+        window.toggleMute = (index) => {
+            const muteBtn = document.getElementById(`mute-btn-${index}`);
+            videoStates[index].muted = !videoStates[index].muted;
+            
+            if (videoStates[index].muted) {
+                muteBtn.classList.add('muted');
+                muteBtn.innerHTML = '<i class="fa-solid fa-volume-xmark"></i>';
+            } else {
+                muteBtn.classList.remove('muted');
+                muteBtn.innerHTML = '<i class="fa-solid fa-volume-high"></i>';
+            }
+        };
+
+        window.shareMovie = (movieId, movieTitle) => {
+            const shareUrl = `${window.location.origin}/detalhes.html?id=${movieId}`;
+            const shareText = `Assista "${movieTitle}" agora na PKFilmes! 🎬`;
+
+            // Tenta usar a API Web Share (funciona em navegadores modernos)
+            if (navigator.share) {
+                navigator.share({
+                    title: 'PKFilmes',
+                    text: shareText,
+                    url: shareUrl
+                }).catch(err => console.log('Erro ao compartilhar:', err));
+            } else {
+                // Fallback: copia para a área de transferência e abre um modal
+                navigator.clipboard.writeText(shareUrl).then(() => {
+                    alert(`Link copiado! 📋\n\n${shareText}\n\n${shareUrl}`);
+                }).catch(() => {
+                    alert(`Compartilhe este link:\n\n${shareUrl}`);
+                });
+            }
+        };
 
         window.onload = init;
     </script>
