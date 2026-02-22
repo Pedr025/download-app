@@ -37,7 +37,7 @@
         
         video.fullscreen-fill { object-fit: cover; }
 
-        /* OVERLAY DE CONTROLES ESTILO DISNEY+ 2026 */
+        /* OVERLAY DE CONTROLES */
         .controls-overlay {
             position: absolute; inset: 0; z-index: 100;
             display: flex; flex-direction: column; justify-content: space-between;
@@ -46,7 +46,6 @@
         }
         .controls-overlay.visible { opacity: 1; visibility: visible; }
         
-        /* BLOQUEIO DE CONTROLES */
         .controls-overlay.locked .top-bar, 
         .controls-overlay.locked .bottom-bar,
         .controls-overlay.locked .center-controls {
@@ -68,16 +67,13 @@
         .top-bar { padding: 40px 60px; display: flex; align-items: center; justify-content: space-between; }
         .top-left { display: flex; align-items: center; gap: 25px; }
         .top-bar .back-btn { color: #fff; font-size: 24px; text-decoration: none; cursor: pointer; transition: 0.3s; }
-        .top-bar .back-btn:hover { transform: scale(1.1); }
         .top-bar h3 { font-size: 22px; font-weight: 600; color: #fff; letter-spacing: 0.5px; }
         
         .top-right { display: flex; align-items: center; gap: 20px; }
-        
         .cast-btn, .fullscreen-fill-btn {
             background: none; border: none; color: #fff; font-size: 24px; cursor: pointer;
             display: flex; align-items: center; gap: 8px; transition: 0.3s;
         }
-        .cast-btn:hover, .fullscreen-fill-btn:hover { color: var(--accent); }
 
         /* CONTROLES CENTRAIS */
         .center-controls {
@@ -89,8 +85,6 @@
             transition: transform 0.2s, opacity 0.2s; 
             display: flex; flex-direction: column; align-items: center; gap: 5px;
         }
-        .center-btn span { font-size: 12px; font-weight: bold; }
-        .center-btn:active { transform: scale(0.9); opacity: 0.7; }
         .play-pause-big { 
             width: 90px; height: 90px; background: rgba(255,255,255,0.1); 
             border-radius: 50%; display: flex; align-items: center; justify-content: center;
@@ -102,7 +96,7 @@
         .bottom-bar { padding: 20px 60px 50px 60px; }
         
         /* SEEKBAR COM PREVIEW */
-        .seekbar-wrapper { position: relative; margin-bottom: 30px; }
+        .seekbar-wrapper { position: relative; margin-bottom: 30px; padding: 10px 0; cursor: pointer; }
         
         .seekbar-preview {
             position: absolute; bottom: 100%; left: 0; transform: translateX(-50%);
@@ -111,13 +105,13 @@
             display: none; z-index: 150; pointer-events: none;
         }
         .seekbar-preview.active { display: flex; flex-direction: column; align-items: center; }
-        .seekbar-preview img { width: 120px; height: 68px; object-fit: cover; border-radius: 4px; margin-bottom: 8px; }
-        .seekbar-preview-time { font-size: 12px; color: #fff; font-weight: bold; }
+        .seekbar-preview img { width: 140px; height: 80px; object-fit: cover; border-radius: 4px; margin-bottom: 8px; }
+        .seekbar-preview-time { font-size: 14px; color: #fff; font-weight: bold; }
         
-        .seekbar-container { width: 100%; height: 6px; background: rgba(255,255,255,0.2); cursor: pointer; position: relative; border-radius: 3px; }
-        .seekbar-fill { width: 0%; height: 100%; background: var(--accent); border-radius: 3px; position: relative; transition: width 0.1s linear; }
+        .seekbar-container { width: 100%; height: 6px; background: rgba(255,255,255,0.2); position: relative; border-radius: 3px; }
+        .seekbar-fill { width: 0%; height: 100%; background: var(--accent); border-radius: 3px; position: relative; }
         .seekbar-handle { 
-            position: absolute; right: -8px; top: 50%; transform: translateY(-50%);
+            position: absolute; right: -9px; top: 50%; transform: translateY(-50%);
             width: 18px; height: 18px; background: #fff; border-radius: 50%; 
             box-shadow: 0 0 10px rgba(0,0,0,0.5);
         }
@@ -125,170 +119,70 @@
         .bottom-actions { display: flex; justify-content: space-between; align-items: center; }
         .actions-left, .actions-right { display: flex; align-items: center; gap: 40px; }
         .action-btn { background: none; border: none; color: #fff; font-size: 22px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 8px; opacity: 0.8; transition: 0.3s; }
-        .action-btn:hover { opacity: 1; color: var(--accent); }
-        .action-btn span { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
         .time-info { font-size: 18px; color: #fff; font-weight: 500; font-variant-numeric: tabular-nums; }
 
-        /* SISTEMA DE ANÚNCIO MODERNO */
+        /* ANÚNCIO */
         .ad-overlay {
             position: absolute; inset: 0; z-index: 300; background: #000;
             display: none; flex-direction: column; align-items: center; justify-content: center;
-            overflow: hidden;
         }
-        .ad-background {
-            position: absolute; inset: 0;
-            background: linear-gradient(45deg, #040714, #0072d2);
-            opacity: 0.8;
-        }
-        .ad-content { 
-            width: 100%; height: 100%; position: relative; z-index: 305;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            text-align: center; color: #fff; padding: 40px;
-        }
-        .ad-card {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            padding: 40px;
-            border-radius: 24px;
-            max-width: 600px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-            animation: adPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-        @keyframes adPop { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-        
-        .ad-card h2 { font-size: 32px; margin-bottom: 15px; background: linear-gradient(to right, #fff, #0072d2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .ad-card p { font-size: 18px; margin-bottom: 30px; opacity: 0.9; line-height: 1.6; }
-        
-        .ad-footer {
-            position: absolute; bottom: 60px; width: 100%;
-            display: flex; justify-content: center; align-items: center; gap: 20px;
-        }
-        
-        .ad-btn {
-            padding: 16px 40px; border-radius: 50px; font-size: 18px; font-weight: bold;
-            cursor: pointer; transition: 0.3s; border: none; text-decoration: none;
-            display: flex; align-items: center; justify-content: center;
-        }
+        .ad-background { position: absolute; inset: 0; background: linear-gradient(45deg, #040714, #0072d2); opacity: 0.8; }
+        .ad-content { width: 100%; height: 100%; position: relative; z-index: 305; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; color: #fff; padding: 40px; }
+        .ad-card { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.2); padding: 40px; border-radius: 24px; max-width: 600px; }
+        .ad-footer { position: absolute; bottom: 60px; width: 100%; display: flex; justify-content: center; align-items: center; gap: 20px; }
+        .ad-btn { padding: 16px 40px; border-radius: 50px; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.3s; border: none; text-decoration: none; display: flex; align-items: center; justify-content: center; }
         .learn-more-btn { background: #fff; color: #040714; }
-        .learn-more-btn:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(255,255,255,0.2); }
-        
-        .skip-ad-btn {
-            background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.3);
-            backdrop-filter: blur(10px); display: none;
-        }
-        
-        .ad-timer-circle {
-            position: relative; width: 60px; height: 60px;
-            display: flex; align-items: center; justify-content: center;
-            font-weight: bold; font-size: 18px;
-        }
-        .ad-timer-circle svg {
-            position: absolute; top: 0; left: 0; width: 60px; height: 60px;
-            transform: rotate(-90deg);
-        }
-        .ad-timer-circle circle {
-            fill: none; stroke: var(--accent); stroke-width: 4;
-            stroke-dasharray: 176; stroke-dashoffset: 0;
-            transition: stroke-dashoffset 1s linear;
-        }
+        .skip-ad-btn { background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.3); display: none; }
+        .ad-timer-circle { position: relative; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 18px; }
+        .ad-timer-circle svg { position: absolute; top: 0; left: 0; width: 60px; height: 60px; transform: rotate(-90deg); }
+        .ad-timer-circle circle { fill: none; stroke: var(--accent); stroke-width: 4; stroke-dasharray: 176; stroke-dashoffset: 0; transition: stroke-dashoffset 1s linear; }
 
-        /* EPISÓDIOS OVERLAY - LEVE E OTIMIZADO */
-        .episodes-overlay {
-            position: fixed; inset: 0; background: rgba(4, 7, 20, 0.95); z-index: 400;
-            display: none; flex-direction: column; padding: 40px 0;
-            backdrop-filter: blur(10px);
-        }
+        /* EPISÓDIOS */
+        .episodes-overlay { position: fixed; inset: 0; background: rgba(4, 7, 20, 0.95); z-index: 400; display: none; flex-direction: column; padding: 40px 0; backdrop-filter: blur(10px); }
         .episodes-overlay.active { display: flex; }
-        .episodes-header { 
-            padding: 0 60px; display: flex; justify-content: space-between; align-items: center; 
-            margin-bottom: 30px; position: relative;
-        }
-        .episodes-header h2 { font-size: 28px; color: #fff; }
-        .episodes-close-btn { 
-            background: none; border: none; color: #fff; font-size: 28px; 
-            cursor: pointer; transition: 0.3s; padding: 10px;
-        }
-        .episodes-close-btn:hover { color: var(--accent); }
-        
-        .episodes-list { 
-            display: flex; overflow-x: auto; gap: 20px; padding: 0 60px; 
-            scrollbar-width: thin; scrollbar-color: var(--accent) rgba(255,255,255,0.1);
-        }
-        .episodes-list::-webkit-scrollbar { height: 6px; }
-        .episodes-list::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); border-radius: 3px; }
-        .episodes-list::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 3px; }
-        
-        .ep-card { 
-            min-width: 280px; background: rgba(255,255,255,0.05); border-radius: 12px; overflow: hidden; 
-            cursor: pointer; border: 2px solid transparent; transition: 0.3s;
-            flex-shrink: 0;
-        }
-        .ep-card:hover { transform: scale(1.05); background: rgba(255,255,255,0.1); }
+        .episodes-header { padding: 0 60px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .episodes-close-btn { background: none; border: none; color: #fff; font-size: 28px; cursor: pointer; padding: 10px; }
+        .episodes-list { display: flex; overflow-x: auto; gap: 20px; padding: 0 60px; scrollbar-width: thin; }
+        .ep-card { min-width: 280px; background: rgba(255,255,255,0.05); border-radius: 12px; overflow: hidden; cursor: pointer; border: 2px solid transparent; transition: 0.3s; flex-shrink: 0; }
         .ep-card.active { border-color: var(--accent); background: rgba(0, 114, 210, 0.1); }
-        
-        .ep-thumb { width: 100%; height: 160px; background-size: cover; background-position: center; position: relative; }
+        .ep-thumb { width: 100%; height: 160px; background-size: cover; background-position: center; }
         .ep-info { padding: 15px; }
         .ep-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
         .ep-title { font-size: 16px; color: #fff; font-weight: 600; flex: 1; }
-        .ep-meta { font-size: 12px; color: var(--accent); font-weight: bold; white-space: nowrap; margin-left: 10px; }
+        .ep-meta { font-size: 12px; color: var(--accent); font-weight: bold; margin-left: 10px; }
         .ep-desc { font-size: 13px; color: #aaa; line-height: 1.4; height: 40px; overflow: hidden; }
-
-        /* RESPONSIVIDADE */
-        @media (max-width: 1024px) {
-            .top-bar, .bottom-bar { padding: 30px 40px; }
-            .center-controls { gap: 60px; }
-            .center-btn { font-size: 35px; }
-            .play-pause-big { width: 70px; height: 70px; font-size: 30px; }
-        }
     </style>
 </head>
 <body>
 
     <div class="player-container" id="player-container">
         <video id="video-player" playsinline preload="auto"></video>
+        <canvas id="preview-canvas" style="display:none;"></canvas>
         
-        <!-- BOTÃO DE CADEADO -->
-        <button class="lock-screen-btn" id="lock-btn" title="Bloquear Controles">
-            <i class="fa-solid fa-lock-open"></i>
-        </button>
+        <button class="lock-screen-btn" id="lock-btn"><i class="fa-solid fa-lock-open"></i></button>
 
-        <!-- CONTROLES -->
         <div class="controls-overlay" id="controls-overlay">
-            <!-- BARRA SUPERIOR -->
             <div class="top-bar">
                 <div class="top-left">
                     <div class="back-btn" id="back-btn"><i class="fa-solid fa-chevron-left"></i></div>
                     <h3 id="video-title">Carregando...</h3>
                 </div>
                 <div class="top-right">
-                    <button class="fullscreen-fill-btn" id="fullscreen-fill-btn" title="Preencher Tela">
-                        <i class="fa-solid fa-maximize"></i>
-                    </button>
-                    <button class="cast-btn" id="cast-btn" title="Transmitir">
+                    <button class="fullscreen-fill-btn" id="fullscreen-fill-btn"><i class="fa-solid fa-maximize"></i></button>
+                    <button class="cast-btn" id="cast-btn">
                         <img src="https://cdn-icons-png.flaticon.com/512/566/566078.png" alt="Cast" style="width: 24px; height: 24px; filter: brightness(0) invert(1);">
                     </button>
                 </div>
             </div>
 
-            <!-- CONTROLES CENTRAIS -->
             <div class="center-controls">
-                <button class="center-btn" id="rewind-btn">
-                    <i class="fa-solid fa-rotate-left"></i>
-                    <span>10s</span>
-                </button>
-                <button class="center-btn play-pause-big" id="play-pause-btn">
-                    <i class="fa-solid fa-play"></i>
-                </button>
-                <button class="center-btn" id="forward-btn">
-                    <i class="fa-solid fa-rotate-right"></i>
-                    <span>10s</span>
-                </button>
+                <button class="center-btn" id="rewind-btn"><i class="fa-solid fa-rotate-left"></i><span>10s</span></button>
+                <button class="center-btn play-pause-big" id="play-pause-btn"><i class="fa-solid fa-play"></i></button>
+                <button class="center-btn" id="forward-btn"><i class="fa-solid fa-rotate-right"></i><span>10s</span></button>
             </div>
 
-            <!-- BARRA INFERIOR -->
             <div class="bottom-bar">
-                <div class="seekbar-wrapper">
+                <div class="seekbar-wrapper" id="seekbar-wrapper">
                     <div class="seekbar-preview" id="seekbar-preview">
                         <img id="preview-img" src="" alt="Preview">
                         <div class="seekbar-preview-time" id="preview-time">00:00</div>
@@ -300,51 +194,37 @@
                     </div>
                 </div>
                 <div class="bottom-actions">
-                    <div class="actions-left">
-                        <div class="time-info" id="time-info">00:00 / 00:00</div>
-                    </div>
+                    <div class="actions-left"><div class="time-info" id="time-info">00:00 / 00:00</div></div>
                     <div class="actions-right">
-                        <button class="action-btn" id="episodes-btn" style="display: none;">
-                            <i class="fa-solid fa-list"></i>
-                            <span>Episódios</span>
-                        </button>
-                        <button class="action-btn" id="next-ep-btn" style="display: none;">
-                            <i class="fa-solid fa-forward-step"></i>
-                            <span>Próximo</span>
-                        </button>
-                        <button class="action-btn" id="fullscreen-btn">
-                            <i class="fa-solid fa-expand"></i>
-                            <span>Tela Cheia</span>
-                        </button>
+                        <button class="action-btn" id="episodes-btn" style="display: none;"><i class="fa-solid fa-list"></i><span>Episódios</span></button>
+                        <button class="action-btn" id="next-ep-btn" style="display: none;"><i class="fa-solid fa-forward-step"></i><span>Próximo</span></button>
+                        <button class="action-btn" id="fullscreen-btn"><i class="fa-solid fa-expand"></i><span>Tela Cheia</span></button>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- SISTEMA DE ANÚNCIO -->
         <div class="ad-overlay" id="ad-overlay">
             <div class="ad-background"></div>
             <div class="ad-content">
                 <div class="ad-card">
                     <h2>Crie seu Próprio Império de Streaming</h2>
-                    <p>Aprenda a criar um site de filmes e séries completo como este! Ganhe um projeto exclusivo para modificar totalmente grátis e comece hoje mesmo.</p>
+                    <p>Aprenda a criar um site de filmes e séries completo como este! Ganhe um projeto exclusivo para modificar totalmente grátis.</p>
                 </div>
-                
                 <div class="ad-footer">
                     <div class="ad-timer-circle" id="ad-timer-container">
                         <svg><circle cx="30" cy="30" r="28" id="timer-circle"></circle></svg>
                         <span id="ad-timer-count">10</span>
                     </div>
-                    <a href="curso.html" class="ad-btn learn-more-btn" id="learn-more-btn">QUERO APRENDER</a>
+                    <a href="curso.html" class="ad-btn learn-more-btn">QUERO APRENDER</a>
                     <button class="ad-btn skip-ad-btn" id="skip-ad-btn">PULAR ANÚNCIO</button>
                 </div>
             </div>
         </div>
 
-        <!-- POP-UP DE EPISÓDIOS -->
         <div class="episodes-overlay" id="episodes-overlay">
             <div class="episodes-header">
-                <h2 id="series-title-popup">Episódios</h2>
+                <h2>Episódios</h2>
                 <button class="episodes-close-btn" id="close-episodes"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <div class="episodes-list" id="episodes-list"></div>
@@ -352,15 +232,12 @@
     </div>
 
     <script type="module">
-        // CONFIGURAÇÃO DA API
         const API_URL = "https://pkfilmes.pages.dev/movies_data.json";
-        
-        // ELEMENTOS
         const video = document.getElementById('video-player');
         const controls = document.getElementById('controls-overlay');
         const playPauseBtn = document.getElementById('play-pause-btn');
         const seekbarFill = document.getElementById('seekbar-fill');
-        const seekbarContainer = document.getElementById('seekbar-container');
+        const seekbarWrapper = document.getElementById('seekbar-wrapper');
         const seekbarPreview = document.getElementById('seekbar-preview');
         const previewImg = document.getElementById('preview-img');
         const previewTime = document.getElementById('preview-time');
@@ -375,158 +252,100 @@
         const fullscreenFillBtn = document.getElementById('fullscreen-fill-btn');
         const backBtn = document.getElementById('back-btn');
         const castBtn = document.getElementById('cast-btn');
-        
-        // ANÚNCIO
         const adOverlay = document.getElementById('ad-overlay');
         const adTimerCount = document.getElementById('ad-timer-count');
         const skipAdBtn = document.getElementById('skip-ad-btn');
-        const learnMoreBtn = document.getElementById('learn-more-btn');
         const timerCircle = document.getElementById('timer-circle');
 
-        // ESTADO
         const urlParams = new URLSearchParams(window.location.search);
         const contentId = urlParams.get('id');
         let currentSeason = parseInt(urlParams.get('season')) || 1;
         let currentEp = parseInt(urlParams.get('ep')) || 1;
         
-        let allData = [];
-        let currentItem = null;
-        let isLocked = false;
-        let isFillMode = false;
-        let controlsTimeout;
-        let adActive = false;
-        let firstAdShown = false;
-        let lastAdTimestamp = 0;
-        let previewTimeout;
+        let allData = [], currentItem = null, isLocked = false, isFillMode = false, adActive = false, firstAdShown = false, lastAdTimestamp = 0, isDragging = false;
 
-	        // INICIALIZAÇÃO
         async function init() {
             try {
                 const res = await fetch(API_URL);
                 allData = await res.json();
-                currentItem = allData.find(i => i.id == contentId);
-                
-                if (!currentItem) throw new Error("Conteúdo não encontrado");
-
+                currentItem = allData.find(i => String(i.id) === String(contentId));
+                if (!currentItem) throw new Error("Não encontrado");
                 setupPlayer();
                 loadContent();
-                forceFullscreenAndLandscape();
-
-            } catch (e) {
-                console.error(e);
-                alert("Erro ao carregar conteúdo.");
-            }
+                // Tenta entrar em fullscreen ao primeiro toque
+                document.addEventListener('click', () => { if(!document.fullscreenElement) forceFullscreen(); }, {once: true});
+            } catch (e) { alert("Erro ao carregar conteúdo."); }
         }
 
-        function forceFullscreenAndLandscape() {
+        function forceFullscreen() {
             const el = document.documentElement;
-            const requestFs = el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen || el.msRequestFullscreen;
-            
-            if (requestFs) {
-                requestFs.call(el).then(() => {
-                    if (screen.orientation && screen.orientation.lock) {
-                        screen.orientation.lock('landscape').catch(err => console.log("Orientation lock failed:", err));
-                    }
-                }).catch(err => console.log("Fullscreen failed:", err));
+            if (el.requestFullscreen) el.requestFullscreen().then(lockOrientation).catch(()=>{});
+            else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+        }
+
+        function lockOrientation() {
+            if (screen.orientation && screen.orientation.lock) {
+                screen.orientation.lock('landscape').catch(()=>{});
             }
         }
 
         function setupPlayer() {
             video.addEventListener('timeupdate', updateProgress);
-            video.addEventListener('play', () => {
-                playPauseBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
-                lastAdTimestamp = Date.now();
-            });
-            video.addEventListener('pause', () => {
-                playPauseBtn.innerHTML = '<i class="fa-solid fa-play"></i>';
-            });
+            video.addEventListener('play', () => { playPauseBtn.innerHTML = '<i class="fa-solid fa-pause"></i>'; lastAdTimestamp = Date.now(); });
+            video.addEventListener('pause', () => { playPauseBtn.innerHTML = '<i class="fa-solid fa-play"></i>'; });
 
-            playPauseBtn.addEventListener('click', togglePlay);
-            rewindBtn.addEventListener('click', () => video.currentTime -= 10);
-            forwardBtn.addEventListener('click', () => video.currentTime += 10);
-            lockBtn.addEventListener('click', toggleLock);
-            
-            // SEEKBAR COM PREVIEW
-            seekbarContainer.addEventListener('mousedown', (e) => {
+            playPauseBtn.onclick = () => video.paused ? video.play() : video.pause();
+            rewindBtn.onclick = () => video.currentTime -= 10;
+            forwardBtn.onclick = () => video.currentTime += 10;
+            lockBtn.onclick = toggleLock;
+            fullscreenBtn.onclick = () => document.fullscreenElement ? document.exitFullscreen() : forceFullscreen();
+            fullscreenFillBtn.onclick = () => { isFillMode = !isFillMode; video.classList.toggle('fullscreen-fill', isFillMode); };
+            backBtn.onclick = () => { saveProgress(); window.history.back(); };
+            castBtn.onclick = () => alert("Nenhum dispositivo de transmissão detectado.");
+
+            // EVENTOS DE SEEKBAR (DRAG)
+            const handleSeek = (e) => {
                 if (isLocked || adActive) return;
-                seekbarPreview.classList.add('active');
-                updatePreview(e);
-            });
-
-            document.addEventListener('mousemove', (e) => {
-                if (seekbarPreview.classList.contains('active')) {
-                    updatePreview(e);
-                }
-            });
-
-            document.addEventListener('mouseup', () => {
-                seekbarPreview.classList.remove('active');
-                clearTimeout(previewTimeout);
-            });
-
-            seekbarContainer.addEventListener('click', (e) => {
-                if (isLocked || adActive) return;
-                const rect = seekbarContainer.getBoundingClientRect();
-                const pos = (e.clientX - rect.left) / rect.width;
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const rect = seekbarWrapper.querySelector('.seekbar-container').getBoundingClientRect();
+                let pos = (clientX - rect.left) / rect.width;
+                pos = Math.max(0, Math.min(1, pos));
                 video.currentTime = pos * video.duration;
-            });
+                updatePreviewUI(clientX, pos);
+            };
 
-            fullscreenBtn.addEventListener('click', () => {
-                if (!document.fullscreenElement) forceFullscreenAndLandscape();
-                else document.exitFullscreen();
-            });
+            seekbarWrapper.onmousedown = seekbarWrapper.ontouchstart = (e) => {
+                isDragging = true;
+                seekbarPreview.classList.add('active');
+                handleSeek(e);
+            };
 
-            fullscreenFillBtn.addEventListener('click', toggleFillMode);
+            window.onmousemove = window.ontouchmove = (e) => {
+                if (isDragging) handleSeek(e);
+            };
 
-            backBtn.addEventListener('click', () => {
-                saveProgress();
-                window.history.back();
-            });
+            window.onmouseup = window.ontouchend = () => {
+                if (isDragging) { isDragging = false; seekbarPreview.classList.remove('active'); }
+            };
 
-            castBtn.addEventListener('click', () => {
-                if (window.chrome && window.chrome.cast && window.chrome.cast.isAvailable) {
-                    alert("Dispositivo de transmissão encontrado! Iniciando conexão...");
-                } else {
-                    alert("Nenhum dispositivo de transmissão (Chromecast/AirPlay) detectado na sua rede.");
-                }
-            });
-
-            // Gestão de Controles
             const showEvents = ['mousemove', 'touchstart', 'mousedown'];
             showEvents.forEach(e => document.addEventListener(e, showControls));
-            video.addEventListener('click', (e) => {
-                e.stopPropagation();
-                showControls();
-            });
+            video.onclick = (e) => { e.stopPropagation(); showControls(); };
         }
 
-        function updatePreview(e) {
-            const rect = seekbarContainer.getBoundingClientRect();
-            const pos = (e.clientX - rect.left) / rect.width;
+        function updatePreviewUI(clientX, pos) {
             const time = pos * video.duration;
-
             previewTime.innerText = formatTime(time);
-            seekbarPreview.style.left = (e.clientX - rect.left) + 'px';
-
-            // Gerar thumbnail (simulado com canvas)
-            if (video.readyState >= 2) {
-                const canvas = document.createElement('canvas');
-                canvas.width = 120;
-                canvas.height = 68;
-                const ctx = canvas.getContext('2d');
-                
-                const currentTime = video.currentTime;
-                video.currentTime = time;
-                
-                video.addEventListener('seeked', () => {
-                    ctx.drawImage(video, 0, 0, 120, 68);
-                    previewImg.src = canvas.toDataURL();
-                    video.currentTime = currentTime;
-                }, { once: true });
-            }
+            seekbarPreview.style.left = (pos * 100) + '%';
+            
+            // Thumbnail generator (canvas)
+            const canvas = document.getElementById('preview-canvas');
+            canvas.width = 140; canvas.height = 80;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0, 140, 80);
+            previewImg.src = canvas.toDataURL();
         }
-
-        function loadContent() {
+	        function loadContent() {
             if (currentItem.tipo === 'serie') {
                 const ep = currentItem.episodios.find(e => e.temporada == currentSeason && e.episodio == currentEp);
                 if (ep) {
@@ -543,133 +362,55 @@
                 videoTitle.innerText = currentItem.titulo;
             }
             
-            // Carregar progresso salvo
+            // CARREGAR PROGRESSO
             const saved = JSON.parse(localStorage.getItem('user_progress') || '[]');
-            const item = saved.find(i => i.id == contentId);
+            const item = saved.find(i => String(i.id) === String(contentId));
             if (item && item.progress > 0) {
-                video.currentTime = (item.progress / 100) * video.duration;
+                video.onloadedmetadata = () => { video.currentTime = (item.progress / 100) * video.duration; };
             }
-            
-            video.play().catch(() => {});
+            video.play().catch(()=>{});
         }
 
         function updateProgress() {
             if (adActive) return;
-
             const percent = (video.currentTime / video.duration) * 100;
             seekbarFill.style.width = percent + '%';
             timeInfo.innerText = `${formatTime(video.currentTime)} / ${formatTime(video.duration)}`;
 
-            // LÓGICA DE ANÚNCIO AUTOMÁTICO
-            if (!firstAdShown && video.currentTime >= 10) {
-                firstAdShown = true;
-                startAd();
-            }
-
-            const now = Date.now();
-            if (firstAdShown && (now - lastAdTimestamp) >= 1200000) {
-                lastAdTimestamp = now;
-                startAd();
-            }
-
-            // Salvar progresso a cada 5 segundos
-            if (Math.floor(video.currentTime) % 5 === 0) {
-                saveProgress();
-            }
+            if (!firstAdShown && video.currentTime >= 10) { firstAdShown = true; startAd(); }
+            if (firstAdShown && (Date.now() - lastAdTimestamp) >= 1200000) { lastAdTimestamp = Date.now(); startAd(); }
+            if (Math.floor(video.currentTime) % 5 === 0) saveProgress();
         }
 
         function saveProgress() {
             let saved = JSON.parse(localStorage.getItem('user_progress') || '[]');
             const progress = (video.currentTime / video.duration) * 100;
-            
-            const index = saved.findIndex(i => i.id == contentId);
-            const data = {
-                id: contentId,
-                progress: progress,
-                season: currentSeason,
-                ep: currentEp,
-                lastUpdate: Date.now()
-            };
-
-            if (index > -1) saved[index] = data;
-            else saved.push(data);
-
+            const index = saved.findIndex(i => String(i.id) === String(contentId));
+            const data = { id: contentId, progress, season: currentSeason, ep: currentEp, lastUpdate: Date.now() };
+            if (index > -1) saved[index] = data; else saved.push(data);
             localStorage.setItem('user_progress', JSON.stringify(saved));
         }
 
         function startAd() {
-            adActive = true;
-            video.pause();
-            
-            controls.classList.remove('visible');
-            lockBtn.style.opacity = '0';
-            adOverlay.style.display = 'flex';
-            
-            let timeLeft = 10;
-            adTimerCount.innerText = timeLeft;
-            skipAdBtn.style.display = 'none';
-            learnMoreBtn.style.display = 'flex';
-            
-            timerCircle.style.strokeDashoffset = '0';
-            
+            adActive = true; video.pause(); controls.classList.remove('visible'); lockBtn.style.opacity = '0'; adOverlay.style.display = 'flex';
+            let timeLeft = 10; adTimerCount.innerText = timeLeft; skipAdBtn.style.display = 'none'; timerCircle.style.strokeDashoffset = '0';
             const adInterval = setInterval(() => {
-                timeLeft--;
-                adTimerCount.innerText = timeLeft;
-                
-                const offset = 176 - (176 * (10 - timeLeft) / 10);
-                timerCircle.style.strokeDashoffset = offset;
-
-                if (timeLeft <= 0) {
-                    clearInterval(adInterval);
-                    skipAdBtn.style.display = 'flex';
-                    document.getElementById('ad-timer-container').style.display = 'none';
-                }
+                timeLeft--; adTimerCount.innerText = timeLeft;
+                timerCircle.style.strokeDashoffset = 176 - (176 * (10 - timeLeft) / 10);
+                if (timeLeft <= 0) { clearInterval(adInterval); skipAdBtn.style.display = 'flex'; document.getElementById('ad-timer-container').style.display = 'none'; }
             }, 1000);
         }
 
-        skipAdBtn.addEventListener('click', () => {
-            adOverlay.style.display = 'none';
-            document.getElementById('ad-timer-container').style.display = 'flex';
-            adActive = false;
-            lockBtn.style.opacity = '1';
-            lastAdTimestamp = Date.now();
-            video.play();
-        });
+        skipAdBtn.onclick = () => { adOverlay.style.display = 'none'; document.getElementById('ad-timer-container').style.display = 'flex'; adActive = false; lockBtn.style.opacity = '1'; lastAdTimestamp = Date.now(); video.play(); };
 
-        function togglePlay() {
-            if (video.paused) video.play();
-            else video.pause();
-        }
+        function toggleLock() { isLocked = !isLocked; lockBtn.innerHTML = isLocked ? '<i class="fa-solid fa-lock"></i>' : '<i class="fa-solid fa-lock-open"></i>'; lockBtn.classList.toggle('active', isLocked); if (isLocked) controls.classList.remove('visible'); }
 
-        function toggleLock() {
-            isLocked = !isLocked;
-            lockBtn.innerHTML = isLocked ? '<i class="fa-solid fa-lock"></i>' : '<i class="fa-solid fa-lock-open"></i>';
-            lockBtn.classList.toggle('active', isLocked);
-            if (isLocked) controls.classList.remove('visible');
-        }
-
-        function toggleFillMode() {
-            isFillMode = !isFillMode;
-            video.classList.toggle('fullscreen-fill', isFillMode);
-            fullscreenFillBtn.style.color = isFillMode ? 'var(--accent)' : '#fff';
-        }
-
-        function showControls() {
-            if (adActive || isLocked) return;
-            controls.classList.add('visible');
-            clearTimeout(controlsTimeout);
-            controlsTimeout = setTimeout(() => {
-                if (!video.paused) controls.classList.remove('visible');
-            }, 4000);
-        }
+        let controlsTimeout;
+        function showControls() { if (adActive || isLocked) return; controls.classList.add('visible'); clearTimeout(controlsTimeout); controlsTimeout = setTimeout(() => { if (!video.paused) controls.classList.remove('visible'); }, 4000); }
 
         function formatTime(s) {
-            const h = Math.floor(s / 3600);
-            const m = Math.floor((s % 3600) / 60);
-            const sec = Math.floor(s % 60);
-            return h > 0 ? 
-                `${h}:${m.toString().padStart(2,'0')}:${sec.toString().padStart(2,'0')}` : 
-                `${m.toString().padStart(2,'0')}:${sec.toString().padStart(2,'0')}`;
+            const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = Math.floor(s % 60);
+            return h > 0 ? `${h}:${m.toString().padStart(2,'0')}:${sec.toString().padStart(2,'0')}` : `${m.toString().padStart(2,'0')}:${sec.toString().padStart(2,'0')}`;
         }
 
         function renderEpisodes() {
@@ -678,29 +419,16 @@
             currentItem.episodios.forEach(ep => {
                 const card = document.createElement('div');
                 card.className = `ep-card ${ep.temporada == currentSeason && ep.episodio == currentEp ? 'active' : ''}`;
-                card.innerHTML = `
-                    <div class="ep-thumb" style="background-image: url('${ep.capa || currentItem.capa}')"></div>
-                    <div class="ep-info">
-                        <div class="ep-header">
-                            <div class="ep-title">${ep.nome}</div>
-                            <div class="ep-meta">T${ep.temporada} EP${ep.episodio}</div>
-                        </div>
-                        <div class="ep-desc">${ep.sinopse || 'Sem sinopse disponível.'}</div>
-                    </div>
-                `;
-                card.onclick = () => {
-                    window.location.href = `player.html?id=${contentId}&season=${ep.temporada}&ep=${ep.episodio}`;
-                };
+                card.innerHTML = `<div class="ep-thumb" style="background-image: url('${ep.capa || currentItem.capa}')"></div><div class="ep-info"><div class="ep-header"><div class="ep-title">${ep.nome}</div><div class="ep-meta">T${ep.temporada} EP${ep.episodio}</div></div><div class="ep-desc">${ep.sinopse || 'Sem sinopse disponível.'}</div></div>`;
+                card.onclick = () => { window.location.href = `player.html?id=${contentId}&season=${ep.temporada}&ep=${ep.episodio}`; };
                 list.appendChild(card);
             });
         }
 
         episodesBtn.onclick = () => document.getElementById('episodes-overlay').classList.add('active');
         document.getElementById('close-episodes').onclick = () => document.getElementById('episodes-overlay').classList.remove('active');
-        
         nextEpBtn.onclick = () => {
-            const next = currentItem.episodios.find(e => e.temporada == currentSeason && e.episodio == currentEp + 1) || 
-                         currentItem.episodios.find(e => e.temporada == currentSeason + 1 && e.episodio == 1);
+            const next = currentItem.episodios.find(e => e.temporada == currentSeason && e.episodio == currentEp + 1) || currentItem.episodios.find(e => e.temporada == currentSeason + 1 && e.episodio == 1);
             if (next) window.location.href = `player.html?id=${contentId}&season=${next.temporada}&ep=${next.episodio}`;
         };
 
