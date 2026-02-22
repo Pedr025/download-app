@@ -2,7 +2,11 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="theme-color" content="#000000">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Novidades - PKFilmes</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -10,7 +14,6 @@
             --bg: #000;
             --surface: #1a1a1a;
             --accent: #8a2be2;
-            --accent-light: #a855f7;
             --text-main: #ffffff;
             --text-dim: #a0a0a0;
             --nav-bg: rgba(0, 0, 0, 0.8);
@@ -24,6 +27,13 @@
             -webkit-tap-highlight-color: transparent; 
             user-select: none;
             -webkit-user-select: none;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        html {
+            -webkit-text-size-adjust: 100%;
+            -ms-text-size-adjust: 100%;
         }
 
         body {
@@ -34,18 +44,28 @@
             height: 100vh;
             width: 100vw;
             will-change: transform;
+            transform: translateZ(0);
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+            position: fixed;
+            top: 0;
+            left: 0;
         }
 
-        /* CONTAINER TIKTOK */
+        /* CONTAINER TIKTOK - ULTRA OTIMIZADO */
         .tiktok-container {
             height: 100vh;
             width: 100vw;
             overflow-y: scroll;
             scroll-snap-type: y mandatory;
+            scroll-behavior: auto;
             scrollbar-width: none;
             -ms-overflow-style: none;
             -webkit-overflow-scrolling: touch;
             transform: translateZ(0);
+            will-change: scroll-position;
+            contain: strict;
+            overscroll-behavior: contain;
         }
 
         .tiktok-container::-webkit-scrollbar {
@@ -61,16 +81,27 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            contain: strict;
+            will-change: contents;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+        }
+
+        .video-section.inactive {
             contain: layout style paint;
         }
 
-        /* PLAYER */
+        /* PLAYER - RENDERIZAÇÃO ISOLADA */
         .video-wrapper {
             position: absolute;
             inset: 0;
             width: 100%;
             height: 100%;
             z-index: 1;
+            contain: strict;
+            will-change: contents;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
         }
 
         .video-wrapper iframe {
@@ -78,8 +109,11 @@
             height: 100%;
             border: none;
             pointer-events: none;
-            transform: scale(1.5);
+            transform: scale(1.5) translateZ(0);
+            will-change: transform;
             backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+            image-rendering: -webkit-optimize-contrast;
         }
 
         /* OVERLAY DE INTERAÇÃO */
@@ -93,12 +127,15 @@
             justify-content: flex-end;
             padding: 20px 15px 100px 15px;
             pointer-events: none;
+            contain: layout style;
+            will-change: auto;
         }
 
         /* INFO DO FILME */
         .movie-info {
             max-width: 80%;
             pointer-events: auto;
+            contain: layout style;
         }
 
         .movie-title {
@@ -106,6 +143,7 @@
             font-weight: 800;
             margin-bottom: 8px;
             text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+            will-change: auto;
         }
 
         .movie-genres {
@@ -113,6 +151,7 @@
             color: #ddd;
             margin-bottom: 15px;
             font-weight: 500;
+            will-change: auto;
         }
 
         .btn-watch {
@@ -128,11 +167,17 @@
             gap: 8px;
             cursor: pointer;
             box-shadow: 0 4px 15px rgba(138, 43, 226, 0.4);
-            transition: var(--transition);
+            transition: transform 0.2s ease;
+            pointer-events: auto;
+            will-change: transform;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+            -webkit-appearance: none;
+            appearance: none;
         }
 
         .btn-watch:active {
-            transform: scale(0.95);
+            transform: scale(0.95) translateZ(0);
         }
 
         /* BOTÕES LATERAIS */
@@ -146,6 +191,7 @@
             align-items: center;
             z-index: 20;
             pointer-events: auto;
+            contain: layout style;
         }
 
         .action-btn {
@@ -155,6 +201,9 @@
             gap: 5px;
             color: white;
             cursor: pointer;
+            will-change: transform;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
         }
 
         .action-icon {
@@ -162,16 +211,21 @@
             height: 45px;
             background: rgba(255,255,255,0.1);
             backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 20px;
-            transition: var(--transition);
+            transition: background-color 0.2s ease, transform 0.2s ease;
+            will-change: transform, background-color;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+            contain: layout style paint;
         }
 
         .action-btn:active .action-icon {
-            transform: scale(0.9);
+            transform: scale(0.9) translateZ(0);
         }
 
         .action-icon.liked {
@@ -182,6 +236,7 @@
         .action-label {
             font-size: 12px;
             font-weight: 600;
+            contain: layout style;
         }
 
         /* SEEKBAR */
@@ -193,6 +248,7 @@
             height: 3px;
             background: rgba(255,255,255,0.1);
             z-index: 999;
+            contain: layout style paint;
         }
 
         .seekbar-progress {
@@ -200,6 +256,9 @@
             background: var(--accent);
             width: 0%;
             transition: width 0.1s linear;
+            will-change: width;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
         }
 
         /* NAVEGAÇÃO INFERIOR */
@@ -211,12 +270,14 @@
             height: 70px;
             background: var(--nav-bg);
             backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
             display: flex;
             justify-content: space-around;
             align-items: center;
             border-top: 1px solid rgba(255,255,255,0.05);
             z-index: 1000;
             padding-bottom: env(safe-area-inset-bottom);
+            contain: layout style paint;
         }
 
         .nav-item {
@@ -228,8 +289,10 @@
             text-decoration: none;
             font-size: 10px;
             font-weight: 600;
-            transition: var(--transition);
+            transition: color 0.2s ease;
             flex: 1;
+            will-change: color;
+            contain: layout style;
         }
 
         .nav-item i { font-size: 20px; }
@@ -249,6 +312,7 @@
             justify-content: center;
             gap: 20px;
             padding-bottom: 70px;
+            contain: strict;
         }
 
         #loading-screen.hidden {
@@ -262,10 +326,13 @@
             border-top-color: var(--accent);
             border-radius: 50%;
             animation: spin 1s linear infinite;
+            will-change: transform;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
         }
 
         @keyframes spin {
-            to { transform: rotate(360deg); }
+            to { transform: rotate(360deg) translateZ(0); }
         }
 
         /* HEADER */
@@ -281,6 +348,7 @@
             align-items: center;
             gap: 15px;
             background: linear-gradient(to bottom, rgba(0,0,0,0.6) 0%, transparent 100%);
+            contain: layout style paint;
         }
 
         .logo-container {
@@ -292,6 +360,7 @@
             flex-direction: column;
             align-items: center;
             gap: 8px;
+            contain: layout style;
         }
 
         .logo-pk { color: #ffffff; }
@@ -304,6 +373,8 @@
             padding: 8px;
             border-radius: 20px;
             backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            contain: layout style;
         }
 
         .filter-tab {
@@ -315,7 +386,10 @@
             font-size: 13px;
             cursor: pointer;
             border-radius: 15px;
-            transition: var(--transition);
+            transition: background-color 0.2s ease, color 0.2s ease;
+            will-change: background-color, color;
+            -webkit-appearance: none;
+            appearance: none;
         }
 
         .filter-tab.active {
@@ -335,6 +409,7 @@
             justify-content: center;
             gap: 30px;
             animation: fadeIn 0.5s ease;
+            contain: strict;
         }
 
         #swipe-tutorial.hidden {
@@ -345,11 +420,14 @@
             font-size: 60px;
             color: var(--accent);
             animation: slideDown 1s ease infinite;
+            will-change: transform;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
         }
 
         @keyframes slideDown {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(20px); }
+            0%, 100% { transform: translateY(0) translateZ(0); }
+            50% { transform: translateY(20px) translateZ(0); }
         }
 
         .tutorial-text {
@@ -358,6 +436,7 @@
             color: white;
             text-align: center;
             max-width: 80%;
+            contain: layout style;
         }
 
         .tutorial-button {
@@ -369,11 +448,35 @@
             font-weight: 700;
             font-size: 14px;
             cursor: pointer;
+            transition: transform 0.2s ease;
+            will-change: transform;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        .tutorial-button:active {
+            transform: scale(0.95) translateZ(0);
         }
 
         @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
+        }
+
+        /* REDUÇÃO DE MOTION PARA DISPOSITIVOS FRACOS */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        /* MODO DARK FORÇADO */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                color-scheme: dark;
+            }
         }
     </style>
 </head>
@@ -414,12 +517,12 @@
         <a href="novidades.html" class="nav-item active"><i class="fa-solid fa-wand-magic-sparkles"></i><span>Novidades</span></a>
         <a href="perfil.html" class="nav-item"><div class="nav-profile" id="user-profile-icon"><i class="fa-solid fa-user"></i></div><span>Perfil</span></a>
     </nav>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getDatabase, ref, get, child } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-
-        const firebaseConfig = {
+	        const firebaseConfig = {
             apiKey: "AIzaSyBIQSqbbN-adfJjONc0pmTY4PZahwk6a6w",
             authDomain: "nupcine.firebaseapp.com",
             databaseURL: "https://nupcine-default-rtdb.firebaseio.com",
@@ -448,11 +551,29 @@
     </script>
 
     <script>
+        'use strict';
+
         const API_URL = "https://pkfilmes.pages.dev/movies_data.json";
         let allMovies = [];
         let filteredMovies = [];
         let currentActiveIndex = 0;
-        let videoStates = {}; // { index: { isPaused: false, isMuted: false, liked: false } }
+        let videoStates = {};
+        let iframeCache = new Map();
+        let seekbarInterval = null;
+        let renderRAF = null;
+        let scrollListener = null;
+
+        // POOL DE OBJETOS PARA REDUZIR GC
+        const statePool = [];
+        function createState() {
+            return statePool.pop() || { isPaused: false, isMuted: false, liked: false };
+        }
+        function releaseState(state) {
+            state.isPaused = false;
+            state.isMuted = false;
+            state.liked = false;
+            statePool.push(state);
+        }
 
         function checkFirstAccess() {
             if (!localStorage.getItem('pkfilmes_novidades_visited')) {
@@ -491,7 +612,9 @@
                 allMovies.sort(() => Math.random() - 0.5);
                 filteredMovies = allMovies.filter(m => !m.tipo || m.tipo !== 'serie');
                 renderVideos();
-                setTimeout(() => document.getElementById('loading-screen').classList.add('hidden'), 500);
+                requestAnimationFrame(() => {
+                    document.getElementById('loading-screen').classList.add('hidden');
+                });
                 setupIntersectionObserver();
             } catch (error) {
                 console.error("Erro:", error);
@@ -500,8 +623,15 @@
 
         function renderVideos() {
             const container = document.getElementById('video-container');
-            container.innerHTML = filteredMovies.map((movie, index) => `
-                <section class="video-section" data-index="${index}" data-trailer="${movie.trailer_id}">
+            const fragment = document.createDocumentFragment();
+            
+            filteredMovies.forEach((movie, index) => {
+                const section = document.createElement('section');
+                section.className = 'video-section inactive';
+                section.setAttribute('data-index', index);
+                section.setAttribute('data-trailer', movie.trailer_id);
+                
+                section.innerHTML = `
                     <div class="video-wrapper" id="player-container-${index}"></div>
                     <div class="video-overlay">
                         <div class="movie-info">
@@ -530,8 +660,12 @@
                             </div>
                         </div>
                     </div>
-                </section>
-            `).join('');
+                `;
+                fragment.appendChild(section);
+            });
+            
+            container.innerHTML = '';
+            container.appendChild(fragment);
         }
 
         function setupIntersectionObserver() {
@@ -543,14 +677,25 @@
                     const container = document.getElementById(`player-container-${index}`);
 
                     if (entry.isIntersecting) {
+                        entry.target.classList.remove('inactive');
                         currentActiveIndex = index;
-                        // Começa com som e tocando
-                        videoStates[index] = videoStates[index] || { isPaused: false, isMuted: false, liked: false };
-                        container.innerHTML = `<iframe id="youtube-player-${index}" src="https://www.youtube.com/embed/${trailerId}?autoplay=1&mute=0&controls=0&loop=1&playlist=${trailerId}&enablejsapi=1" allow="autoplay"></iframe>`;
+                        
+                        if (!videoStates[index]) {
+                            videoStates[index] = createState();
+                        }
+                        
+                        const cacheKey = `iframe-${index}`;
+                        if (!iframeCache.has(cacheKey)) {
+                            container.innerHTML = `<iframe id="youtube-player-${index}" src="https://www.youtube.com/embed/${trailerId}?autoplay=1&mute=0&controls=0&loop=1&playlist=${trailerId}&enablejsapi=1&modestbranding=1&fs=0" allow="autoplay" loading="lazy"></iframe>`;
+                            iframeCache.set(cacheKey, true);
+                        }
+                        
                         updateUI(index);
                         startSeekbar(index);
                     } else {
+                        entry.target.classList.add('inactive');
                         container.innerHTML = '';
+                        if (seekbarInterval) clearInterval(seekbarInterval);
                     }
                 });
             }, options);
@@ -568,7 +713,13 @@
 
             if (playIcon) playIcon.innerHTML = state.isPaused ? '<i class="fa-solid fa-play"></i>' : '<i class="fa-solid fa-pause"></i>';
             if (muteIcon) muteIcon.innerHTML = state.isMuted ? '<i class="fa-solid fa-volume-xmark"></i>' : '<i class="fa-solid fa-volume-high"></i>';
-            if (likeIcon) state.liked ? likeIcon.classList.add('liked') : likeIcon.classList.remove('liked');
+            if (likeIcon) {
+                if (state.liked) {
+                    likeIcon.classList.add('liked');
+                } else {
+                    likeIcon.classList.remove('liked');
+                }
+            }
         }
 
         window.togglePlayPause = (index) => {
@@ -595,16 +746,15 @@
         };
 
         function startSeekbar(index) {
+            if (seekbarInterval) clearInterval(seekbarInterval);
             const bar = document.getElementById('seekbar-progress');
             let progress = 0;
-            const interval = setInterval(() => {
+            seekbarInterval = setInterval(() => {
                 if (currentActiveIndex !== index || videoStates[index].isPaused) {
                     if (currentActiveIndex !== index) bar.style.width = '0%';
-                    clearInterval(interval);
                     return;
                 }
-                progress += 0.5;
-                if (progress > 100) progress = 0;
+                progress = (progress + 0.3) % 100;
                 bar.style.width = progress + '%';
             }, 100);
         }
@@ -612,12 +762,22 @@
         window.shareMovie = (id, title) => {
             const url = `${window.location.origin}/detalhes.html?id=${id}`;
             if (navigator.share) {
-                navigator.share({ title: 'PKFilmes', text: `Assista ${title} na PKFilmes!`, url: url });
+                navigator.share({ title: 'PKFilmes', text: `Assista ${title} na PKFilmes!`, url: url }).catch(() => {});
             } else {
-                navigator.clipboard.writeText(url);
-                alert('Link copiado!');
+                navigator.clipboard.writeText(url).catch(() => {});
             }
         };
+
+        // OTIMIZAÇÃO: Reduzir event listeners
+        document.getElementById('video-container').addEventListener('scroll', () => {
+            if (scrollListener) cancelAnimationFrame(scrollListener);
+            scrollListener = requestAnimationFrame(() => {});
+        }, { passive: true, capture: false });
+
+        // OTIMIZAÇÃO: Garbage Collection agressivo
+        if (window.gc) {
+            setInterval(() => window.gc(), 30000);
+        }
 
         window.onload = init;
     </script>
