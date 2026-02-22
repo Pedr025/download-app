@@ -204,81 +204,62 @@
         <header class="header">
             <a href="javascript:history.back()"><i class="fa-solid fa-arrow-left"></i></a>
             <div class="player-controls">
-                <button class="btn-control" id="cast-btn" style="display: none;"><i class="fa-solid fa-tower-broadcast"></i></button>
-                <button class="btn-control" id="play-pause-btn"><i class="fa-solid fa-play"></i></button>
                 <button class="btn-control" id="mute-unmute-btn"><i class="fa-solid fa-volume-xmark"></i></button>
+                <button class="btn-control" id="play-pause-btn"><i class="fa-solid fa-pause"></i></button>
             </div>
         </header>
-        <main>
-            <div class="cover-container" id="cover"><div id="video-background"></div></div>
-            <div class="info-container">
-                <img src="" alt="Logo" class="title-logo" id="title-logo">
-                <div class="meta-info"><span id="year"></span><span id="duration"></span></div>
-                <p class="synopsis" id="synopsis"></p>
-                <span class="read-more" id="synopsis-read-more">Ver mais</span>
-                <div class="action-buttons" id="action-buttons">
-                    <button class="btn btn-primary" id="watch-btn"><i class="fa-solid fa-play"></i> Assistir</button>
-                    <button class="btn btn-secondary" id="rave-btn">
-<img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTfMSQujinUhNcpVxWAJEucMPrzFoPCup-hC6GmQpu_fA&s=10" style="width:20px;height:20px">
-Assistir no Rave
-</button>
-                </div>
+
+        <div class="cover-container" id="cover">
+            <div id="video-background"></div>
+        </div>
+
+        <div class="info-container">
+            <img id="title-logo" class="title-logo" src="" alt="">
+            <div class="meta-info">
+                <span id="year"></span>
+                <span id="duration"></span>
+                <span id="genres"></span>
             </div>
 
-
-
-
-<div class="ad-layout">
-
-<span>Remova esse anúncio sendo premium</span>
-
-<button onclick="location.href='premium.html'">
-Premium
-</button>
-
-<script>
-  atOptions = {
-    'key' : 'd743ea16ee8525c87e3b9f86c525d9ac',
-    'format' : 'iframe',
-    'height' : 50,
-    'width' : 320,
-    'params' : {}
-  };
-</script>
-<script src="https://peacockvowel.com/d743ea16ee8525c87e3b9f86c525d9ac/invoke.js"></script>
-
-</div>
-
-
-
-
-
-            <div class="tabs-header" id="tabs-header">
-                <div class="tabs" id="tabs"></div>
-                <div id="season-selector-container"><button id="season-selector-btn" class="season-selector-btn"></button></div>
+            <div class="action-buttons" id="action-buttons">
+                <button class="btn btn-primary" id="watch-btn"><i class="fa-solid fa-play"></i> Assistir</button>
+                <button class="btn btn-secondary" id="rave-btn"><i class="fa-solid fa-users"></i> Assistir com Amigos</button>
             </div>
-            <div id="tab-content-episodes" class="tab-content"><div class="episode-list" id="episode-list"></div></div>
-            <div id="tab-content-details" class="tab-content">
-                <div class="details-list">
-                    <p><strong>Gêneros:</strong> <span id="genres"></span></p>
-                    <h4 style="margin-top: 20px; margin-bottom: 10px;">Elenco</h4>
-                    <div class="cast-row" id="cast-row"></div>
-                </div>
+
+            <p class="synopsis" id="synopsis"></p>
+            <span class="read-more" id="synopsis-read-more" style="display:none;">Ver mais</span>
+        </div>
+
+        <div class="tabs-header">
+            <div class="tabs" id="tabs"></div>
+            <div id="season-selector-container">
+                <button class="season-selector-btn" id="season-selector-btn">Temporada 1 <i class="fa-solid fa-caret-down"></i></button>
             </div>
-        </main>
+        </div>
+	        <div id="tab-content-episodes" class="tab-content">
+            <div class="episode-list" id="episode-list"></div>
+        </div>
+
+        <div id="tab-content-details" class="tab-content">
+            <div class="details-list">
+                <p><strong>Elenco:</strong></p>
+                <div class="cast-row" id="cast-row"></div>
+            </div>
+        </div>
     </div>
 
+    <!-- POPUPS -->
     <div class="popup-overlay rave-style" id="rave-popup">
         <div class="popup-content">
             <div class="popup-header">
-                <img src="" class="popup-cover" id="popup-cover">
+                <img id="popup-cover" class="popup-cover" src="" alt="">
                 <div>
                     <h3 class="popup-title" id="popup-title"></h3>
                     <p class="popup-description" id="popup-description"></p>
-                    <span class="read-more-popup" id="popup-read-more">Ver mais</span>
+                    <span class="read-more-popup" id="popup-read-more" style="display:none;">Ver mais</span>
                 </div>
             </div>
-            <button class="btn btn-primary" id="popup-watch-btn">Assistir</button>
+            <button class="btn btn-primary" id="popup-watch-btn"><i class="fa-solid fa-play"></i> Assistir no Rave</button>
         </div>
     </div>
 
@@ -288,136 +269,77 @@ Premium
         </div>
     </div>
 
-    <!-- Firebase SDKs -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getDatabase, ref, get, child } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyBIQSqbbN-adfJjONc0pmTY4PZahwk6a6w",
-            authDomain: "nupcine.firebaseapp.com",
-            databaseURL: "https://nupcine-default-rtdb.firebaseio.com",
-            projectId: "nupcine",
-            storageBucket: "nupcine.appspot.com",
-            messagingSenderId: "602295443044",
-            appId: "1:602295443044:web:af618627a1dbe5b142c971",
-            measurementId: "G-YD3TPSJTCF"
-        };
-
-        const appFirebase = initializeApp(firebaseConfig);
-        const db = getDatabase(appFirebase);
-        const auth = getAuth(appFirebase);
-
-        let currentUser = null;
+    <script src="https://www.youtube.com/iframe_api"></script>
+    <script>
+        // CONFIGURAÇÃO DA API
+        const API_URL = "https://pkfilmes.pages.dev/movies_data.json";
+        
+        // LÓGICA DE PROGRESSO (LOCALSTORAGE)
         let userProgress = {};
-
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                currentUser = user;
-                await loadUserProgress();
-            }
-            main();
-        });
-
-        async function loadUserProgress() {
-            if (!currentUser) return;
-            const dbRef = ref(db);
-            try {
-                const snapshot = await get(child(dbRef, `users/${currentUser.uid}/progress`));
-                if (snapshot.exists()) {
-                    userProgress = snapshot.val();
-                }
-            } catch (error) {
-                console.error("Erro ao carregar progresso:", error);
-            }
+        function loadLocalProgress() {
+            const saved = JSON.parse(localStorage.getItem('user_progress') || '[]');
+            userProgress = {};
+            saved.forEach(item => {
+                // Chave para séries: ID_S1_E1 | Chave para filmes: ID
+                const key = item.season ? `${item.id}_S${item.season}_E${item.ep}` : item.id;
+                userProgress[key] = item;
+            });
         }
 
-        // --- MEDIDAS DE SEGURANÇA ---
-        document.addEventListener('keydown', function (e) {
-            if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) || (e.ctrlKey && e.key === 'U')) {
-                e.preventDefault();
-            }
-        });
-        (function() {
-            function block() {
-                setInterval(() => {
-                    try { (function() { return false; } ['constructor']('debugger') ['call']()); } catch (e) {}
-                }, 50);
-            }
-            try { block(); } catch (e) {}
-        })();
+        let player;
+        let isMuted = true;
+        let isPaused = false;
+        const autoplayDelay = 3000;
 
-        // --- LÓGICA DO PLAYER DO TRAILER ---
-        let player, isMuted = true, isPaused = true, youtubeReady = false, trailerHasPlayed = false;
-        const tag = document.createElement('script');
-        tag.src = "https://www.youtube.com/iframe_api";
-        document.head.appendChild(tag);
-        window.onYouTubeIframeAPIReady = () => { youtubeReady = true; };
+        function onYouTubeIframeAPIReady() { main(); }
 
-        function togglePlay() {
-            if (!player) return;
-            const icon = document.querySelector('#play-pause-btn i');
-            if (isPaused) {
-                if (!trailerHasPlayed) { startTrailerPlayback(); } else { player.playVideo(); }
-                icon.className = 'fa-solid fa-pause';
-            } else {
-                player.pauseVideo();
-                icon.className = 'fa-solid fa-play';
-            }
-            isPaused = !isPaused;
-        }
-
-        function toggleMute() {
-            if (!player) return;
-            const icon = document.querySelector('#mute-unmute-btn i');
-            if (isMuted) { player.unMute(); icon.className = 'fa-solid fa-volume-high'; } 
-            else { player.mute(); icon.className = 'fa-solid fa-volume-xmark'; }
-            isMuted = !isMuted;
-        }
-
-        function startTrailerPlayback() {
-            if (trailerHasPlayed || !player) return;
-            player.playVideo();
-            document.getElementById('video-background').classList.add('visible');
-            trailerHasPlayed = true;
-        }
-
-        function setupPlayer(trailerId, autoplayDelay = 8000) {
-            const checkYT = setInterval(() => {
-                if (youtubeReady) {
-                    clearInterval(checkYT);
+        function setupPlayer(trailerId) {
+            if (!trailerId) return;
+            setTimeout(() => {
+                if (window.YT && YT.Player) {
                     player = new YT.Player('video-background', {
                         videoId: trailerId,
                         playerVars: { 'autoplay': 0, 'controls': 0, 'mute': 1, 'loop': 1, 'playlist': trailerId, 'playsinline': 1, 'modestbranding': 1, 'rel': 0 },
                         events: { 'onReady': () => {
                             document.getElementById('play-pause-btn').addEventListener('click', togglePlay);
                             document.getElementById('mute-unmute-btn').addEventListener('click', toggleMute);
-                            setTimeout(startTrailerPlayback, autoplayDelay);
+                            setTimeout(() => {
+                                if (player && player.playVideo) {
+                                    player.playVideo();
+                                    document.getElementById('video-background').classList.add('visible');
+                                }
+                            }, autoplayDelay);
                         }}
                     });
                 }
             }, 100);
         }
 
-        // --- LÓGICA DE PROGRESSO ---
+        function togglePlay() {
+            if (!player) return;
+            isPaused = !isPaused;
+            if (isPaused) player.pauseVideo(); else player.playVideo();
+            document.getElementById('play-pause-btn').innerHTML = isPaused ? '<i class="fa-solid fa-play"></i>' : '<i class="fa-solid fa-pause"></i>';
+        }
+
+        function toggleMute() {
+            if (!player) return;
+            isMuted = !isMuted;
+            if (isMuted) player.mute(); else player.unMute();
+            document.getElementById('mute-unmute-btn').innerHTML = isMuted ? '<i class="fa-solid fa-volume-xmark"></i>' : '<i class="fa-solid fa-volume-high"></i>';
+        }
+
         function checkContinueWatching(key, elementToUpdate, isEpisode = false) {
             const savedProgress = userProgress[key];
-
-            if (savedProgress && savedProgress.time > 5) {
-                const percentage = (savedProgress.time / savedProgress.duration) * 100;
-                
-                // Criar seekbar
+            if (savedProgress && savedProgress.progress > 5) {
+                const percentage = savedProgress.progress;
                 const progressBar = document.createElement('div');
                 progressBar.className = 'progress-bar-details';
                 progressBar.innerHTML = `<div style="width: ${percentage}%;"></div>`;
 
-		if (isEpisode) {
+                if (isEpisode) {
                     elementToUpdate.appendChild(progressBar);
-                    // Se > 90%, aplicar blur e texto
-                    if (percentage >= 90) {
-                        elementToUpdate.classList.add('watched');
-                    }
+                    if (percentage >= 90) elementToUpdate.classList.add('watched');
                 } else {
                     const watchBtn = elementToUpdate.querySelector('#watch-btn');
                     watchBtn.insertAdjacentElement('afterend', progressBar);
@@ -428,6 +350,7 @@ Premium
         }
 
         async function main() {
+            loadLocalProgress();
             const urlParams = new URLSearchParams(window.location.search);
             const contentId = urlParams.get('id');
             const skeletonLoader = document.getElementById('skeleton-loader');
@@ -436,22 +359,26 @@ Premium
             if (!contentId) { document.body.innerHTML = "<h1>ID não fornecido.</h1>"; return; }
 
             try {
-                const response = await fetch(`https://pkapi-six.vercel.app/page/detalhes_ID?id=${contentId}`);
-                const item = await response.json();
+                const response = await fetch(API_URL);
+                const allData = await response.json();
+                const item = allData.find(i => i.id == contentId);
+
+                if (!item) throw new Error("Conteúdo não encontrado");
 
                 document.title = item.titulo;
                 document.getElementById('cover').style.backgroundImage = `url(${item.banner || item.capa})`;
                 document.getElementById('title-logo').src = item.logo;
                 document.getElementById('synopsis').textContent = item.sinopse;
                 document.getElementById('year').textContent = item.ano || '';
-                document.getElementById('duration').textContent = item.duracao || '';
                 document.getElementById('genres').textContent = item.generos;
                 
                 const castRow = document.getElementById('cast-row');
-                castRow.innerHTML = ''; // Limpar antes de renderizar
-                item.cast.forEach(actor => {
-                    castRow.innerHTML += `<div class="cast-card"><img src="${actor.foto}" alt="${actor.nome}" loading="lazy"><div class="actor-name">${actor.nome}</div><div class="char-name">${actor.personagem}</div></div>`;
-                });
+                castRow.innerHTML = '';
+                if (item.cast) {
+                    item.cast.forEach(actor => {
+                        castRow.innerHTML += `<div class="cast-card"><img src="${actor.foto}" alt="${actor.nome}" loading="lazy"><div class="actor-name">${actor.nome}</div><div class="char-name">${actor.personagem}</div></div>`;
+                    });
+                }
 
                 if (item.trailer_id) setupPlayer(item.trailer_id);
 
@@ -465,18 +392,18 @@ Premium
                     });
                 }
 
-                const ravePopup = document.getElementById('rave-popup');
                 document.getElementById('rave-btn').addEventListener('click', () => {
+                    const ravePopup = document.getElementById('rave-popup');
                     document.getElementById('popup-cover').src = item.capa;
                     document.getElementById('popup-title').textContent = item.titulo;
                     document.getElementById('popup-description').textContent = item.sinopse;
                     document.getElementById('popup-watch-btn').onclick = () => window.open(item.link_pagina, '_blank');
                     ravePopup.classList.add('visible');
                 });
-                ravePopup.addEventListener('click', (e) => { if (e.target === ravePopup) ravePopup.classList.remove('visible'); });
+                document.getElementById('rave-popup').addEventListener('click', (e) => { if (e.target.id === 'rave-popup') document.getElementById('rave-popup').classList.remove('visible'); });
 
                 const tabsContainer = document.getElementById('tabs');
-                tabsContainer.innerHTML = ''; // Limpar abas
+                tabsContainer.innerHTML = '';
                 let firstTab;
 
                 if (item.tipo === 'serie') {
@@ -491,7 +418,7 @@ Premium
                     const seasonPopup = document.getElementById('season-popup');
                     const seasonList = document.getElementById('season-list');
                     const seasonSelectorBtn = document.getElementById('season-selector-btn');
-                    seasonList.innerHTML = ''; // Limpar lista
+                    seasonList.innerHTML = '';
                     let currentSeason = 1;
 
                     function updateSeasonButton(seasonNum) {
@@ -522,10 +449,10 @@ Premium
                             epItem.className = 'episode-item';
                             epItem.onclick = () => window.location.href = `player.html?id=${item.id}&season=${ep.temporada}&ep=${ep.episodio}`;
                             epItem.innerHTML = `
-                                <div class="episode-thumb" style="background-image: url(${ep.capa})"></div>
+                                <div class="episode-thumb" style="background-image: url(${ep.capa || item.capa})"></div>
                                 <div class="episode-info">
                                     <h4>${ep.episodio}. ${ep.nome}</h4>
-                                    <p>${ep.sinopse}</p>
+                                    <p>${ep.sinopse || 'Sem sinopse disponível.'}</p>
                                 </div>`;
                             episodeList.appendChild(epItem);
                             checkContinueWatching(epKey, epItem, true);
@@ -535,13 +462,12 @@ Premium
                     updateSeasonButton(currentSeason);
                     renderEpisodes(currentSeason);
                     
-                    // Lógica do botão principal "Continuar Assistindo" para Série
                     const watchBtn = document.getElementById('watch-btn');
                     let lastWatchedEp = null;
                     item.episodios.forEach(ep => {
                         const key = `${item.id}_S${ep.temporada}_E${ep.episodio}`;
                         if (userProgress[key]) {
-                            if (!lastWatchedEp || userProgress[key].date > lastWatchedEp.date) {
+                            if (!lastWatchedEp || userProgress[key].lastUpdate > lastWatchedEp.lastUpdate) {
                                 lastWatchedEp = { ...ep, ...userProgress[key] };
                             }
                         }
@@ -559,8 +485,6 @@ Premium
                 } else {
                     firstTab = 'details';
                     const watchBtn = document.getElementById('watch-btn');
-                    
-                    // Lógica do botão principal "Continuar Assistindo" para Filme
                     if (userProgress[item.id]) {
                         watchBtn.innerHTML = `<i class="fa-solid fa-play"></i> Continuar Assistindo`;
                         watchBtn.onclick = () => window.location.href = `player.html?id=${item.id}`;
@@ -576,8 +500,10 @@ Premium
                 function switchTab(tabName) {
                     tabContents.forEach(c => c.classList.remove('active'));
                     tabButtons.forEach(b => b.classList.remove('active'));
-                    document.getElementById(`tab-content-${tabName}`).classList.add('active');
-                    document.querySelector(`.tab-btn[data-tab="${tabName}"]`).classList.add('active');
+                    const targetContent = document.getElementById(`tab-content-${tabName}`);
+                    const targetBtn = document.querySelector(`.tab-btn[data-tab="${tabName}"]`);
+                    if (targetContent) targetContent.classList.add('active');
+                    if (targetBtn) targetBtn.classList.add('active');
                 }
                 tabButtons.forEach(b => b.addEventListener('click', () => switchTab(b.dataset.tab)));
                 switchTab(firstTab);
@@ -587,7 +513,7 @@ Premium
 
             } catch (error) {
                 console.error(error);
-                skeletonLoader.innerHTML = `<h2>Erro ao carregar conteúdo.</h2>`;
+                skeletonLoader.innerHTML = `<h2 style="color:white; text-align:center; padding-top:50px;">Erro ao carregar conteúdo.</h2>`;
             }
         }
     </script>
