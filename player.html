@@ -7,150 +7,89 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         :root { 
-            --accent: #0072d2; /* Azul Disney+ */
-            --bg-dark: #040714; /* Azul Marinho Escuro Disney+ */
+            --accent: #0072d2;
+            --bg-dark: #040714;
             --text-main: #f9f9f9;
-            --control-bg: rgba(4, 7, 20, 0.7);
             --disney-gradient: linear-gradient(to bottom, rgba(4, 7, 20, 0.8) 0%, transparent 20%, transparent 80%, rgba(4, 7, 20, 0.8) 100%);
         }
         
-        * { 
-            box-sizing: border-box; margin: 0; padding: 0; 
-            -webkit-user-select: none; user-select: none; 
-            -webkit-tap-highlight-color: transparent;
-        }
-        
-        body, html { 
-            width: 100%; height: 100%; background-color: #000; 
-            overflow: hidden; font-family: 'Avenir Next', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
-        }
-        
-        .player-container { 
-            position: relative; width: 100%; height: 100%; background-color: #000; 
-            display: flex; align-items: center; justify-content: center;
-        }
-        
-        video { 
-            width: 100%; height: 100%; object-fit: contain; 
-            transition: object-fit 0.3s ease;
-        }
-        
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; }
+        body, html { width: 100%; height: 100%; background-color: #000; overflow: hidden; font-family: 'Avenir Next', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+        .player-container { position: relative; width: 100%; height: 100%; background-color: #000; display: flex; align-items: center; justify-content: center; }
+        video { width: 100%; height: 100%; object-fit: contain; transition: object-fit 0.3s ease; }
         video.fullscreen-fill { object-fit: cover; }
 
-        /* OVERLAY DE CONTROLES */
-        .controls-overlay {
-            position: absolute; inset: 0; z-index: 100;
-            display: flex; flex-direction: column; justify-content: space-between;
-            background: var(--disney-gradient);
-            opacity: 0; visibility: hidden; transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.5s;
-        }
+        /* CONTROLES */
+        .controls-overlay { position: absolute; inset: 0; z-index: 100; display: flex; flex-direction: column; justify-content: space-between; background: var(--disney-gradient); opacity: 0; visibility: hidden; transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.5s; }
         .controls-overlay.visible { opacity: 1; visibility: visible; }
+        .controls-overlay.locked .top-bar, .controls-overlay.locked .bottom-bar, .controls-overlay.locked .center-controls { display: none !important; }
         
-        .controls-overlay.locked .top-bar, 
-        .controls-overlay.locked .bottom-bar,
-        .controls-overlay.locked .center-controls {
-            display: none !important;
-        }
-        
-        .lock-screen-btn {
-            position: absolute; left: 40px; top: 50%; transform: translateY(-50%);
-            z-index: 110; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); 
-            color: #fff; width: 50px; height: 50px; border-radius: 50%; cursor: pointer;
-            display: flex; align-items: center; justify-content: center; font-size: 20px;
-            opacity: 0; visibility: hidden; transition: all 0.3s;
-            backdrop-filter: blur(10px);
-        }
+        .lock-screen-btn { position: absolute; left: 40px; top: 50%; transform: translateY(-50%); z-index: 110; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); color: #fff; width: 50px; height: 50px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 20px; opacity: 0; visibility: hidden; transition: all 0.3s; backdrop-filter: blur(10px); }
         .controls-overlay.visible .lock-screen-btn { opacity: 1; visibility: visible; }
         .lock-screen-btn.active { background: var(--accent); border-color: var(--accent); }
 
         /* BARRA SUPERIOR */
-        .top-bar { padding: 40px 60px; display: flex; align-items: center; justify-content: space-between; }
-        .top-left { display: flex; align-items: center; gap: 25px; }
-        .top-bar .back-btn { color: #fff; font-size: 24px; text-decoration: none; cursor: pointer; transition: 0.3s; }
-        .top-bar h3 { font-size: 22px; font-weight: 600; color: #fff; letter-spacing: 0.5px; }
-        
-        .top-right { display: flex; align-items: center; gap: 20px; }
-        .cast-btn, .fullscreen-fill-btn {
-            background: none; border: none; color: #fff; font-size: 24px; cursor: pointer;
-            display: flex; align-items: center; gap: 8px; transition: 0.3s;
-        }
+        .top-bar { padding: 35px 50px; display: flex; align-items: center; justify-content: space-between; }
+        .top-left { display: flex; align-items: center; gap: 20px; }
+        .top-bar .back-btn { color: #fff; font-size: 22px; cursor: pointer; transition: 0.3s; }
+        .top-bar h3 { font-size: 20px; font-weight: 600; color: #fff; }
+        .top-right { display: flex; align-items: center; gap: 15px; }
+        .cast-btn, .fullscreen-fill-btn { background: none; border: none; color: #fff; font-size: 20px; cursor: pointer; transition: 0.3s; }
 
         /* CONTROLES CENTRAIS */
-        .center-controls {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            display: flex; align-items: center; gap: 100px; z-index: 105;
-        }
-        .center-btn { 
-            background: none; border: none; color: #fff; font-size: 45px; cursor: pointer; 
-            transition: transform 0.2s, opacity 0.2s; 
-            display: flex; flex-direction: column; align-items: center; gap: 5px;
-        }
-        .play-pause-big { 
-            width: 90px; height: 90px; background: rgba(255,255,255,0.1); 
-            border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            backdrop-filter: blur(5px); border: 1px solid rgba(255,255,255,0.2);
-            font-size: 40px;
-        }
+        .center-controls { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: flex; align-items: center; gap: 80px; z-index: 105; }
+        .center-btn { background: none; border: none; color: #fff; font-size: 40px; cursor: pointer; transition: transform 0.2s; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+        .center-btn span { font-size: 11px; font-weight: bold; }
+        .play-pause-big { width: 80px; height: 80px; background: rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(5px); border: 1px solid rgba(255,255,255,0.2); font-size: 35px; }
 
         /* BARRA INFERIOR */
-        .bottom-bar { padding: 20px 60px 50px 60px; }
-        
-        /* SEEKBAR COM PREVIEW */
-        .seekbar-wrapper { position: relative; margin-bottom: 30px; padding: 10px 0; cursor: pointer; }
-        
-        .seekbar-preview {
-            position: absolute; bottom: 100%; left: 0; transform: translateX(-50%);
-            background: rgba(0,0,0,0.9); border: 2px solid var(--accent);
-            border-radius: 8px; padding: 8px; margin-bottom: 15px;
-            display: none; z-index: 150; pointer-events: none;
-        }
+        .bottom-bar { padding: 15px 50px 40px 50px; }
+        .seekbar-wrapper { position: relative; margin-bottom: 25px; }
+        .seekbar-preview { position: absolute; bottom: 100%; left: 0; transform: translateX(-50%); background: rgba(0,0,0,0.95); border: 2px solid var(--accent); border-radius: 8px; padding: 6px; margin-bottom: 12px; display: none; z-index: 150; pointer-events: none; }
         .seekbar-preview.active { display: flex; flex-direction: column; align-items: center; }
-        .seekbar-preview img { width: 140px; height: 80px; object-fit: cover; border-radius: 4px; margin-bottom: 8px; }
-        .seekbar-preview-time { font-size: 14px; color: #fff; font-weight: bold; }
-        
-        .seekbar-container { width: 100%; height: 6px; background: rgba(255,255,255,0.2); position: relative; border-radius: 3px; }
-        .seekbar-fill { width: 0%; height: 100%; background: var(--accent); border-radius: 3px; position: relative; }
-        .seekbar-handle { 
-            position: absolute; right: -9px; top: 50%; transform: translateY(-50%);
-            width: 18px; height: 18px; background: #fff; border-radius: 50%; 
-            box-shadow: 0 0 10px rgba(0,0,0,0.5);
-        }
+        .seekbar-preview img { width: 100px; height: 60px; object-fit: cover; border-radius: 4px; margin-bottom: 6px; }
+        .seekbar-preview-time { font-size: 12px; color: #fff; font-weight: bold; }
+        .seekbar-container { width: 100%; height: 5px; background: rgba(255,255,255,0.2); position: relative; border-radius: 2px; cursor: pointer; }
+        .seekbar-fill { width: 0%; height: 100%; background: var(--accent); border-radius: 2px; }
+        .seekbar-handle { position: absolute; right: -8px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; background: #fff; border-radius: 50%; box-shadow: 0 0 10px rgba(0,0,0,0.5); }
 
         .bottom-actions { display: flex; justify-content: space-between; align-items: center; }
-        .actions-left, .actions-right { display: flex; align-items: center; gap: 40px; }
-        .action-btn { background: none; border: none; color: #fff; font-size: 22px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 8px; opacity: 0.8; transition: 0.3s; }
-        .time-info { font-size: 18px; color: #fff; font-weight: 500; font-variant-numeric: tabular-nums; }
+        .actions-left, .actions-right { display: flex; align-items: center; gap: 35px; }
+        .action-btn { background: none; border: none; color: #fff; font-size: 20px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; opacity: 0.8; transition: 0.3s; }
+        .action-btn span { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+        .time-info { font-size: 16px; color: #fff; font-weight: 500; }
 
         /* ANÚNCIO */
-        .ad-overlay {
-            position: absolute; inset: 0; z-index: 300; background: #000;
-            display: none; flex-direction: column; align-items: center; justify-content: center;
-        }
+        .ad-overlay { position: absolute; inset: 0; z-index: 300; background: #000; display: none; flex-direction: column; align-items: center; justify-content: center; }
         .ad-background { position: absolute; inset: 0; background: linear-gradient(45deg, #040714, #0072d2); opacity: 0.8; }
         .ad-content { width: 100%; height: 100%; position: relative; z-index: 305; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; color: #fff; padding: 40px; }
         .ad-card { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.2); padding: 40px; border-radius: 24px; max-width: 600px; }
-        .ad-footer { position: absolute; bottom: 60px; width: 100%; display: flex; justify-content: center; align-items: center; gap: 20px; }
-        .ad-btn { padding: 16px 40px; border-radius: 50px; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.3s; border: none; text-decoration: none; display: flex; align-items: center; justify-content: center; }
+        .ad-card h2 { font-size: 28px; margin-bottom: 15px; }
+        .ad-card p { font-size: 16px; margin-bottom: 20px; opacity: 0.9; }
+        .ad-footer { position: absolute; bottom: 50px; width: 100%; display: flex; justify-content: center; align-items: center; gap: 15px; }
+        .ad-btn { padding: 14px 35px; border-radius: 50px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.3s; border: none; text-decoration: none; display: flex; align-items: center; justify-content: center; }
         .learn-more-btn { background: #fff; color: #040714; }
         .skip-ad-btn { background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.3); display: none; }
-        .ad-timer-circle { position: relative; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 18px; }
-        .ad-timer-circle svg { position: absolute; top: 0; left: 0; width: 60px; height: 60px; transform: rotate(-90deg); }
-        .ad-timer-circle circle { fill: none; stroke: var(--accent); stroke-width: 4; stroke-dasharray: 176; stroke-dashoffset: 0; transition: stroke-dashoffset 1s linear; }
+        .ad-timer-circle { position: relative; width: 55px; height: 55px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 16px; }
+        .ad-timer-circle svg { position: absolute; top: 0; left: 0; width: 55px; height: 55px; transform: rotate(-90deg); }
+        .ad-timer-circle circle { fill: none; stroke: var(--accent); stroke-width: 3; stroke-dasharray: 160; stroke-dashoffset: 0; transition: stroke-dashoffset 1s linear; }
 
         /* EPISÓDIOS */
-        .episodes-overlay { position: fixed; inset: 0; background: rgba(4, 7, 20, 0.95); z-index: 400; display: none; flex-direction: column; padding: 40px 0; backdrop-filter: blur(10px); }
+        .episodes-overlay { position: fixed; inset: 0; background: rgba(4, 7, 20, 0.95); z-index: 400; display: none; flex-direction: column; padding: 35px 0; backdrop-filter: blur(10px); }
         .episodes-overlay.active { display: flex; }
-        .episodes-header { padding: 0 60px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
-        .episodes-close-btn { background: none; border: none; color: #fff; font-size: 28px; cursor: pointer; padding: 10px; }
-        .episodes-list { display: flex; overflow-x: auto; gap: 20px; padding: 0 60px; scrollbar-width: thin; }
-        .ep-card { min-width: 280px; background: rgba(255,255,255,0.05); border-radius: 12px; overflow: hidden; cursor: pointer; border: 2px solid transparent; transition: 0.3s; flex-shrink: 0; }
+        .episodes-header { padding: 0 50px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        .episodes-header h2 { font-size: 24px; color: #fff; }
+        .episodes-close-btn { background: none; border: none; color: #fff; font-size: 26px; cursor: pointer; padding: 8px; }
+        .episodes-list { display: flex; overflow-x: auto; gap: 18px; padding: 0 50px; scrollbar-width: thin; }
+        .ep-card { min-width: 260px; background: rgba(255,255,255,0.05); border-radius: 12px; overflow: hidden; cursor: pointer; border: 2px solid transparent; transition: 0.3s; flex-shrink: 0; }
+        .ep-card:hover { transform: scale(1.05); background: rgba(255,255,255,0.1); }
         .ep-card.active { border-color: var(--accent); background: rgba(0, 114, 210, 0.1); }
-        .ep-thumb { width: 100%; height: 160px; background-size: cover; background-position: center; }
-        .ep-info { padding: 15px; }
-        .ep-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
-        .ep-title { font-size: 16px; color: #fff; font-weight: 600; flex: 1; }
-        .ep-meta { font-size: 12px; color: var(--accent); font-weight: bold; margin-left: 10px; }
-        .ep-desc { font-size: 13px; color: #aaa; line-height: 1.4; height: 40px; overflow: hidden; }
+        .ep-thumb { width: 100%; height: 150px; background-size: cover; background-position: center; }
+        .ep-info { padding: 12px; }
+        .ep-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
+        .ep-title { font-size: 14px; color: #fff; font-weight: 600; flex: 1; }
+        .ep-meta { font-size: 11px; color: var(--accent); font-weight: bold; margin-left: 8px; white-space: nowrap; }
+        .ep-desc { font-size: 12px; color: #aaa; line-height: 1.3; height: 36px; overflow: hidden; }
     </style>
 </head>
 <body>
@@ -170,7 +109,7 @@
                 <div class="top-right">
                     <button class="fullscreen-fill-btn" id="fullscreen-fill-btn"><i class="fa-solid fa-maximize"></i></button>
                     <button class="cast-btn" id="cast-btn">
-                        <img src="https://cdn-icons-png.flaticon.com/512/566/566078.png" alt="Cast" style="width: 24px; height: 24px; filter: brightness(0) invert(1);">
+                        <img src="https://cdn-icons-png.flaticon.com/512/566/566078.png" alt="Cast" style="width: 20px; height: 20px; filter: brightness(0) invert(1);">
                     </button>
                 </div>
             </div>
@@ -213,7 +152,7 @@
                 </div>
                 <div class="ad-footer">
                     <div class="ad-timer-circle" id="ad-timer-container">
-                        <svg><circle cx="30" cy="30" r="28" id="timer-circle"></circle></svg>
+                        <svg><circle cx="27.5" cy="27.5" r="25" id="timer-circle"></circle></svg>
                         <span id="ad-timer-count">10</span>
                     </div>
                     <a href="curso.html" class="ad-btn learn-more-btn">QUERO APRENDER</a>
@@ -272,7 +211,6 @@
                 if (!currentItem) throw new Error("Não encontrado");
                 setupPlayer();
                 loadContent();
-                // Tenta entrar em fullscreen ao primeiro toque
                 document.addEventListener('click', () => { if(!document.fullscreenElement) forceFullscreen(); }, {once: true});
             } catch (e) { alert("Erro ao carregar conteúdo."); }
         }
@@ -303,7 +241,7 @@
             backBtn.onclick = () => { saveProgress(); window.history.back(); };
             castBtn.onclick = () => alert("Nenhum dispositivo de transmissão detectado.");
 
-            // EVENTOS DE SEEKBAR (DRAG)
+            // EVENTOS DE SEEKBAR COM PREVIEW OTIMIZADO
             const handleSeek = (e) => {
                 if (isLocked || adActive) return;
                 const clientX = e.touches ? e.touches[0].clientX : e.clientX;
@@ -311,7 +249,7 @@
                 let pos = (clientX - rect.left) / rect.width;
                 pos = Math.max(0, Math.min(1, pos));
                 video.currentTime = pos * video.duration;
-                updatePreviewUI(clientX, pos);
+                updatePreviewUI(pos);
             };
 
             seekbarWrapper.onmousedown = seekbarWrapper.ontouchstart = (e) => {
@@ -333,19 +271,28 @@
             video.onclick = (e) => { e.stopPropagation(); showControls(); };
         }
 
-        function updatePreviewUI(clientX, pos) {
+        function updatePreviewUI(pos) {
             const time = pos * video.duration;
             previewTime.innerText = formatTime(time);
             seekbarPreview.style.left = (pos * 100) + '%';
             
-            // Thumbnail generator (canvas)
-            const canvas = document.getElementById('preview-canvas');
-            canvas.width = 140; canvas.height = 80;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(video, 0, 0, 140, 80);
-            previewImg.src = canvas.toDataURL();
+            // Tentar gerar thumbnail do vídeo
+            try {
+                const canvas = document.getElementById('preview-canvas');
+                canvas.width = 100; canvas.height = 60;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(video, 0, 0, 100, 60);
+                previewImg.src = canvas.toDataURL();
+            } catch (e) {
+                // Fallback para banner do item
+                if (currentItem) {
+                    previewImg.src = currentItem.tipo === 'serie' ? 
+                        (currentItem.episodios.find(ep => ep.temporada == currentSeason && ep.episodio == currentEp)?.capa || currentItem.capa) :
+                        currentItem.capa;
+                }
+            }
         }
-	        function loadContent() {
+        function loadContent() {
             if (currentItem.tipo === 'serie') {
                 const ep = currentItem.episodios.find(e => e.temporada == currentSeason && e.episodio == currentEp);
                 if (ep) {
@@ -362,7 +309,7 @@
                 videoTitle.innerText = currentItem.titulo;
             }
             
-            // CARREGAR PROGRESSO
+            // Carregar progresso salvo
             const saved = JSON.parse(localStorage.getItem('user_progress') || '[]');
             const item = saved.find(i => String(i.id) === String(contentId));
             if (item && item.progress > 0) {
@@ -396,7 +343,7 @@
             let timeLeft = 10; adTimerCount.innerText = timeLeft; skipAdBtn.style.display = 'none'; timerCircle.style.strokeDashoffset = '0';
             const adInterval = setInterval(() => {
                 timeLeft--; adTimerCount.innerText = timeLeft;
-                timerCircle.style.strokeDashoffset = 176 - (176 * (10 - timeLeft) / 10);
+                timerCircle.style.strokeDashoffset = 160 - (160 * (10 - timeLeft) / 10);
                 if (timeLeft <= 0) { clearInterval(adInterval); skipAdBtn.style.display = 'flex'; document.getElementById('ad-timer-container').style.display = 'none'; }
             }, 1000);
         }
