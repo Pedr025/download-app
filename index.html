@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
     <title>Início - PKFilmes</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -572,7 +573,11 @@
         const db = getDatabase(app);
         const auth = getAuth(app);
 
-        const API_URL = "https://pkapi-omega.vercel.app/filmes/series";
+        // Proxy para evitar erros de CORS
+        const PROXY_URL = "https://api.allorigins.win/raw?url=";
+        const BASE_API_URL = "https://pkapi-omega.vercel.app/filmes/series";
+        const API_URL = PROXY_URL + encodeURIComponent(BASE_API_URL);
+        
         let allData = [];
         let currentFilter = 'all';
         let currentGenre = null;
@@ -631,8 +636,17 @@
         // Inicializar a Página
         async function init() {
             try {
-                console.log("Iniciando fetch da API...");
-                const res = await fetch(API_URL);
+                console.log("Iniciando fetch da API via Proxy...");
+                // Tenta primeiro com o proxy, se falhar tenta direto
+                let res;
+                try {
+                    res = await fetch(API_URL);
+                    if (!res.ok) throw new Error("Proxy falhou");
+                } catch (proxyErr) {
+                    console.warn("Proxy falhou, tentando direto...");
+                    res = await fetch(BASE_API_URL);
+                }
+
                 if (!res.ok) throw new Error(`Erro HTTP: ${res.status}`);
                 
                 allData = await res.json();
@@ -805,7 +819,17 @@
         // Criar o card individual com dados da API + Firebase
         async function createContinueCard(data) {
             try {
-                const res = await fetch(`https://pkapi-omega.vercel.app/page/detalhes_ID?id=${data.contentId}`);
+                const detailsUrl = `https://pkapi-omega.vercel.app/page/detalhes_ID?id=${data.contentId}`;
+                const proxiedDetailsUrl = PROXY_URL + encodeURIComponent(detailsUrl);
+                
+                let res;
+                try {
+                    res = await fetch(proxiedDetailsUrl);
+                    if (!res.ok) throw new Error("Proxy falhou");
+                } catch (e) {
+                    res = await fetch(detailsUrl);
+                }
+
                 if (!res.ok) return null;
                 const details = await res.json();
                 
@@ -937,7 +961,7 @@
             return section;
         }
 
-        function startPromo() {
+	        function startPromo() {
             setTimeout(() => {
                 const overlay = document.getElementById('promo-overlay');
                 if (!overlay) return;
