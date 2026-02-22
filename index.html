@@ -312,41 +312,12 @@
             border-radius: 2px;
         }
 
-        .continue-watching-section.visitor-blur .scroll-container {
-            filter: blur(10px);
-            pointer-events: none;
-        }
-
-        .visitor-overlay {
-            position: absolute;
-            inset: 0;
-            z-index: 50;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            background: rgba(0,0,0,0.4);
-            text-align: center;
+        .continue-empty-msg {
             padding: 20px;
-        }
-
-        .visitor-overlay p {
-            color: white;
-            font-weight: 700;
-            margin-bottom: 15px;
-            font-size: 16px;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
-        }
-
-        .btn-visitor-login {
-            background: var(--accent);
-            color: white;
-            padding: 10px 25px;
-            border-radius: 25px;
-            text-decoration: none;
-            font-weight: 700;
+            text-align: center;
+            color: var(--text-dim);
             font-size: 14px;
-            box-shadow: 0 4px 15px rgba(138, 43, 226, 0.4);
+            font-weight: 600;
         }
 
         /* SEÇÕES DE CATEGORIAS */
@@ -583,13 +554,14 @@
                 <h3 class="promo-title" id="promo-title">Aprenda a Criar Apps!</h3>
                 <p class="promo-text" id="promo-desc">Domine o desenvolvimento de aplicativos de streaming como este e transforme sua carreira.</p>
                 <span class="promo-highlight" id="promo-tag">VAGAS LIMITADAS - 60% OFF</span>
-                <a href="https://pay.kiwify.com.br/M9YhK6Y" target="_blank" class="promo-btn" id="promo-link">
+	                <a href="https://pay.kiwify.com.br/M9YhK6Y" target="_blank" class="promo-btn" id="promo-link">
                     GARANTIR MINHA VAGA <i class="fa-solid fa-rocket"></i>
                 </a>
                 <div class="timer-badge" id="promo-timer">Liberando em 8s</div>
             </div>
         </div>
     </div>
+
     <main>
         <!-- SKELETON (CARREGAMENTO) -->
         <div id="loading-skeleton">
@@ -649,10 +621,8 @@
         const db = getDatabase(app);
         const auth = getAuth(app);
 
-        // Proxy para evitar erros de CORS
-        const PROXY_URL = "https://api.allorigins.win/raw?url=";
-        const BASE_API_URL = "https://pkfilmes.pages.dev/movies_data.json";
-        const API_URL = PROXY_URL + encodeURIComponent(BASE_API_URL);
+        // API URL
+        const API_URL = "https://pkfilmes.pages.dev/movies_data.json";
         
         let allData = [];
         let currentFilter = 'all';
@@ -661,7 +631,6 @@
         let isPaused = false;
         let trailerTimeout = null;
         let currentUser = null;
-        let isVisitor = localStorage.getItem('visitorMode') === 'true';
 
         // NOMES CRIATIVOS PARA AS CATEGORIAS
         const categoryNames = {
@@ -700,29 +669,20 @@
 
         onAuthStateChanged(auth, (user) => {
             currentUser = user;
-            if (user) isVisitor = false;
             init();
         });
 
         async function init() {
             try {
-                console.log("Iniciando fetch da API...");
-                let res;
-                try {
-                    res = await fetch(API_URL);
-                    if (!res.ok) throw new Error("Proxy falhou");
-                } catch (proxyErr) {
-                    res = await fetch(BASE_API_URL);
-                }
-
+                // Carregamento otimizado: Busca direta sem proxy se possível para velocidade
+                const res = await fetch(API_URL);
                 if (!res.ok) throw new Error(`Erro HTTP: ${res.status}`);
                 
                 allData = await res.json();
                 
-                if (!Array.isArray(allData)) {
-                    allData = [];
-                }
+                if (!Array.isArray(allData)) allData = [];
 
+                // Extração de gêneros otimizada
                 const genres = new Set();
                 allData.forEach(item => {
                     if (item.generos) {
@@ -743,18 +703,22 @@
 
                 renderPage();
                 
-                const skeleton = document.getElementById('loading-skeleton');
-                const content = document.getElementById('real-content');
-                if (skeleton) skeleton.style.display = 'none';
-                if (content) content.style.display = 'block';
+                document.getElementById('loading-skeleton').style.display = 'none';
+                document.getElementById('real-content').style.display = 'block';
                 
                 startPromo();
             } catch (e) { 
                 console.error("Erro na inicialização:", e);
-                const skeleton = document.getElementById('loading-skeleton');
-                const content = document.getElementById('real-content');
-                if (skeleton) skeleton.style.display = 'none';
-                if (content) content.style.display = 'block';
+                // Fallback para proxy se falhar direto
+                try {
+                    const proxyRes = await fetch("https://api.allorigins.win/raw?url=" + encodeURIComponent(API_URL));
+                    allData = await proxyRes.json();
+                    renderPage();
+                    document.getElementById('loading-skeleton').style.display = 'none';
+                    document.getElementById('real-content').style.display = 'block';
+                } catch(err) {
+                    console.error("Falha total no carregamento");
+                }
             }
         }
 
@@ -764,18 +728,19 @@
             if (currentGenre) filtered = filtered.filter(i => i.generos && i.generos.includes(currentGenre));
 
             if (filtered.length === 0) {
-                const container = document.getElementById('content-sections');
-                if (container) container.innerHTML = '<p style="text-align:center; padding:20px; color:var(--text-dim);">Nenhum conteúdo encontrado.</p>';
+                document.getElementById('content-sections').innerHTML = '<p style="text-align:center; padding:20px; color:var(--text-dim);">Nenhum conteúdo encontrado.</p>';
                 return;
             }
 
+            // Banner Aleatório
             const heroItem = filtered[Math.floor(Math.random() * filtered.length)];
             renderHero(heroItem);
 
-            await renderContinueWatching();
+            // Continuar Assistindo
+            renderContinueWatching();
 
+            // Categorias
             const container = document.getElementById('content-sections');
-            if (!container) return;
             container.innerHTML = '';
 
             const activeGenres = {};
@@ -785,149 +750,91 @@
                         const genre = g.trim();
                         if (genre && genre !== 'Talk' && genre !== 'Kids') {
                             if (!activeGenres[genre]) activeGenres[genre] = [];
-                            activeGenres[genre].push(item);
+                            if (activeGenres[genre].length < 15) activeGenres[genre].push(item); // Limite de itens por seção para performance
                         }
                     });
                 }
             });
 
-            let genreKeys = Object.keys(activeGenres);
-            genreKeys.sort(() => Math.random() - 0.5);
-            
-            genreKeys.forEach(genre => {
+            Object.keys(activeGenres).sort(() => Math.random() - 0.5).forEach(genre => {
                 const displayNames = categoryNames[genre] || [`Tudo de ${genre}`];
                 const randomTitle = displayNames[Math.floor(Math.random() * displayNames.length)];
                 container.appendChild(createSection(randomTitle, activeGenres[genre]));
             });
         }
 
-        /* --- SISTEMA CONTINUAR ASSISTINDO --- */
+        /* --- SISTEMA CONTINUAR ASSISTINDO (LOCALSTORAGE) --- */
 
-        async function renderContinueWatching() {
+        function renderContinueWatching() {
             const wrapper = document.getElementById('continue-watching-wrapper');
             if (!wrapper) return;
             wrapper.innerHTML = '';
 
             const section = document.createElement('div');
             section.className = 'continue-watching-section';
-            if (isVisitor) section.classList.add('visitor-blur');
-
             section.innerHTML = `
                 <div class="section-header"><h2 class="section-title">Continuar Assistindo</h2></div>
                 <div class="scroll-container" id="continue-list"></div>
             `;
 
-            if (isVisitor) {
-                section.innerHTML += `
-                    <div class="visitor-overlay">
-                        <p>Você está no modo visitante</p>
-                        <a href="onboarding.html" class="btn-visitor-login">Login</a>
-                    </div>
-                `;
-            }
-
             wrapper.appendChild(section);
             const listContainer = section.querySelector('#continue-list');
 
-            if (!isVisitor && currentUser) {
-                try {
-                    const dbRef = ref(db);
-                    const snapshot = await get(child(dbRef, `users/${currentUser.uid}/progress`));
-                    
-                    if (snapshot.exists()) {
-                        const progressData = snapshot.val();
-                        const sortedKeys = Object.keys(progressData).sort((a, b) => progressData[b].date - progressData[a].date);
-                        
-                        const seriesGroups = {};
-                        const finalItems = [];
-
-                        for (const key of sortedKeys) {
-                            const item = progressData[key];
-                            if (item.season && item.episode) {
-                                if (!seriesGroups[item.contentId]) {
-                                    seriesGroups[item.contentId] = item;
-                                    finalItems.push({ ...item, key });
-                                }
-                            } else {
-                                finalItems.push({ ...item, key });
-                            }
-                        }
-
-                        for (const item of finalItems) {
-                            const card = await createContinueCard(item);
-                            if (card) listContainer.appendChild(card);
-                        }
-                    } else {
-                        wrapper.innerHTML = '';
+            // Lógica LocalStorage
+            const localProgress = JSON.parse(localStorage.getItem('user_progress') || '[]');
+            
+            if (localProgress.length > 0) {
+                localProgress.forEach(data => {
+                    const details = allData.find(i => i.id == data.id);
+                    if (details) {
+                        const card = createContinueCard(data, details);
+                        listContainer.appendChild(card);
                     }
-                } catch (e) {
-                    console.error("Erro ao carregar progresso:", e);
-                    wrapper.innerHTML = '';
-                }
-            } else if (isVisitor) {
-                for (let i = 0; i < 3; i++) {
-                    const mockCard = document.createElement('div');
-                    mockCard.className = 'continue-card';
-                    mockCard.innerHTML = `<div class="continue-thumb" style="background-color: #333"></div><div class="continue-info"><div class="continue-name">••••••••</div></div>`;
-                    listContainer.appendChild(mockCard);
-                }
+                });
+            } else {
+                listContainer.innerHTML = '<p class="continue-empty-msg">Assista conteúdos para aparecer aqui.</p>';
             }
         }
 
-        async function createContinueCard(data) {
-            try {
-                const details = allData.find(i => i.id == data.contentId);
-                if (!details) return null;
-                
-                const card = document.createElement('div');
-                card.className = 'continue-card';
-                
-                let thumb = details.banner || details.capa;
-                let title = details.titulo;
-                let meta = details.generos ? details.generos.split(',')[0] : '';
-                let epInfo = '';
-                let link = `detalhes.html?id=${data.contentId}`;
+        function createContinueCard(data, details) {
+            const card = document.createElement('div');
+            card.className = 'continue-card';
+            
+            let thumb = details.banner || details.capa;
+            let title = details.titulo;
+            let meta = details.generos ? details.generos.split(',')[0] : '';
+            let link = `detalhes.html?id=${data.id}`;
 
-                if (data.season && data.episode && details.episodios) {
-                    const ep = details.episodios.find(e => e.temporada == data.season && e.episodio == data.episode);
-                    if (ep) {
-                        thumb = ep.capa || thumb;
-                        epInfo = ep.nome;
-                        meta = `T${data.season} EP${data.episode}`;
-                        link = `player.html?id=${data.contentId}&season=${data.season}&ep=${data.episode}`;
-                    }
-                } else {
-                    link = `player.html?id=${data.contentId}`;
-                }
+            if (data.season && data.episode) {
+                meta = `T${data.season} EP${data.episode}`;
+                link = `player.html?id=${data.id}&season=${data.season}&ep=${data.episode}`;
+            }
 
-                const progress = (data.time / data.duration) * 100;
+            const progress = data.progress || 0;
 
-                card.innerHTML = `
-                    <div class="continue-remove" onclick="event.stopPropagation(); removeFromFirebase('${data.key}')">
-                        <i class="fa-solid fa-xmark"></i>
+            card.innerHTML = `
+                <div class="continue-remove" onclick="event.stopPropagation(); removeFromLocal('${data.id}')">
+                    <i class="fa-solid fa-xmark"></i>
+                </div>
+                <div class="continue-thumb" style="background-image: url('${thumb}')" onclick="window.location.href='${link}'"></div>
+                <div class="continue-info" onclick="window.location.href='${link}'">
+                    <div class="continue-title-row">
+                        <span class="continue-name">${title}</span>
+                        <span class="continue-meta">${meta}</span>
                     </div>
-                    <div class="continue-thumb" style="background-image: url('${thumb}')" onclick="window.location.href='${link}'"></div>
-                    <div class="continue-info" onclick="window.location.href='${link}'">
-                        <div class="continue-title-row">
-                            <span class="continue-name">${title}</span>
-                            <span class="continue-meta">${meta}</span>
-                        </div>
-                        ${epInfo ? `<div class="continue-ep-name">${epInfo}</div>` : ''}
-                        <div class="continue-progress-container">
-                            <div class="continue-progress-bar" style="width: ${progress}%"></div>
-                        </div>
+                    <div class="continue-progress-container">
+                        <div class="continue-progress-bar" style="width: ${progress}%"></div>
                     </div>
-                `;
-                return card;
-            } catch (e) { return null; }
+                </div>
+            `;
+            return card;
         }
 
-        window.removeFromFirebase = async (key) => {
-            if (!currentUser) return;
-            try {
-                await remove(ref(db, `users/${currentUser.uid}/progress/${key}`));
-                renderContinueWatching();
-            } catch (e) { console.error("Erro ao remover:", e); }
+        window.removeFromLocal = (id) => {
+            let localProgress = JSON.parse(localStorage.getItem('user_progress') || '[]');
+            localProgress = localProgress.filter(i => i.id != id);
+            localStorage.setItem('user_progress', JSON.stringify(localProgress));
+            renderContinueWatching();
         };
 
         /* --- LÓGICA DO BANNER (HERO) --- */
@@ -938,7 +845,6 @@
             if (!mediaContainer || !contentArea) return;
             
             clearTimeout(trailerTimeout);
-            
             mediaContainer.innerHTML = `<img src="${item.banner || item.capa}" id="hero-static-img">`;
             
             contentArea.innerHTML = `
@@ -966,16 +872,13 @@
             const container = document.getElementById('hero-media-container');
             if (!container) return;
             container.innerHTML = `<iframe id="youtube-player" src="https://www.youtube.com/embed/${id}?autoplay=1&mute=1&controls=0&loop=1&playlist=${id}&enablejsapi=1" allow="autoplay"></iframe>`;
-            isMuted = true;
-            isPaused = false;
         }
 
         window.toggleHeroMute = (btn) => {
             const iframe = document.getElementById('youtube-player');
             if (!iframe) return;
             isMuted = !isMuted;
-            const command = isMuted ? 'mute' : 'unMute';
-            iframe.contentWindow.postMessage(JSON.stringify({ event: 'command', func: command }), '*');
+            iframe.contentWindow.postMessage(JSON.stringify({ event: 'command', func: isMuted ? 'mute' : 'unMute' }), '*');
             btn.innerHTML = isMuted ? '<i class="fa-solid fa-volume-xmark"></i>' : '<i class="fa-solid fa-volume-high"></i>';
         };
 
@@ -983,8 +886,7 @@
             const iframe = document.getElementById('youtube-player');
             if (!iframe) return;
             isPaused = !isPaused;
-            const command = isPaused ? 'pauseVideo' : 'playVideo';
-            iframe.contentWindow.postMessage(JSON.stringify({ event: 'command', func: command }), '*');
+            iframe.contentWindow.postMessage(JSON.stringify({ event: 'command', func: isPaused ? 'pauseVideo' : 'playVideo' }), '*');
             btn.innerHTML = isPaused ? '<i class="fa-solid fa-play"></i>' : '<i class="fa-solid fa-pause"></i>';
         };
 
@@ -1006,29 +908,26 @@
             return section;
         }
 
-	        function startPromo() {
+        function startPromo() {
             setTimeout(() => {
                 const overlay = document.getElementById('promo-overlay');
                 if (!overlay) return;
                 overlay.style.display = 'flex';
                 let seconds = 8;
-                const timerText = document.getElementById('promo-timer');
-                const closeBtn = document.getElementById('promo-close-btn');
                 const interval = setInterval(() => {
                     seconds--;
-                    if (timerText) timerText.innerText = `Liberando em ${seconds}s`;
+                    document.getElementById('promo-timer').innerText = `Liberando em ${seconds}s`;
                     if (seconds <= 0) {
                         clearInterval(interval);
-                        if (timerText) timerText.style.display = 'none';
-                        if (closeBtn) closeBtn.style.display = 'flex';
+                        document.getElementById('promo-timer').style.display = 'none';
+                        document.getElementById('promo-close-btn').style.display = 'flex';
                     }
                 }, 1000);
             }, 2000);
         }
 
         window.addEventListener('scroll', () => {
-            const header = document.getElementById('main-header');
-            if (header) header.classList.toggle('scrolled', window.scrollY > 50);
+            document.getElementById('main-header').classList.toggle('scrolled', window.scrollY > 50);
         });
     </script>
 </body>
