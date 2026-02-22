@@ -3,14 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PKFilmes - Player</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>PKFilmes - Player Disney+ 2026</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         :root { 
-            --accent: #e50914; /* Vermelho Netflix */
-            --bg-dark: #000000;
-            --text-main: #ffffff;
-            --control-bg: rgba(0, 0, 0, 0.5);
+            --accent: #0072d2; /* Azul Disney+ */
+            --bg-dark: #040714; /* Azul Marinho Escuro Disney+ */
+            --text-main: #f9f9f9;
+            --control-bg: rgba(4, 7, 20, 0.7);
+            --disney-gradient: linear-gradient(to bottom, rgba(4, 7, 20, 0.8) 0%, transparent 20%, transparent 80%, rgba(4, 7, 20, 0.8) 100%);
         }
         
         * { 
@@ -21,7 +22,7 @@
         
         body, html { 
             width: 100%; height: 100%; background-color: #000; 
-            overflow: hidden; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; 
+            overflow: hidden; font-family: 'Avenir Next', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
         }
         
         .player-container { 
@@ -31,12 +32,12 @@
         
         video { width: 100%; height: 100%; object-fit: contain; }
 
-        /* OVERLAY DE CONTROLES ESTILO NETFLIX */
+        /* OVERLAY DE CONTROLES ESTILO DISNEY+ 2026 */
         .controls-overlay {
             position: absolute; inset: 0; z-index: 100;
             display: flex; flex-direction: column; justify-content: space-between;
-            background: linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, transparent 20%, transparent 80%, rgba(0,0,0,0.7) 100%);
-            opacity: 0; visibility: hidden; transition: opacity 0.4s ease, visibility 0.4s ease;
+            background: var(--disney-gradient);
+            opacity: 0; visibility: hidden; transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.5s;
         }
         .controls-overlay.visible { opacity: 1; visibility: visible; }
         
@@ -46,97 +47,167 @@
         .controls-overlay.locked .center-controls {
             display: none !important;
         }
+        
         .lock-screen-btn {
-            position: absolute; left: 30px; top: 50%; transform: translateY(-50%);
-            z-index: 110; background: none; border: none; color: #fff; font-size: 24px; cursor: pointer;
+            position: absolute; left: 40px; top: 50%; transform: translateY(-50%);
+            z-index: 110; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); 
+            color: #fff; width: 50px; height: 50px; border-radius: 50%; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; font-size: 20px;
             opacity: 0; visibility: hidden; transition: all 0.3s;
+            backdrop-filter: blur(10px);
         }
         .controls-overlay.visible .lock-screen-btn { opacity: 1; visibility: visible; }
+        .lock-screen-btn.active { background: var(--accent); border-color: var(--accent); }
 
         /* BARRA SUPERIOR */
-        .top-bar { padding: 30px 50px; display: flex; align-items: center; gap: 30px; }
-        .top-bar .back-btn { color: #fff; font-size: 28px; text-decoration: none; cursor: pointer; }
-        .top-bar h3 { font-size: 20px; font-weight: 500; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+        .top-bar { padding: 40px 60px; display: flex; align-items: center; justify-content: space-between; }
+        .top-left { display: flex; align-items: center; gap: 25px; }
+        .top-bar .back-btn { color: #fff; font-size: 24px; text-decoration: none; cursor: pointer; transition: 0.3s; }
+        .top-bar .back-btn:hover { transform: scale(1.1); }
+        .top-bar h3 { font-size: 22px; font-weight: 600; color: #fff; letter-spacing: 0.5px; }
+        
+        .cast-btn {
+            background: none; border: none; color: #fff; font-size: 24px; cursor: pointer;
+            display: flex; align-items: center; gap: 8px; transition: 0.3s;
+        }
+        .cast-btn:hover { color: var(--accent); }
 
-        /* CONTROLES CENTRAIS (VOLTAR/PLAY/AVANÇAR) */
+        /* CONTROLES CENTRAIS */
         .center-controls {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            display: flex; align-items: center; gap: 80px; z-index: 105;
+            display: flex; align-items: center; gap: 100px; z-index: 105;
         }
-        .center-btn { background: none; border: none; color: #fff; font-size: 50px; cursor: pointer; transition: transform 0.2s; }
-        .center-btn:active { transform: scale(0.9); }
-        .play-pause-big { font-size: 70px; }
+        .center-btn { 
+            background: none; border: none; color: #fff; font-size: 45px; cursor: pointer; 
+            transition: transform 0.2s, opacity 0.2s; 
+            display: flex; flex-direction: column; align-items: center; gap: 5px;
+        }
+        .center-btn span { font-size: 12px; font-weight: bold; }
+        .center-btn:active { transform: scale(0.9); opacity: 0.7; }
+        .play-pause-big { 
+            width: 90px; height: 90px; background: rgba(255,255,255,0.1); 
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            backdrop-filter: blur(5px); border: 1px solid rgba(255,255,255,0.2);
+            font-size: 40px;
+        }
 
         /* BARRA INFERIOR */
-        .bottom-bar { padding: 20px 50px 40px 50px; }
+        .bottom-bar { padding: 20px 60px 50px 60px; }
         
         /* SEEKBAR */
-        .seekbar-container { width: 100%; height: 4px; background: rgba(255,255,255,0.3); cursor: pointer; margin-bottom: 25px; position: relative; border-radius: 2px; }
-        .seekbar-fill { width: 0%; height: 100%; background: var(--accent); border-radius: 2px; position: relative; }
+        .seekbar-container { width: 100%; height: 6px; background: rgba(255,255,255,0.2); cursor: pointer; margin-bottom: 30px; position: relative; border-radius: 3px; }
+        .seekbar-fill { width: 0%; height: 100%; background: var(--accent); border-radius: 3px; position: relative; transition: width 0.1s linear; }
         .seekbar-handle { 
             position: absolute; right: -8px; top: 50%; transform: translateY(-50%);
-            width: 16px; height: 16px; background: var(--accent); border-radius: 50%; 
+            width: 18px; height: 18px; background: #fff; border-radius: 50%; 
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
         }
 
         .bottom-actions { display: flex; justify-content: space-between; align-items: center; }
-        .actions-left, .actions-right { display: flex; align-items: center; gap: 35px; }
-        .action-btn { background: none; border: none; color: #fff; font-size: 24px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 5px; }
-        .action-btn span { font-size: 12px; font-weight: 500; }
-        .time-info { font-size: 16px; color: #fff; font-weight: 500; }
+        .actions-left, .actions-right { display: flex; align-items: center; gap: 40px; }
+        .action-btn { background: none; border: none; color: #fff; font-size: 22px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 8px; opacity: 0.8; transition: 0.3s; }
+        .action-btn:hover { opacity: 1; color: var(--accent); }
+        .action-btn span { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+        .time-info { font-size: 18px; color: #fff; font-weight: 500; font-variant-numeric: tabular-nums; }
 
-        /* POP-UP DE EPISÓDIOS (HORIZONTAL) */
-        .episodes-overlay {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 200;
-            display: none; flex-direction: column; padding: 40px 0;
-        }
-        .episodes-overlay.active { display: flex; }
-        .episodes-header { padding: 0 50px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
-        .episodes-header h2 { font-size: 24px; color: #fff; }
-        .episodes-list { 
-            display: flex; overflow-x: auto; gap: 20px; padding: 20px 50px; 
-            scrollbar-width: none; -ms-overflow-style: none;
-        }
-        .episodes-list::-webkit-scrollbar { display: none; }
-        .ep-card { 
-            min-width: 280px; background: #181818; border-radius: 8px; overflow: hidden; 
-            cursor: pointer; border: 2px solid transparent; transition: 0.3s;
-        }
-        .ep-card.active { border-color: var(--accent); }
-        .ep-thumb { width: 100%; height: 157px; background-size: cover; background-position: center; position: relative; }
-        .ep-info { padding: 15px; }
-        .ep-info h4 { font-size: 14px; color: #fff; margin-bottom: 5px; }
-        .ep-info p { font-size: 12px; color: #999; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
-
-        /* SISTEMA DE ANÚNCIO */
+        /* SISTEMA DE ANÚNCIO MODERNO */
         .ad-overlay {
             position: absolute; inset: 0; z-index: 300; background: #000;
             display: none; flex-direction: column; align-items: center; justify-content: center;
+            overflow: hidden;
         }
-        .ad-content { width: 100%; height: 100%; position: relative; }
-        .ad-video-placeholder { 
-            width: 100%; height: 100%; display: flex; flex-direction: column; 
-            align-items: center; justify-content: center; background: #111;
+        .ad-background {
+            position: absolute; inset: 0;
+            background: linear-gradient(45deg, #040714, #0072d2);
+            opacity: 0.8;
         }
-        .ad-video-placeholder img { max-width: 80%; max-height: 60%; border-radius: 10px; margin-bottom: 20px; }
-        .ad-video-placeholder h2 { color: #fff; margin-bottom: 10px; }
-        .ad-controls { 
-            position: absolute; bottom: 40px; right: 40px; z-index: 310;
-            display: flex; flex-direction: column; align-items: flex-end; gap: 15px;
+        .ad-content { 
+            width: 100%; height: 100%; position: relative; z-index: 305;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            text-align: center; color: #fff; padding: 40px;
         }
+        .ad-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 40px;
+            border-radius: 24px;
+            max-width: 600px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            animation: adPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes adPop { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        
+        .ad-card h2 { font-size: 32px; margin-bottom: 15px; background: linear-gradient(to right, #fff, #0072d2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .ad-card p { font-size: 18px; margin-bottom: 30px; opacity: 0.9; line-height: 1.6; }
+        
+        .ad-footer {
+            position: absolute; bottom: 60px; width: 100%;
+            display: flex; justify-content: center; align-items: center; gap: 20px;
+        }
+        
+        .ad-btn {
+            padding: 16px 40px; border-radius: 50px; font-size: 18px; font-weight: bold;
+            cursor: pointer; transition: 0.3s; border: none; text-decoration: none;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .learn-more-btn { background: #fff; color: #040714; }
+        .learn-more-btn:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(255,255,255,0.2); }
+        
         .skip-ad-btn {
-            background: rgba(0,0,0,0.8); color: #fff; border: 1px solid #fff;
-            padding: 12px 25px; font-size: 16px; font-weight: bold; cursor: pointer;
-            display: none;
+            background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.3);
+            backdrop-filter: blur(10px); display: none;
         }
-        .ad-timer { background: rgba(0,0,0,0.6); color: #fff; padding: 8px 15px; border-radius: 4px; font-size: 14px; }
-        .ad-seekbar { position: absolute; bottom: 0; left: 0; height: 5px; background: #f1c40f; width: 0%; transition: width 0.1s linear; }
+        
+        .ad-timer-circle {
+            position: relative; width: 60px; height: 60px;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: bold; font-size: 18px;
+        }
+        .ad-timer-circle svg {
+            position: absolute; top: 0; left: 0; width: 60px; height: 60px;
+            transform: rotate(-90deg);
+        }
+        .ad-timer-circle circle {
+            fill: none; stroke: var(--accent); stroke-width: 4;
+            stroke-dasharray: 176; stroke-dashoffset: 0;
+            transition: stroke-dashoffset 1s linear;
+        }
 
-        /* MENSAGEM DE ORIENTAÇÃO */
-        .orientation-msg {
-            position: fixed; inset: 0; background: #000; z-index: 9999;
-            display: none; flex-direction: column; align-items: center; justify-content: center;
-            color: #fff; text-align: center; padding: 20px;
+        /* EPISÓDIOS OVERLAY */
+        .episodes-overlay {
+            position: fixed; inset: 0; background: rgba(4, 7, 20, 0.95); z-index: 400;
+            display: none; flex-direction: column; padding: 60px 0;
+            backdrop-filter: blur(20px);
         }
+        .episodes-overlay.active { display: flex; }
+        .episodes-header { padding: 0 60px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; }
+        .episodes-header h2 { font-size: 32px; color: #fff; }
+        .episodes-list { 
+            display: flex; overflow-x: auto; gap: 25px; padding: 20px 60px; 
+            scrollbar-width: none;
+        }
+        .episodes-list::-webkit-scrollbar { display: none; }
+        .ep-card { 
+            min-width: 320px; background: rgba(255,255,255,0.05); border-radius: 12px; overflow: hidden; 
+            cursor: pointer; border: 2px solid transparent; transition: 0.3s;
+        }
+        .ep-card:hover { transform: scale(1.05); background: rgba(255,255,255,0.1); }
+        .ep-card.active { border-color: var(--accent); background: rgba(0, 114, 210, 0.1); }
+        .ep-thumb { width: 100%; height: 180px; background-size: cover; background-position: center; position: relative; }
+        .ep-info { padding: 20px; }
+        .ep-info h4 { font-size: 16px; color: #fff; margin-bottom: 8px; }
+        .ep-info p { font-size: 13px; color: #aaa; line-height: 1.5; height: 60px; overflow: hidden; }
+
+        /* ORIENTAÇÃO */
+        .orientation-msg {
+            position: fixed; inset: 0; background: var(--bg-dark); z-index: 9999;
+            display: none; flex-direction: column; align-items: center; justify-content: center;
+            color: #fff; text-align: center; padding: 40px;
+        }
+        .orientation-msg i { font-size: 60px; color: var(--accent); margin-bottom: 30px; animation: rotate 2s infinite linear; }
+        @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        
         @media screen and (orientation: portrait) {
             .orientation-msg { display: flex; }
         }
@@ -144,31 +215,46 @@
 </head>
 <body>
 
-    <div class="orientation-msg">
-        <i class="fa-solid fa-rotate" style="font-size: 50px; margin-bottom: 20px;"></i>
-        <h2>Por favor, gire seu celular</h2>
-        <p>Este player funciona apenas na horizontal.</p>
+    <div class="orientation-msg" id="orientation-msg">
+        <i class="fa-solid fa-mobile-screen-button"></i>
+        <h2>Gire seu dispositivo</h2>
+        <p>Para a melhor experiência Disney+, use o modo paisagem.</p>
     </div>
 
     <div class="player-container" id="player-container">
-        <video id="video-player" playsinline></video>
+        <video id="video-player" playsinline preload="auto"></video>
         
-        <!-- BOTÃO DE CADEADO (LIVRE DOS GRUPOS PARA NÃO SUMIR) -->
-        <button class="lock-screen-btn" id="lock-btn"><i class="fa-solid fa-lock-open"></i></button>
+        <!-- BOTÃO DE CADEADO -->
+        <button class="lock-screen-btn" id="lock-btn" title="Bloquear Controles">
+            <i class="fa-solid fa-lock-open"></i>
+        </button>
 
         <!-- CONTROLES -->
         <div class="controls-overlay" id="controls-overlay">
             <!-- BARRA SUPERIOR -->
             <div class="top-bar">
-                <div class="back-btn" id="back-btn"><i class="fa-solid fa-arrow-left"></i></div>
-                <h3 id="video-title">Carregando...</h3>
+                <div class="top-left">
+                    <div class="back-btn" id="back-btn"><i class="fa-solid fa-chevron-left"></i></div>
+                    <h3 id="video-title">Carregando...</h3>
+                </div>
+                <button class="cast-btn" id="cast-btn">
+                    <i class="fa-solid fa-chromecast"></i>
+                </button>
             </div>
 
             <!-- CONTROLES CENTRAIS -->
             <div class="center-controls">
-                <button class="center-btn" id="rewind-btn"><i class="fa-solid fa-backward-10"></i></button>
-                <button class="center-btn play-pause-big" id="play-pause-btn"><i class="fa-solid fa-play"></i></button>
-                <button class="center-btn" id="forward-btn"><i class="fa-solid fa-forward-10"></i></button>
+                <button class="center-btn" id="rewind-btn">
+                    <i class="fa-solid fa-rotate-left"></i>
+                    <span>10s</span>
+                </button>
+                <button class="center-btn play-pause-big" id="play-pause-btn">
+                    <i class="fa-solid fa-play"></i>
+                </button>
+                <button class="center-btn" id="forward-btn">
+                    <i class="fa-solid fa-rotate-right"></i>
+                    <span>10s</span>
+                </button>
             </div>
 
             <!-- BARRA INFERIOR -->
@@ -184,7 +270,7 @@
                     </div>
                     <div class="actions-right">
                         <button class="action-btn" id="episodes-btn" style="display: none;">
-                            <i class="fa-solid fa-layer-group"></i>
+                            <i class="fa-solid fa-list"></i>
                             <span>Episódios</span>
                         </button>
                         <button class="action-btn" id="next-ep-btn" style="display: none;">
@@ -202,18 +288,21 @@
 
         <!-- SISTEMA DE ANÚNCIO -->
         <div class="ad-overlay" id="ad-overlay">
+            <div class="ad-background"></div>
             <div class="ad-content">
-                <div class="ad-video-placeholder">
-                    <!-- COMENTÁRIO: Altere a imagem e o texto do anúncio aqui -->
-                    <img src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=1000&auto=format&fit=crop" alt="Curso">
-                    <h2>Domine o Desenvolvimento de Apps</h2>
-                    <p>Aprenda a criar plataformas como esta do zero!</p>
+                <div class="ad-card">
+                    <h2>Crie seu Próprio Império de Streaming</h2>
+                    <p>Aprenda a criar um site de filmes e séries completo como este! Ganhe um projeto exclusivo para modificar totalmente grátis e comece hoje mesmo.</p>
                 </div>
-                <div class="ad-controls">
-                    <div class="ad-timer" id="ad-timer">Anúncio termina em 10s</div>
-                    <button class="skip-ad-btn" id="skip-ad-btn">Pular Anúncio <i class="fa-solid fa-forward"></i></button>
+                
+                <div class="ad-footer">
+                    <div class="ad-timer-circle" id="ad-timer-container">
+                        <svg><circle cx="30" cy="30" r="28" id="timer-circle"></circle></svg>
+                        <span id="ad-timer-count">10</span>
+                    </div>
+                    <a href="curso.html" class="ad-btn learn-more-btn" id="learn-more-btn">QUERO APRENDER</a>
+                    <button class="ad-btn skip-ad-btn" id="skip-ad-btn">PULAR ANÚNCIO</button>
                 </div>
-                <div class="ad-seekbar" id="ad-seekbar"></div>
             </div>
         </div>
 
@@ -223,9 +312,7 @@
                 <h2 id="series-title-popup">Episódios</h2>
                 <div class="back-btn" id="close-episodes"><i class="fa-solid fa-xmark"></i></div>
             </div>
-            <div class="episodes-list" id="episodes-list">
-                <!-- Injetado via JS -->
-            </div>
+            <div class="episodes-list" id="episodes-list"></div>
         </div>
     </div>
 
@@ -248,12 +335,14 @@
         const nextEpBtn = document.getElementById('next-ep-btn');
         const fullscreenBtn = document.getElementById('fullscreen-btn');
         const backBtn = document.getElementById('back-btn');
+        const castBtn = document.getElementById('cast-btn');
         
         // ANÚNCIO
         const adOverlay = document.getElementById('ad-overlay');
-        const adTimerText = document.getElementById('ad-timer');
+        const adTimerCount = document.getElementById('ad-timer-count');
         const skipAdBtn = document.getElementById('skip-ad-btn');
-        const adSeekbar = document.getElementById('ad-seekbar');
+        const learnMoreBtn = document.getElementById('learn-more-btn');
+        const timerCircle = document.getElementById('timer-circle');
 
         // ESTADO
         const urlParams = new URLSearchParams(window.location.search);
@@ -265,11 +354,11 @@
         let currentItem = null;
         let isLocked = false;
         let controlsTimeout;
-        let adCount = 0;
         let adActive = false;
-        let lastAdTime = 0;
+        let firstAdShown = false;
+        let lastAdTimestamp = 0;
 
-        // INICIALIZAÇÃO
+           // INICIALIZAÇÃO
         async function init() {
             try {
                 const res = await fetch(API_URL);
@@ -280,30 +369,44 @@
 
                 setupPlayer();
                 loadContent();
-                enterFullscreen();
+                
+                // Forçar Fullscreen e Orientação ao iniciar
+                document.addEventListener('click', () => {
+                    forceFullscreenAndLandscape();
+                }, { once: true });
+
             } catch (e) {
                 console.error(e);
                 alert("Erro ao carregar conteúdo.");
             }
         }
 
+        function forceFullscreenAndLandscape() {
+            const el = document.documentElement;
+            const requestFs = el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen || el.msRequestFullscreen;
+            
+            if (requestFs) {
+                requestFs.call(el).then(() => {
+                    if (screen.orientation && screen.orientation.lock) {
+                        screen.orientation.lock('landscape').catch(err => console.log("Orientation lock failed:", err));
+                    }
+                }).catch(err => console.log("Fullscreen failed:", err));
+            }
+        }
+
         function setupPlayer() {
-            // Eventos de Vídeo
             video.addEventListener('timeupdate', updateProgress);
-            video.addEventListener('loadedmetadata', () => {
-                // Carregar progresso salvo
-                const saved = JSON.parse(localStorage.getItem('user_progress') || '[]');
-                const item = saved.find(i => i.id == contentId);
-                if (item && item.progress > 0) {
-                    video.currentTime = (item.progress / 100) * video.duration;
-                }
+            video.addEventListener('play', () => {
+                playPauseBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
+                lastAdTimestamp = Date.now();
+            });
+            video.addEventListener('pause', () => {
+                playPauseBtn.innerHTML = '<i class="fa-solid fa-play"></i>';
             });
 
-            // Controles
             playPauseBtn.addEventListener('click', togglePlay);
             rewindBtn.addEventListener('click', () => video.currentTime -= 10);
             forwardBtn.addEventListener('click', () => video.currentTime += 10);
-            
             lockBtn.addEventListener('click', toggleLock);
             
             seekbarContainer.addEventListener('click', (e) => {
@@ -313,14 +416,28 @@
                 video.currentTime = pos * video.duration;
             });
 
-            // Fullscreen e Orientação
-            fullscreenBtn.addEventListener('click', toggleFullscreen);
-            backBtn.addEventListener('click', exitPlayer);
+            fullscreenBtn.addEventListener('click', () => {
+                if (!document.fullscreenElement) forceFullscreenAndLandscape();
+                else document.exitFullscreen();
+            });
 
-            // Exibir controles
-            document.addEventListener('mousemove', showControls);
-            document.addEventListener('touchstart', showControls);
-            video.addEventListener('click', showControls);
+            backBtn.addEventListener('click', () => window.history.back());
+
+            castBtn.addEventListener('click', () => {
+                if (window.chrome && window.chrome.cast && window.chrome.cast.isAvailable) {
+                    alert("Dispositivo de transmissão encontrado! Iniciando conexão...");
+                } else {
+                    alert("Nenhum dispositivo de transmissão (Chromecast/AirPlay) detectado na sua rede.");
+                }
+            });
+
+            // Gestão de Controles
+            const showEvents = ['mousemove', 'touchstart', 'mousedown'];
+            showEvents.forEach(e => document.addEventListener(e, showControls));
+            video.addEventListener('click', (e) => {
+                e.stopPropagation();
+                showControls();
+            });
         }
 
         function loadContent() {
@@ -330,19 +447,18 @@
                     video.src = ep.link_mp4;
                     videoTitle.innerText = `${currentItem.titulo} - T${currentSeason}:E${currentEp} ${ep.nome}`;
                     episodesBtn.style.display = 'flex';
-                    
-                    // Verificar se tem próximo
                     const next = currentItem.episodios.find(e => e.temporada == currentSeason && e.episodio == currentEp + 1) || 
                                  currentItem.episodios.find(e => e.temporada == currentSeason + 1 && e.episodio == 1);
                     nextEpBtn.style.display = next ? 'flex' : 'none';
-                    
                     renderEpisodes();
                 }
             } else {
                 video.src = currentItem.link_mp4;
                 videoTitle.innerText = currentItem.titulo;
             }
-            video.play();
+            video.play().catch(() => {
+                // Autoplay bloqueado, aguarda clique do usuário
+            });
         }
 
         function updateProgress() {
@@ -352,75 +468,76 @@
             seekbarFill.style.width = percent + '%';
             timeInfo.innerText = `${formatTime(video.currentTime)} / ${formatTime(video.duration)}`;
 
-            // LÓGICA DE ANÚNCIO (Aos 10 segundos, 3 vezes)
-            // COMENTÁRIO: Aqui você define quando o anúncio aparece. 
-            // Atualmente: Se passou 10s desde o último anúncio e ainda não passou 3 vezes.
-            if (video.currentTime > 10 && adCount < 3 && (video.currentTime - lastAdTime) > 60) {
+            // LÓGICA DE ANÚNCIO AUTOMÁTICO
+            // 1. No segundo 10
+            if (!firstAdShown && video.currentTime >= 10) {
+                firstAdShown = true;
                 startAd();
             }
 
-            // Salvar progresso a cada 5 segundos
-            if (Math.floor(video.currentTime) % 5 === 0) {
-                saveProgress();
+            // 2. A cada 20 minutos (1200 segundos)
+            const now = Date.now();
+            if (firstAdShown && (now - lastAdTimestamp) >= 1200000) {
+                lastAdTimestamp = now;
+                startAd();
             }
         }
 
         function startAd() {
             adActive = true;
-            adCount++;
-            lastAdTime = video.currentTime;
             video.pause();
             
-            // Esconder controles
             controls.classList.remove('visible');
-            lockBtn.style.display = 'none';
+            lockBtn.style.opacity = '0';
             adOverlay.style.display = 'flex';
             
             let timeLeft = 10;
+            adTimerCount.innerText = timeLeft;
             skipAdBtn.style.display = 'none';
-            adSeekbar.style.width = '0%';
-
+            learnMoreBtn.style.display = 'flex';
+            
+            // Reset Circle
+            timerCircle.style.strokeDashoffset = '0';
+            
             const adInterval = setInterval(() => {
                 timeLeft--;
-                adTimerText.innerText = `Anúncio termina em ${timeLeft}s`;
-                adSeekbar.style.width = ((10 - timeLeft) / 10 * 100) + '%';
+                adTimerCount.innerText = timeLeft;
+                
+                // Update Circle Animation (Dasharray is 176)
+                const offset = 176 - (176 * (10 - timeLeft) / 10);
+                timerCircle.style.strokeDashoffset = offset;
 
                 if (timeLeft <= 0) {
                     clearInterval(adInterval);
-                    skipAdBtn.style.display = 'block';
-                    adTimerText.innerText = "Anúncio finalizado";
+                    skipAdBtn.style.display = 'flex';
+                    document.getElementById('ad-timer-container').style.display = 'none';
                 }
             }, 1000);
         }
-	        skipAdBtn.addEventListener('click', () => {
+
+        skipAdBtn.addEventListener('click', () => {
             adOverlay.style.display = 'none';
+            document.getElementById('ad-timer-container').style.display = 'flex';
             adActive = false;
-            lockBtn.style.display = 'block';
+            lockBtn.style.opacity = '1';
+            lastAdTimestamp = Date.now(); // Reset timer for next 20min ad
             video.play();
         });
 
         function togglePlay() {
-            if (video.paused) {
-                video.play();
-                playPauseBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
-            } else {
-                video.pause();
-                playPauseBtn.innerHTML = '<i class="fa-solid fa-play"></i>';
-            }
+            if (video.paused) video.play();
+            else video.pause();
         }
 
         function toggleLock() {
             isLocked = !isLocked;
             lockBtn.innerHTML = isLocked ? '<i class="fa-solid fa-lock"></i>' : '<i class="fa-solid fa-lock-open"></i>';
-            if (isLocked) {
-                controls.classList.add('locked');
-            } else {
-                controls.classList.remove('locked');
-            }
+            lockBtn.classList.toggle('active', isLocked);
+            if (isLocked) controls.classList.remove('visible');
         }
 
         function showControls() {
-            if (adActive) return;
+            if (adActive || isLocked) return;
             controls.classList.add('visible');
             clearTimeout(controlsTimeout);
             controlsTimeout = setTimeout(() => {
@@ -437,46 +554,6 @@
                 `${m.toString().padStart(2,'0')}:${sec.toString().padStart(2,'0')}`;
         }
 
-        function saveProgress() {
-            let saved = JSON.parse(localStorage.getItem('user_progress') || '[]');
-            const progress = (video.currentTime / video.duration) * 100;
-            
-            const index = saved.findIndex(i => i.id == contentId);
-            const data = {
-                id: contentId,
-                progress: progress,
-                season: currentSeason,
-                ep: currentEp,
-                lastUpdate: Date.now()
-            };
-
-            if (index > -1) saved[index] = data;
-            else saved.push(data);
-
-            localStorage.setItem('user_progress', JSON.stringify(saved));
-        }
-
-        function enterFullscreen() {
-            const el = document.documentElement;
-            if (el.requestFullscreen) el.requestFullscreen();
-            else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
-            
-            if (screen.orientation && screen.orientation.lock) {
-                screen.orientation.lock('landscape').catch(() => {});
-            }
-        }
-
-        function toggleFullscreen() {
-            if (!document.fullscreenElement) enterFullscreen();
-            else document.exitFullscreen();
-        }
-
-        function exitPlayer() {
-            saveProgress();
-            window.history.back();
-        }
-
-        // EPISÓDIOS
         function renderEpisodes() {
             const list = document.getElementById('episodes-list');
             list.innerHTML = '';
