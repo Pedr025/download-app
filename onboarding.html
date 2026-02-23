@@ -3,131 +3,541 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PKFilmes - Bem-vindo</title>
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+    <title>Onboarding - PKFilmes</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800;900&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        :root { --primary: #8a2be2; --bg: #050505; --text: #ffffff; --text-dim: rgba(255, 255, 255, 0.6); }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
-        body { background-color: var(--bg); color: var(--text); overflow-x: hidden; min-height: 100vh; width: 100vw; }
-        .background-container { position: fixed; inset: 0; z-index: -1; overflow: hidden; }
-        .mosaico-bg { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; width: 120%; height: 120%; transform: rotate(-10deg) translate(-10%, -10%); filter: blur(50px) brightness(0.2); opacity: 0.5; }
-        .mosaico-bg img { width: 100%; height: 100%; object-fit: cover; border-radius: 10px; }
-        .overlay-gradient { position: absolute; inset: 0; background: radial-gradient(circle at center, transparent 0%, var(--bg) 90%); }
-        header { position: fixed; top: 0; left: 0; right: 0; padding: 25px 5%; display: flex; justify-content: space-between; align-items: center; z-index: 100; background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent); }
-        .logo { font-size: 28px; font-weight: 900; text-decoration: none; color: white; }
-        .logo span { color: var(--primary); }
-        .btn-top-login { background: var(--primary); color: white; border: none; padding: 10px 25px; border-radius: 30px; font-weight: 700; cursor: pointer; }
-        .hero-section { height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 0 20px; text-align: center; position: relative; z-index: 10; }
-        .hero-text h1 { font-size: clamp(45px, 10vw, 90px); font-weight: 900; line-height: 0.85; margin-bottom: 25px; letter-spacing: -3px; }
-        .hero-text p { font-size: clamp(18px, 2.5vw, 24px); color: var(--text-dim); margin-bottom: 40px; }
-        .hero-btns { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; }
-        .main-action-btn { background: var(--primary); color: white; border: none; padding: 20px 50px; border-radius: 50px; font-size: 18px; font-weight: 900; cursor: pointer; box-shadow: 0 20px 40px rgba(138, 43, 226, 0.4); }
-        .guest-btn { background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); padding: 20px 40px; border-radius: 50px; font-size: 18px; font-weight: 700; cursor: pointer; backdrop-filter: blur(10px); }
-        .auth-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); backdrop-filter: blur(20px); z-index: 1000; display: none; justify-content: center; align-items: center; padding: 20px; }
-        .auth-overlay.active { display: flex; }
-        .auth-card { background: #111; width: 100%; max-width: 420px; padding: 50px 40px; border-radius: 30px; border: 1px solid rgba(255,255,255,0.1); position: relative; }
-        .close-auth { position: absolute; top: 25px; right: 25px; color: var(--text-dim); cursor: pointer; font-size: 24px; }
-        .auth-card h2 { font-size: 32px; font-weight: 900; margin-bottom: 35px; text-align: center; }
-        .form-group { margin-bottom: 25px; }
-        .form-group label { display: block; font-size: 11px; font-weight: 800; color: var(--text-dim); margin-bottom: 10px; text-transform: uppercase; }
-        .form-group input { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 18px; border-radius: 15px; color: white; font-size: 16px; outline: none; }
-        .auth-btn { width: 100%; background: var(--primary); color: white; border: none; padding: 18px; border-radius: 15px; font-size: 17px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 12px; }
-        .auth-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-        .loader { display: none; width: 20px; height: 20px; border: 3px solid white; border-top-color: transparent; border-radius: 50%; animation: spin 0.8s linear infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .auth-switch { margin-top: 30px; text-align: center; font-size: 15px; color: var(--text-dim); }
-        .auth-switch span { color: var(--primary); font-weight: 800; cursor: pointer; }
+        :root {
+            --bg: #0b0b0b;
+            --surface: #1a1a1a;
+            --accent: #8a2be2;
+            --accent-light: #a855f7;
+            --text-main: #ffffff;
+            --text-dim: #a0a0a0;
+            --transition: all 0.3s ease;
+        }
+        
+        * { 
+            box-sizing: border-box; 
+            margin: 0; 
+            padding: 0; 
+            -webkit-tap-highlight-color: transparent; 
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+        }
+        
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            overflow-x: hidden;
+        }
+
+        #onboarding-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .onboarding-step {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto;
+            animation: fadeIn 0.5s ease;
+            padding-bottom: 150px;
+        }
+
+        .onboarding-step.active { display: flex; }
+
+        .onboarding-title { 
+            font-size: 28px; 
+            font-weight: 800; 
+            margin-bottom: 10px; 
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .onboarding-subtitle { 
+            font-size: 15px; 
+            color: var(--text-dim); 
+            margin-bottom: 30px; 
+            text-align: center;
+            max-width: 600px;
+        }
+
+        .search-container { 
+            width: 100%; 
+            position: relative; 
+            margin-bottom: 25px; 
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 15px 45px 15px 20px;
+            background: var(--surface);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 30px;
+            color: white;
+            font-size: 16px;
+            outline: none;
+            transition: var(--transition);
+        }
+
+        .search-input:focus {
+            border-color: var(--accent);
+            background: rgba(26, 26, 26, 0.8);
+        }
+
+        .search-icon {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-dim);
+            pointer-events: none;
+        }
+
+        .selection-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 15px;
+            width: 100%;
+            margin-bottom: 30px;
+        }
+
+        .selectable-card {
+            aspect-ratio: 2/3;
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: var(--transition);
+            background: var(--surface);
+        }
+
+        .selectable-card img { 
+            width: 100%; 
+            height: 100%; 
+            object-fit: cover;
+            loading: lazy;
+        }
+
+        .selectable-card.selected { 
+            border-color: var(--accent); 
+            transform: scale(0.95);
+            box-shadow: 0 0 20px rgba(138, 43, 226, 0.5);
+        }
+
+        .selectable-card.selected::after {
+            content: '\f00c';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: var(--accent);
+            color: white;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            z-index: 10;
+        }
+
+        .category-selection { 
+            display: flex; 
+            flex-wrap: wrap; 
+            gap: 10px; 
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        .selectable-tag {
+            padding: 12px 25px;
+            background: var(--surface);
+            border-radius: 30px;
+            cursor: pointer;
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: var(--transition);
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .selectable-tag:hover {
+            border-color: var(--accent);
+        }
+
+        .selectable-tag.selected { 
+            background: var(--accent); 
+            border-color: var(--accent);
+            box-shadow: 0 0 15px rgba(138, 43, 226, 0.5);
+        }
+
+        .saga-selection { 
+            display: grid; 
+            grid-template-columns: repeat(2, 1fr); 
+            gap: 15px; 
+            width: 100%;
+            margin-bottom: 30px;
+        }
+
+        .saga-card {
+            background: var(--surface);
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+            min-height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .saga-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            opacity: 0.2;
+            z-index: 1;
+        }
+
+        .saga-card span { 
+            position: relative; 
+            z-index: 2; 
+            font-weight: 800; 
+            font-size: 16px;
+        }
+
+        .saga-card.selected { 
+            border-color: var(--accent); 
+            background: rgba(138, 43, 226, 0.15);
+            box-shadow: 0 0 20px rgba(138, 43, 226, 0.5);
+        }
+
+        .onboarding-footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            padding: 20px;
+            background: linear-gradient(to top, #000 70%, transparent);
+            display: flex;
+            justify-content: center;
+            z-index: 10000;
+        }
+
+        .btn-continue {
+            padding: 15px 60px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 30px;
+            font-size: 16px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: var(--transition);
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        .btn-continue.active {
+            opacity: 1;
+            pointer-events: auto;
+            box-shadow: 0 0 20px var(--accent);
+        }
+
+        .btn-continue:active {
+            transform: scale(0.98);
+        }
+
+        .progress-indicator {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .progress-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            transition: var(--transition);
+        }
+
+        .progress-dot.active {
+            background: var(--accent);
+            width: 24px;
+            border-radius: 4px;
+        }
+
+        .loading-text {
+            text-align: center;
+            color: var(--text-dim);
+            font-size: 14px;
+            margin: 20px 0;
+        }
+
+        @keyframes fadeIn { 
+            from { opacity: 0; transform: translateY(10px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
+
+        @media (max-width: 768px) {
+            .saga-selection {
+                grid-template-columns: 1fr;
+            }
+            .selection-grid {
+                grid-template-columns: repeat(auto-fill, minmax(85px, 1fr));
+            }
+        }
     </style>
 </head>
 <body>
-    <div class="background-container"><div class="mosaico-bg" id="bg-mosaico"></div><div class="overlay-gradient"></div></div>
-    <header>
-        <a href="#" class="logo">PK<span>FILMES</span></a>
-        <button class="btn-top-login" onclick="openAuth('login')">Entrar</button>
-    </header>
-    <main>
-        <section class="hero-section">
-            <h1>Sua próxima história começa aqui.</h1>
-            <p>Filmes e séries ilimitados, onde e quando você quiser.</p>
-            <div class="hero-btns">
-                <button class="main-action-btn" onclick="openAuth('register')">CRIAR CONTA</button>
-                <button class="guest-btn" onclick="window.location.href='index.html'">ENTRAR COMO VISITANTE</button>
+
+    <div id="onboarding-overlay">
+        <!-- PASSO 1: FILMES PREFERIDOS -->
+        <div class="onboarding-step active" id="step-movies">
+            <div class="progress-indicator">
+                <div class="progress-dot active"></div>
+                <div class="progress-dot"></div>
+                <div class="progress-dot"></div>
             </div>
-        </section>
-    </main>
-    <div class="auth-overlay" id="auth-modal">
-        <div class="auth-card">
-            <i class="fa-solid fa-xmark close-auth" onclick="closeAuth()"></i>
-            <h2 id="auth-title">Bem-vindo</h2>
-            <form id="auth-form" onsubmit="handleAuth(event)">
-                <div class="form-group" id="name-group" style="display: none;"><label>Como podemos te chamar?</label><input type="text" id="auth-name" placeholder="Seu nome de usuário"></div>
-                <div class="form-group"><label>Seu melhor e-mail</label><input type="email" id="auth-email" placeholder="email@exemplo.com" required></div>
-                <button type="submit" class="auth-btn" id="auth-submit-btn"><span id="btn-text">Continuar</span><div class="loader" id="btn-loader"></div></button>
-            </form>
-            <div class="auth-switch" id="auth-switch-text"></div>
+            <h1 class="onboarding-title">Escolha seus favoritos</h1>
+            <p class="onboarding-subtitle">Selecione no mínimo 6 filmes ou séries que você ama. Use a busca para encontrar rapidamente.</p>
+            
+            <div class="search-container">
+                <input type="text" class="search-input" placeholder="Pesquisar filmes..." id="onboarding-search">
+                <i class="fa-solid fa-magnifying-glass search-icon"></i>
+            </div>
+
+            <div id="loading-indicator" class="loading-text" style="display:none;">Carregando filmes...</div>
+            <div class="selection-grid" id="onboarding-movies-grid"></div>
+        </div>
+
+        <!-- PASSO 2: CATEGORIAS PREFERIDAS -->
+        <div class="onboarding-step" id="step-categories">
+            <div class="progress-indicator">
+                <div class="progress-dot"></div>
+                <div class="progress-dot active"></div>
+                <div class="progress-dot"></div>
+            </div>
+            <h1 class="onboarding-title">O que você gosta de assistir?</h1>
+            <p class="onboarding-subtitle">Escolha no mínimo 3 categorias preferidas para personalizarmos suas recomendações.</p>
+            
+            <div class="category-selection" id="onboarding-categories-grid"></div>
+        </div>
+
+        <!-- PASSO 3: SAGAS -->
+        <div class="onboarding-step" id="step-sagas">
+            <div class="progress-indicator">
+                <div class="progress-dot"></div>
+                <div class="progress-dot"></div>
+                <div class="progress-dot active"></div>
+            </div>
+            <h1 class="onboarding-title">Escolha suas Sagas Favoritas</h1>
+            <p class="onboarding-subtitle">Selecione as franquias que você mais gosta. Elas aparecerão destacadas na sua home.</p>
+            
+            <div class="saga-selection" id="onboarding-sagas-grid"></div>
+        </div>
+
+        <div class="onboarding-footer">
+            <button class="btn-continue" id="btn-continue" onclick="nextStep()">CONTINUAR (0/6)</button>
         </div>
     </div>
+
     <script>
-        const SUPABASE_URL = 'https://obqruwsilkurkbttsslaf.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9icXJ1d3NpbGt1cmJrdHNzbGFmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzMzU2MjksImV4cCI6MjA4NjkxMTYyOX0.y_PuDzJ7WRHU1oqBeeDBoBZzgki9RPk_HasOlXq5mMw';
-        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        let authMode = 'login';
-        const authModal = document.getElementById('auth-modal');
-        const authTitle = document.getElementById('auth-title');
-        const nameGroup = document.getElementById('name-group');
-        const authSwitchText = document.getElementById('auth-switch-text');
-        const authSubmitBtnText = document.getElementById('btn-text');
-        function openAuth(modeToSet) {
-            authMode = modeToSet;
-            authTitle.innerText = modeToSet === 'login' ? 'Acessar sua Conta' : 'Criar Nova Conta';
-            nameGroup.style.display = modeToSet === 'register' ? 'block' : 'none';
-            authSubmitBtnText.innerText = modeToSet === 'login' ? 'Receber Link de Acesso' : 'Criar e Acessar';
-            authSwitchText.innerHTML = modeToSet === 'login' ? 'Novo por aqui? <span onclick="toggleMode()">Crie sua conta</span>' : 'Já tem uma conta? <span onclick="toggleMode()">Faça o login</span>';
-            authModal.classList.add('active');
-            document.getElementById('auth-email').focus();
-        }
-        function closeAuth() { authModal.classList.remove('active'); }
-        function toggleMode() { openAuth(authMode === 'login' ? 'register' : 'login'); }
-        async function handleAuth(e) {
-            e.preventDefault();
-            const email = document.getElementById('auth-email').value.trim();
-            const name = document.getElementById('auth-name').value.trim();
-            const btn = document.getElementById('auth-submit-btn');
-            const loader = document.getElementById('btn-loader');
-            const text = document.getElementById('btn-text');
-            if (!email) { alert("Por favor, insira um e-mail válido."); return; }
-            btn.disabled = true;
-            loader.style.display = 'block';
-            text.style.display = 'none';
+        const API_URL = "https://pkfilmes.pages.dev/movies_data.json";
+        let allData = [];
+        let selectedMovies = [];
+        let selectedCategories = [];
+        let selectedSagas = [];
+        let currentStep = 1;
+        let searchTimeout;
+
+        const sagasList = [
+            { name: 'Harry Potter', img: 'https://images.tcdn.com.br/img/img_prod/697730/poster_p_filme_harry_potter_e_a_pedra_filosofal_c_1147_1_20201013150811.jpg' },
+            { name: 'Game of Thrones', img: 'https://m.media-amazon.com/images/I/918S-uX9p8L._AC_SL1500_.jpg' },
+            { name: 'Piratas do Caribe', img: 'https://m.media-amazon.com/images/I/71y7X6xY0TL._AC_SL1000_.jpg' },
+            { name: 'Maze Runner', img: 'https://m.media-amazon.com/images/I/91G9uY8vR0L._AC_SL1500_.jpg' },
+            { name: 'Vingadores', img: 'https://m.media-amazon.com/images/I/719f649H1hL._AC_SL1000_.jpg' },
+            { name: 'Star Wars', img: 'https://m.media-amazon.com/images/I/812W97VV6pL._AC_SL1500_.jpg' },
+            { name: 'Senhor dos Anéis', img: 'https://m.media-amazon.com/images/I/71lKVr5YqrL._AC_SL1000_.jpg' },
+            { name: 'Matrix', img: 'https://m.media-amazon.com/images/I/71Yg9qXHe-L._AC_SL1000_.jpg' }
+        ];
+
+        async function init() {
             try {
-                if (authMode === 'login') {
-                    const { error } = await supabaseClient.auth.signInWithOtp({ email, options: { emailRedirectTo: `${window.location.origin}/index.html` } });
-                    if (error) throw error;
-                    alert('✅ Link de acesso enviado! Verifique seu e-mail.');
-                } else {
-                    if (!name) { alert("Por favor, insira um nome de usuário."); throw new Error("Nome não fornecido."); }
-                    const { data, error: signUpError } = await supabaseClient.auth.signUp({ email: email, password: 'pk' + Math.random().toString(36).slice(-8) });
-                    if (signUpError) throw signUpError;
-                    if (data.user) {
-                        const { error: profileError } = await supabaseClient.from('profiles').insert({ id: data.user.id, username: name, email: email });
-                        if (profileError) throw profileError;
-                        alert('✅ Conta criada com sucesso! Um link de confirmação foi enviado para o seu e-mail.');
-                    } else { throw new Error("Não foi possível criar o usuário."); }
-                }
-                closeAuth();
-            } catch (error) {
-                console.error("Erro no handleAuth:", error);
-                alert('⚠️ Ops! Algo deu errado: ' + error.message);
-            } finally {
-                btn.disabled = false;
-                loader.style.display = 'none';
-                text.style.display = 'block';
+                document.getElementById('loading-indicator').style.display = 'block';
+                const res = await fetch(API_URL);
+                allData = await res.json();
+                document.getElementById('loading-indicator').style.display = 'none';
+                
+                renderOnboardingMovies();
+                renderOnboardingCategories();
+                renderOnboardingSagas();
+                
+                document.getElementById('onboarding-search').addEventListener('input', (e) => {
+                    clearTimeout(searchTimeout);
+                    searchTimeout = setTimeout(() => {
+                        renderOnboardingMovies(e.target.value);
+                    }, 300);
+                });
+            } catch (e) { 
+                console.error("Erro ao carregar dados:", e);
+                document.getElementById('loading-indicator').innerHTML = 'Erro ao carregar. Tente recarregar a página.';
             }
         }
-        authModal.addEventListener('click', (e) => { if (e.target === authModal) closeAuth(); });
+
+        function renderOnboardingMovies(query = '') {
+            const grid = document.getElementById('onboarding-movies-grid');
+            let filtered = allData;
+            
+            if (query.trim()) {
+                filtered = allData.filter(m => 
+                    m.nome.toLowerCase().includes(query.toLowerCase()) ||
+                    (m.titulo && m.titulo.toLowerCase().includes(query.toLowerCase()))
+                );
+            }
+
+            const displayList = filtered.slice(0, 60);
+
+            grid.innerHTML = displayList.map(movie => `
+                <div class="selectable-card ${selectedMovies.includes(movie.id) ? 'selected' : ''}" 
+                     onclick="toggleMovieSelection('${movie.id}')" 
+                     title="${movie.nome}">
+                    <img src="${movie.capa}" alt="${movie.nome}" loading="lazy">
+                </div>
+            `).join('');
+            
+            updateContinueButton();
+        }
+
+        window.toggleMovieSelection = (id) => {
+            if (selectedMovies.includes(id)) {
+                selectedMovies = selectedMovies.filter(mid => mid !== id);
+            } else {
+                selectedMovies.push(id);
+            }
+            renderOnboardingMovies(document.getElementById('onboarding-search').value);
+        };
+
+        function renderOnboardingCategories() {
+            const genres = new Set();
+            allData.forEach(item => { 
+                if (item.generos) {
+                    item.generos.split(',').forEach(g => {
+                        const genre = g.trim();
+                        if (genre && genre !== 'Talk' && genre !== 'Kids') {
+                            genres.add(genre);
+                        }
+                    });
+                }
+            });
+            
+            const grid = document.getElementById('onboarding-categories-grid');
+            grid.innerHTML = Array.from(genres).sort().map(genre => `
+                <div class="selectable-tag ${selectedCategories.includes(genre) ? 'selected' : ''}" 
+                     onclick="toggleCategorySelection('${genre}')">${genre}</div>
+            `).join('');
+        }
+
+        window.toggleCategorySelection = (genre) => {
+            if (selectedCategories.includes(genre)) {
+                selectedCategories = selectedCategories.filter(g => g !== genre);
+            } else {
+                selectedCategories.push(genre);
+            }
+            renderOnboardingCategories();
+            updateContinueButton();
+        };
+
+        function renderOnboardingSagas() {
+            const grid = document.getElementById('onboarding-sagas-grid');
+            grid.innerHTML = sagasList.map(saga => `
+                <div class="saga-card ${selectedSagas.includes(saga.name) ? 'selected' : ''}" 
+                     style="background-image: url('${saga.img}')"
+                     onclick="toggleSagaSelection('${saga.name}', this)">
+                    <span>${saga.name}</span>
+                </div>
+            `).join('');
+        }
+	        window.toggleSagaSelection = (saga, el) => {
+            if (selectedSagas.includes(saga)) {
+                selectedSagas = selectedSagas.filter(s => s !== saga);
+                el.classList.remove('selected');
+            } else {
+                selectedSagas.push(saga);
+                el.classList.add('selected');
+            }
+            updateContinueButton();
+        };
+
+        function updateContinueButton() {
+            const btn = document.getElementById('btn-continue');
+            if (currentStep === 1) {
+                btn.innerText = `CONTINUAR (${selectedMovies.length}/6)`;
+                btn.classList.toggle('active', selectedMovies.length >= 6);
+            } else if (currentStep === 2) {
+                btn.innerText = `CONTINUAR (${selectedCategories.length}/3)`;
+                btn.classList.toggle('active', selectedCategories.length >= 3);
+            } else {
+                btn.innerText = `FINALIZAR (${selectedSagas.length}/1)`;
+                btn.classList.toggle('active', selectedSagas.length >= 1);
+            }
+        }
+
+        window.nextStep = () => {
+            if (currentStep === 1 && selectedMovies.length >= 6) {
+                document.getElementById('step-movies').classList.remove('active');
+                document.getElementById('step-categories').classList.add('active');
+                currentStep = 2;
+            } else if (currentStep === 2 && selectedCategories.length >= 3) {
+                document.getElementById('step-categories').classList.remove('active');
+                document.getElementById('step-sagas').classList.add('active');
+                currentStep = 3;
+            } else if (currentStep === 3 && selectedSagas.length >= 1) {
+                finishOnboarding();
+            }
+            updateContinueButton();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+
+        function finishOnboarding() {
+            localStorage.setItem('pk_onboarding_finished', 'true');
+            localStorage.setItem('pk_fav_movies', JSON.stringify(selectedMovies));
+            localStorage.setItem('pk_fav_categories', JSON.stringify(selectedCategories));
+            localStorage.setItem('pk_fav_sagas', JSON.stringify(selectedSagas));
+            window.location.href = 'inicio.html';
+        }
+
+        init();
     </script>
 </body>
 </html>
-
