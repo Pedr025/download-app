@@ -111,7 +111,6 @@
             padding: 0 20px 40px 20px;
             overflow: hidden;
             background: #000;
-            margin-top: 140px;
         }
 
         .hero-media {
@@ -151,23 +150,15 @@
         .hero-logo {
             max-width: 240px;
             max-height: 100px;
-            margin-bottom: 10px;
+            margin-bottom: 20px;
             display: block;
         }
 
         .hero-title-fallback {
             font-size: 36px;
             font-weight: 800;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
             line-height: 1;
-        }
-
-        .hero-genres {
-            font-size: 14px;
-            color: var(--text-dim);
-            margin-bottom: 20px;
-            font-weight: 600;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
         }
 
         .hero-btns {
@@ -313,19 +304,10 @@
             border-radius: 2px;
         }
 
-        .continue-empty-msg {
-            padding: 20px;
-            text-align: center;
-            color: var(--text-dim);
-            font-size: 14px;
-            font-weight: 600;
-        }
-
         /* SEÇÕES DE CATEGORIAS */
         .section { margin-bottom: 30px; position: relative; }
         .section-header { padding: 0 20px; margin-bottom: 15px; }
         .section-title { font-size: 18px; font-weight: 800; color: white; }
-        .section-subtitle { font-size: 13px; color: var(--text-dim); font-weight: 600; margin-top: 5px; }
         
         .scroll-container { 
             display: flex; 
@@ -362,85 +344,29 @@
         }
 
         /* CARDS ESPECIAIS PARA SAGAS (ESTILO STACK) */
-        .saga-section {
-            margin-bottom: 30px;
-            position: relative;
-            padding: 0 20px;
-        }
-
-        .saga-cards-container {
-            display: flex;
-            gap: 15px;
-            overflow-x: auto;
-            padding-bottom: 10px;
-            scrollbar-width: none;
-        }
-
+        .saga-section { margin-bottom: 30px; padding: 0 20px; }
+        .saga-cards-container { display: flex; gap: 15px; overflow-x: auto; padding-bottom: 10px; scrollbar-width: none; }
         .saga-cards-container::-webkit-scrollbar { display: none; }
-
         .saga-card-item {
-            min-width: 200px;
-            max-width: 200px;
-            flex-shrink: 0;
-            position: relative;
-            cursor: pointer;
-            transition: var(--transition);
-            border-radius: 12px;
-            overflow: hidden;
-            height: 280px;
+            min-width: 200px; max-width: 200px; flex-shrink: 0; position: relative;
+            cursor: pointer; transition: var(--transition); border-radius: 12px;
+            overflow: hidden; height: 280px;
         }
-
-        .saga-card-item:active { transform: scale(0.98); }
-
         .saga-card-bg {
-            width: 100%;
-            height: 100%;
-            background-size: cover;
-            background-position: center;
-            position: relative;
-            display: flex;
-            align-items: flex-end;
-            padding: 15px;
+            width: 100%; height: 100%; background-size: cover; background-position: center;
+            position: relative; display: flex; align-items: flex-end; padding: 15px;
         }
-
         .saga-card-bg::before {
-            content: '';
-            position: absolute;
-            inset: 0;
+            content: ''; position: absolute; inset: 0;
             background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.3) 50%, transparent 100%);
             z-index: 1;
         }
-
-        .saga-card-info {
-            position: relative;
-            z-index: 2;
-            width: 100%;
-        }
-
-        .saga-card-title {
-            font-size: 14px;
-            font-weight: 700;
-            color: white;
-            margin-bottom: 5px;
-            line-height: 1.2;
-        }
-
-        .saga-card-meta {
-            font-size: 12px;
-            color: rgba(255,255,255,0.7);
-        }
-
+        .saga-card-info { position: relative; z-index: 2; width: 100%; }
+        .saga-card-title { font-size: 14px; font-weight: 700; color: white; margin-bottom: 5px; line-height: 1.2; }
+        .saga-card-meta { font-size: 12px; color: rgba(255,255,255,0.7); }
         .saga-card-badge {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: var(--accent);
-            color: white;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 11px;
-            font-weight: 700;
-            z-index: 3;
+            position: absolute; top: 10px; right: 10px; background: var(--accent);
+            color: white; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; z-index: 3;
         }
 
         /* MODAL DE GÊNEROS */
@@ -556,19 +482,15 @@
         </div>
     </header>
 
-    <!-- MODAL DE GÊNEROS -->
     <div class="modal-categories" id="modal-categories">
         <div class="modal-header">
             <h2 class="modal-title">Gêneros</h2>
             <i class="fa-solid fa-xmark close-modal" onclick="toggleCategories()"></i>
         </div>
-        <div class="category-grid" id="category-grid">
-            <!-- Injetado via JS -->
-        </div>
+        <div class="category-grid" id="category-grid"></div>
     </div>
 
     <main>
-        <!-- SKELETON (CARREGAMENTO) -->
         <div id="loading-skeleton">
             <div class="hero skeleton"></div>
             <div class="section" style="padding: 20px;">
@@ -581,30 +503,41 @@
             </div>
         </div>
 
-        <!-- CONTEÚDO PRINCIPAL -->
         <div id="real-content" style="display: none;">
             <section class="hero" id="hero-section">
                 <div class="hero-media" id="hero-media-container"></div>
                 <div class="hero-content" id="hero-content-area"></div>
             </section>
-            
-            <!-- ÁREA ONDE O "CONTINUAR ASSISTINDO" SERÁ INJETADO -->
             <div id="continue-watching-wrapper"></div>
-
-            <!-- ÁREA DAS CATEGORIAS AUTOMÁTICAS -->
             <div id="content-sections"></div>
         </div>
     </main>
-	
-    <!-- BARRA DE NAVEGAÇÃO INFERIOR -->
+
     <nav class="nav">
         <a href="inicio.html" class="nav-item active"><i class="fa-solid fa-house"></i><span>Início</span></a>
         <a href="#" class="nav-item"><i class="fa-solid fa-magnifying-glass"></i><span>Buscar</span></a>
         <a href="#" class="nav-item"><i class="fa-solid fa-crown"></i><span>Ranking</span></a>
         <a href="#" class="nav-item"><div class="nav-profile" id="user-profile-icon"><i class="fa-solid fa-user"></i></div><span>Perfil</span></a>
     </nav>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBIQSqbbN-adfJjONc0pmTY4PZahwk6a6w",
+            authDomain: "nupcine.firebaseapp.com",
+            databaseURL: "https://nupcine-default-rtdb.firebaseio.com",
+            projectId: "nupcine",
+            storageBucket: "nupcine.appspot.com",
+            messagingSenderId: "602295443044",
+            appId: "1:602295443044:web:af618627a1dbe5b142c971",
+            measurementId: "G-YD3TPSJTCF"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const auth = getAuth(app);
         const API_URL = "https://pkfilmes.pages.dev/movies_data.json";
         
         let allData = [];
@@ -613,10 +546,19 @@
         let isMuted = true;
         let isPaused = false;
         let trailerTimeout = null;
-        let userSagas = [];
-        let userCategories = [];
-        let userMovies = [];
+        let currentUser = null;
         let usedMovieIds = new Set();
+
+        const sagaIds = {
+            'Harry Potter': [671, 672, 673, 674, 675, 767, 12444, 12445],
+            'Game of Thrones': [1399, 94997, 225634],
+            'Piratas do Caribe': [22, 58, 285, 1865, 166426],
+            'Maze Runner': [198663, 294254, 336843],
+            'Vingadores': [24428, 99861, 100402, 299536],
+            'Star Wars': [11, 1891, 1892, 1893, 1894, 1895, 140607, 181808, 330459, 348350],
+            'Senhor dos Anéis': [120, 121, 122, 49051, 57158, 122917],
+            'Matrix': [603, 604, 605, 624860]
+        };
 
         const categoryNames = {
             "Comédia": ["Comédia para morrer de rir", "Risadas sem controle", "Humor que cura o dia"],
@@ -628,25 +570,21 @@
             "Romance": ["Romance de aquecer o coração", "Histórias de amor inesquecíveis", "Paixão em cena"]
         };
 
+        onAuthStateChanged(auth, (user) => {
+            currentUser = user;
+            init();
+        });
+
         async function init() {
+            if (!localStorage.getItem('pk_onboarding_finished')) {
+                window.location.href = 'onboarding.html';
+                return;
+            }
+
             try {
-                // Verificar se passou pelo onboarding
-                if (!localStorage.getItem('pk_onboarding_finished')) {
-                    window.location.href = 'onboarding.html';
-                    return;
-                }
-
-                // Carregar preferências do usuário
-                userSagas = JSON.parse(localStorage.getItem('pk_fav_sagas') || '[]');
-                userCategories = JSON.parse(localStorage.getItem('pk_fav_categories') || '[]');
-                userMovies = JSON.parse(localStorage.getItem('pk_fav_movies') || '[]');
-
                 const res = await fetch(API_URL);
                 allData = await res.json();
-
-                if (!Array.isArray(allData)) allData = [];
-
-                // Extração de gêneros otimizada
+                
                 const genres = new Set();
                 allData.forEach(item => {
                     if (item.generos) {
@@ -666,12 +604,9 @@
                 }
 
                 renderPage();
-                
                 document.getElementById('loading-skeleton').style.display = 'none';
                 document.getElementById('real-content').style.display = 'block';
-            } catch (e) { 
-                console.error("Erro na inicialização:", e);
-            }
+            } catch (e) { console.error(e); }
         }
 
         async function renderPage() {
@@ -679,76 +614,47 @@
             if (currentFilter !== 'all') filtered = filtered.filter(i => i.tipo === currentFilter);
             if (currentGenre) filtered = filtered.filter(i => i.generos && i.generos.includes(currentGenre));
 
-            if (filtered.length === 0) {
-                document.getElementById('content-sections').innerHTML = '<p style="text-align:center; padding:20px; color:var(--text-dim);">Nenhum conteúdo encontrado.</p>';
-                return;
-            }
-
-            // Banner Aleatório
             const heroItem = filtered[Math.floor(Math.random() * filtered.length)];
             renderHero(heroItem);
-
-            // Continuar Assistindo
             renderContinueWatching();
 
-            // Renderizar conteúdo personalizado
             const container = document.getElementById('content-sections');
             container.innerHTML = '';
             usedMovieIds.clear();
 
-            // 1. SAGAS ESCOLHIDAS (com cards especiais)
-            if (userSagas.length > 0) {
-                userSagas.forEach(saga => {
-                    const sagaMovies = allData.filter(m => 
-                        m.nome.toLowerCase().includes(saga.toLowerCase()) ||
-                        m.titulo.toLowerCase().includes(saga.toLowerCase())
-                    ).filter(m => !usedMovieIds.has(m.id));
+            const userSagas = JSON.parse(localStorage.getItem('pk_fav_sagas') || '[]');
+            const userCats = JSON.parse(localStorage.getItem('pk_fav_categories') || '[]');
 
-                    if (sagaMovies.length > 0) {
-                        sagaMovies.forEach(m => usedMovieIds.add(m.id));
-                        container.appendChild(createSagaSection(saga, sagaMovies.slice(0, 20)));
-                    }
-                });
-            }
-
-            // 2. CATEGORIAS FAVORITAS DO USUÁRIO
-            if (userCategories.length > 0) {
-                userCategories.forEach(cat => {
-                    const catMovies = filtered.filter(m => 
-                        m.generos && m.generos.includes(cat)
-                    ).filter(m => !usedMovieIds.has(m.id));
-
-                    if (catMovies.length > 0) {
-                        catMovies.forEach(m => usedMovieIds.add(m.id));
-                        const displayNames = categoryNames[cat] || [`Tudo de ${cat}`];
-                        const randomTitle = displayNames[Math.floor(Math.random() * displayNames.length)];
-                        container.appendChild(createSection(randomTitle, catMovies.slice(0, 20)));
-                    }
-                });
-            }
-
-            // 3. OUTRAS CATEGORIAS (Aleatório)
-            const allGenres = new Set();
-            allData.forEach(item => {
-                if (item.generos) {
-                    item.generos.split(',').forEach(g => {
-                        const genre = g.trim();
-                        if (genre && genre !== 'Talk' && genre !== 'Kids') allGenres.add(genre);
-                    });
+            // 1. SAGAS (IDs específicos)
+            userSagas.forEach(saga => {
+                const ids = sagaIds[saga] || [];
+                const sagaMovies = allData.filter(m => ids.includes(parseInt(m.id)) || ids.includes(m.id));
+                if (sagaMovies.length > 0) {
+                    sagaMovies.forEach(m => usedMovieIds.add(m.id));
+                    container.appendChild(createSagaSection(saga, sagaMovies));
                 }
             });
 
-            Array.from(allGenres).sort(() => Math.random() - 0.5).slice(0, 8).forEach(genre => {
-                if (!userCategories.includes(genre)) {
-                    const movies = filtered.filter(m => 
-                        m.generos && m.generos.includes(genre)
-                    ).filter(m => !usedMovieIds.has(m.id));
+            // 2. CATEGORIAS PREFERIDAS
+            userCats.forEach(cat => {
+                const catMovies = filtered.filter(m => m.generos && m.generos.includes(cat) && !usedMovieIds.has(m.id));
+                if (catMovies.length > 0) {
+                    catMovies.forEach(m => usedMovieIds.add(m.id));
+                    const titles = categoryNames[cat] || [`Tudo de ${cat}`];
+                    container.appendChild(createSection(titles[Math.floor(Math.random() * titles.length)], catMovies.slice(0, 20)));
+                }
+            });
 
+            // 3. RESTANTE (Aleatório)
+            const otherGenres = new Set();
+            allData.forEach(item => { if (item.generos) item.generos.split(',').forEach(g => otherGenres.add(g.trim())); });
+            Array.from(otherGenres).sort(() => Math.random() - 0.5).slice(0, 10).forEach(genre => {
+                if (!userCats.includes(genre)) {
+                    const movies = filtered.filter(m => m.generos && m.generos.includes(genre) && !usedMovieIds.has(m.id));
                     if (movies.length > 0) {
                         movies.forEach(m => usedMovieIds.add(m.id));
-                        const displayNames = categoryNames[genre] || [`Tudo de ${genre}`];
-                        const randomTitle = displayNames[Math.floor(Math.random() * displayNames.length)];
-                        container.appendChild(createSection(randomTitle, movies.slice(0, 15)));
+                        const titles = categoryNames[genre] || [`Mais de ${genre}`];
+                        container.appendChild(createSection(titles[Math.floor(Math.random() * titles.length)], movies.slice(0, 15)));
                     }
                 }
             });
@@ -757,35 +663,24 @@
         function renderHero(item) {
             const mediaContainer = document.getElementById('hero-media-container');
             const contentArea = document.getElementById('hero-content-area');
-            if (!mediaContainer || !contentArea) return;
+            if (!mediaContainer || !contentArea || !item) return;
             
             clearTimeout(trailerTimeout);
             mediaContainer.innerHTML = `<img src="${item.banner || item.capa}" id="hero-static-img">`;
-            
             contentArea.innerHTML = `
                 ${item.logo ? `<img src="${item.logo}" class="hero-logo" alt="${item.titulo}">` : `<h1 class="hero-title-fallback">${item.titulo}</h1>`}
                 <div class="hero-genres">${item.generos || ''}</div>
                 <div class="hero-btns">
-                    <button class="btn btn-play" onclick="window.location.href='detalhes.html?id=${item.id}'">
-                        <i class="fa-solid fa-play"></i> Assistir
-                    </button>
-                    <button class="btn btn-control" id="hero-play-pause" onclick="toggleHeroPlayPause(this)">
-                        <i class="fa-solid fa-pause"></i>
-                    </button>
-                    <button class="btn btn-control" id="hero-mute" onclick="toggleHeroMute(this)">
-                        <i class="fa-solid fa-volume-xmark"></i>
-                    </button>
+                    <button class="btn btn-play" onclick="window.location.href='detalhes.html?id=${item.id}'"><i class="fa-solid fa-play"></i> Assistir</button>
+                    <button class="btn btn-control" id="hero-play-pause" onclick="toggleHeroPlayPause(this)"><i class="fa-solid fa-pause"></i></button>
+                    <button class="btn btn-control" id="hero-mute" onclick="toggleHeroMute(this)"><i class="fa-solid fa-volume-xmark"></i></button>
                 </div>
             `;
-
-            if (item.trailer_id) {
-                trailerTimeout = setTimeout(() => startTrailer(item.trailer_id), 5000);
-            }
+            if (item.trailer_id) trailerTimeout = setTimeout(() => startTrailer(item.trailer_id), 5000);
         }
 
         function startTrailer(id) {
             const container = document.getElementById('hero-media-container');
-            if (!container) return;
             container.innerHTML = `<iframe id="youtube-player" src="https://www.youtube.com/embed/${id}?autoplay=1&mute=1&controls=0&loop=1&playlist=${id}&enablejsapi=1" allow="autoplay"></iframe>`;
         }
 
@@ -809,127 +704,69 @@
             const wrapper = document.getElementById('continue-watching-wrapper');
             if (!wrapper) return;
             wrapper.innerHTML = '';
-
             const section = document.createElement('div');
             section.className = 'continue-watching-section';
-            section.innerHTML = `
-                <div class="section-header"><h2 class="section-title">Continuar Assistindo</h2></div>
-                <div class="scroll-container" id="continue-list"></div>
-            `;
-
+            section.innerHTML = `<div class="section-header"><h2 class="section-title">Continuar Assistindo</h2></div><div class="scroll-container" id="continue-list"></div>`;
             wrapper.appendChild(section);
-            const listContainer = section.querySelector('#continue-list');
-
-            const localProgress = JSON.parse(localStorage.getItem('user_progress') || '[]');
-            
-            if (localProgress.length > 0) {
-                localProgress.forEach(data => {
+            const list = section.querySelector('#continue-list');
+            const progress = JSON.parse(localStorage.getItem('user_progress') || '[]');
+            if (progress.length > 0) {
+                progress.forEach(data => {
                     const details = allData.find(i => i.id == data.id);
-                    if (details) {
-                        const card = createContinueCard(data, details);
-                        listContainer.appendChild(card);
-                    }
+                    if (details) list.appendChild(createContinueCard(data, details));
                 });
-            } else {
-                listContainer.innerHTML = '<p class="continue-empty-msg">Assista conteúdos para aparecer aqui.</p>';
-            }
+            } else list.innerHTML = '<p class="continue-empty-msg">Nada para mostrar aqui.</p>';
         }
 
         function createContinueCard(data, details) {
             const card = document.createElement('div');
             card.className = 'continue-card';
-            
-            let thumb = details.banner || details.capa;
-            let title = details.titulo;
-            let meta = details.generos ? details.generos.split(',')[0] : '';
-            let link = `detalhes.html?id=${data.id}`;
-
-            if (data.season && data.episode) {
-                meta = `T${data.season} EP${data.episode}`;
-                link = `player.html?id=${data.id}&season=${data.season}&ep=${data.episode}`;
-            }
-
-            const progress = data.progress || 0;
-
+            const thumb = details.banner || details.capa;
+            const link = data.season ? `player.html?id=${data.id}&season=${data.season}&ep=${data.episode}` : `detalhes.html?id=${data.id}`;
             card.innerHTML = `
-                <div class="continue-remove" onclick="event.stopPropagation(); removeFromLocal('${data.id}')">
-                    <i class="fa-solid fa-xmark"></i>
-                </div>
+                <div class="continue-remove" onclick="event.stopPropagation(); removeFromLocal('${data.id}')"><i class="fa-solid fa-xmark"></i></div>
                 <div class="continue-thumb" style="background-image: url('${thumb}')" onclick="window.location.href='${link}'"></div>
                 <div class="continue-info" onclick="window.location.href='${link}'">
-                    <div class="continue-title-row">
-                        <span class="continue-name">${title}</span>
-                        <span class="continue-meta">${meta}</span>
-                    </div>
-                    <div class="continue-progress-container">
-                        <div class="continue-progress-bar" style="width: ${progress}%"></div>
-                    </div>
+                    <div class="continue-title-row"><span class="continue-name">${details.titulo}</span><span class="continue-meta">${data.season ? 'T'+data.season+' EP'+data.episode : ''}</span></div>
+                    <div class="continue-progress-container"><div class="continue-progress-bar" style="width: ${data.progress}%"></div></div>
                 </div>
             `;
             return card;
         }
 
         window.removeFromLocal = (id) => {
-            let localProgress = JSON.parse(localStorage.getItem('user_progress') || '[]');
-            localProgress = localProgress.filter(i => i.id != id);
-            localStorage.setItem('user_progress', JSON.stringify(localProgress));
+            let p = JSON.parse(localStorage.getItem('user_progress') || '[]');
+            localStorage.setItem('user_progress', JSON.stringify(p.filter(i => i.id != id)));
             renderContinueWatching();
         };
 
-        function createSagaSection(sagaName, items) {
+        function createSagaSection(name, items) {
             const section = document.createElement('div');
             section.className = 'saga-section';
-            
-            const header = document.createElement('div');
-            header.className = 'section-header';
-            header.innerHTML = `<h2 class="section-title">🎬 ${sagaName}</h2>`;
-            section.appendChild(header);
-
-            const container = document.createElement('div');
-            container.className = 'saga-cards-container';
-            
-            items.forEach(item => {
-                const card = document.createElement('div');
-                card.className = 'saga-card-item';
-                card.onclick = () => window.location.href = `detalhes.html?id=${item.id}`;
-                
-                const genres = item.generos ? item.generos.split(',')[0].trim() : 'Filme';
-                
-                card.innerHTML = `
-                    <div class="saga-card-bg" style="background-image: url('${item.capa}')">
-                        <div class="saga-card-badge">SAGA</div>
-                        <div class="saga-card-info">
-                            <div class="saga-card-title">${item.nome}</div>
-                            <div class="saga-card-meta">${genres}</div>
+            section.innerHTML = `<div class="section-header"><h2 class="section-title">🔥 Saga: ${name}</h2></div><div class="saga-cards-container">
+                ${items.map(item => `
+                    <div class="saga-card-item" onclick="window.location.href='detalhes.html?id=${item.id}'">
+                        <div class="saga-card-bg" style="background-image: url('${item.capa}')">
+                            <div class="saga-card-badge">SAGA</div>
+                            <div class="saga-card-info"><div class="saga-card-title">${item.nome}</div><div class="saga-card-meta">${item.generos ? item.generos.split(',')[0] : ''}</div></div>
                         </div>
                     </div>
-                `;
-                container.appendChild(card);
-            });
-
-            section.appendChild(container);
+                `).join('')}
+            </div>`;
             return section;
         }
 
         function createSection(title, items) {
             const section = document.createElement('div');
             section.className = 'section';
-            section.innerHTML = `
-                <div class="section-header"><h2 class="section-title">${title}</h2></div>
-                <div class="scroll-container">
-                    ${items.map(item => `
-                        <div class="card" onclick="window.location.href='detalhes.html?id=${item.id}'">
-                            <div class="card-thumb"><img src="${item.capa || item.banner}" alt="${item.titulo}" loading="lazy"></div>
-                        </div>
-                    `).join('')}
-                </div>
-            `;
+            section.innerHTML = `<div class="section-header"><h2 class="section-title">${title}</h2></div><div class="scroll-container">
+                ${items.map(item => `<div class="card" onclick="window.location.href='detalhes.html?id=${item.id}'"><div class="card-thumb"><img src="${item.capa}" alt="${item.titulo}" loading="lazy"></div></div>`).join('')}
+            </div>`;
             return section;
         }
 
         window.setFilter = (type, btn) => {
             currentFilter = type;
-            currentGenre = null;
             document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             renderPage();
@@ -941,15 +778,9 @@
             renderPage();
         };
 
-        window.toggleCategories = () => {
-            document.getElementById('modal-categories').classList.toggle('active');
-        };
+        window.toggleCategories = () => document.getElementById('modal-categories').classList.toggle('active');
 
-        window.addEventListener('scroll', () => {
-            document.getElementById('main-header').classList.toggle('scrolled', window.scrollY > 50);
-        });
-
-        init();
+        window.addEventListener('scroll', () => document.getElementById('main-header').classList.toggle('scrolled', window.scrollY > 50));
     </script>
 </body>
 </html>
