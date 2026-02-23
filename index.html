@@ -18,6 +18,33 @@
             --nav-bg: rgba(11, 11, 11, 0.8);
             --card-radius: 8px;
             --transition: all 0.3s ease;
+            --theme-element-opacity: 0.3;
+        }
+
+        /* TEMAS PERSONALIZADOS */
+        body.theme-harry-potter {
+            --bg: #0d0d1a;
+            --surface: #1a1a2e;
+            --accent: #e3a000; /* Dourado */
+            --accent-light: #ffd700;
+        }
+        body.theme-got {
+            --bg: #121212;
+            --surface: #222;
+            --accent: #c0c0c0; /* Prata/Gelo */
+            --accent-light: #e0e0e0;
+        }
+        body.theme-lgbt {
+            --bg: #0f0f0f;
+            --surface: #1e1e1e;
+            --accent: #ff0080; /* Rosa Vibrante */
+            --accent-light: #ff66b2;
+        }
+        body.theme-horror {
+            --bg: #050000;
+            --surface: #1a0000;
+            --accent: #b30000; /* Sangue */
+            --accent-light: #ff0000;
         }
         
         /* BLOQUEIO DE SELEÇÃO E ESTILOS BASE */
@@ -38,6 +65,214 @@
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             padding-bottom: 90px;
             overflow-x: hidden;
+            transition: background-color 0.5s ease;
+        }
+
+        /* ELEMENTOS DE TEMA EM BACKGROUND */
+        .theme-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+            overflow: hidden;
+            opacity: var(--theme-element-opacity);
+        }
+
+        .theme-element {
+            position: absolute;
+            transition: all 2s ease-in-out;
+        }
+
+        /* ONBOARDING SYSTEM */
+        #onboarding-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .onboarding-step {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .onboarding-step.active {
+            display: flex;
+        }
+
+        .onboarding-title {
+            font-size: 24px;
+            font-weight: 800;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .onboarding-subtitle {
+            font-size: 14px;
+            color: var(--text-dim);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .search-container {
+            width: 100%;
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 15px 45px 15px 20px;
+            background: var(--surface);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 30px;
+            color: white;
+            font-size: 16px;
+            outline: none;
+        }
+
+        .selection-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 15px;
+            width: 100%;
+            margin-bottom: 100px;
+        }
+
+        .selectable-card {
+            aspect-ratio: 2/3;
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: var(--transition);
+        }
+
+        .selectable-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .selectable-card.selected {
+            border-color: var(--accent);
+            transform: scale(0.95);
+        }
+
+        .selectable-card.selected::after {
+            content: '\f00c';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: var(--accent);
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+
+        .category-selection {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .selectable-tag {
+            padding: 12px 25px;
+            background: var(--surface);
+            border-radius: 30px;
+            cursor: pointer;
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: var(--transition);
+            font-weight: 600;
+        }
+
+        .selectable-tag.selected {
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+
+        .theme-selection {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            width: 100%;
+        }
+
+        .theme-card {
+            background: var(--surface);
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: var(--transition);
+        }
+
+        .theme-card i {
+            font-size: 30px;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .theme-card.selected {
+            border-color: var(--accent);
+            background: rgba(138, 43, 226, 0.1);
+        }
+
+        .onboarding-footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            padding: 20px;
+            background: linear-gradient(to top, #000 70%, transparent);
+            display: flex;
+            justify-content: center;
+            z-index: 10000;
+        }
+
+        .btn-continue {
+            padding: 15px 60px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 30px;
+            font-size: 16px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: var(--transition);
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        .btn-continue.active {
+            opacity: 1;
+            pointer-events: auto;
+            box-shadow: 0 0 20px var(--accent);
         }
 
         /* CABEÇALHO (HEADER) */
@@ -72,6 +307,11 @@
 
         .logo-pk { color: #ffffff; }
         .logo-filmes { color: var(--accent); }
+
+        /* Estilo da logo por tema */
+        body.theme-harry-potter .logo-pk { font-family: 'Harry P', serif; }
+        body.theme-got .logo-container { font-family: 'Cinzel', serif; letter-spacing: 2px; }
+        body.theme-horror .logo-filmes { color: #ff0000; text-shadow: 0 0 10px #ff0000; }
 
         /* FILTROS DE NAVEGAÇÃO */
         .nav-filters {
@@ -312,16 +552,8 @@
             border-radius: 2px;
         }
 
-        .continue-empty-msg {
-            padding: 20px;
-            text-align: center;
-            color: var(--text-dim);
-            font-size: 14px;
-            font-weight: 600;
-        }
-
         /* SEÇÕES DE CATEGORIAS */
-        .section { margin-bottom: 30px; }
+        .section { margin-bottom: 30px; position: relative; }
         .section-header { padding: 0 20px; margin-bottom: 15px; }
         .section-title { font-size: 18px; font-weight: 800; color: white; }
         
@@ -359,16 +591,19 @@
             object-fit: cover;
         }
 
-        /* MODAL DE CATEGORIAS */
+        /* MODAL DE GÊNEROS */
         .modal-categories {
             position: fixed;
-            inset: 0;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             background: rgba(0,0,0,0.95);
             z-index: 2000;
+            padding: 40px 20px;
             display: none;
             flex-direction: column;
-            padding: 40px 20px;
-            overflow-y: auto;
+            animation: fadeIn 0.3s ease;
         }
 
         .modal-categories.active { display: flex; }
@@ -387,6 +622,7 @@
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 15px;
+            overflow-y: auto;
         }
 
         .category-item {
@@ -395,100 +631,20 @@
             border-radius: 12px;
             text-align: center;
             font-weight: 700;
-            border: 1px solid rgba(255,255,255,0.1);
+            font-size: 16px;
+            cursor: pointer;
             transition: var(--transition);
         }
 
-        .category-item:active { background: var(--accent); border-color: var(--accent); }
+        .category-item:active { transform: scale(0.95); background: var(--accent); }
 
-        /* SKELETON LOADING */
-        .skeleton {
-            background: linear-gradient(90deg, #1a1a1a 25%, #252525 50%, #1a1a1a 75%);
-            background-size: 200% 100%;
-            animation: skeleton-loading 1.5s infinite;
-        }
-
-        @keyframes skeleton-loading {
-            0% { background-position: 200% 0; }
-            100% { background-position: -200% 0; }
-        }
-
-        /* POP-UP DE ANÚNCIO (PROMO) */
-        .promo-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.85);
-            backdrop-filter: blur(8px);
-            z-index: 3000;
-            display: none;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-
-        .promo-card {
-            background: #121212;
-            width: 100%;
-            max-width: 350px;
-            border-radius: 20px;
-            overflow: hidden;
-            position: relative;
-            border: 1px solid rgba(138, 43, 226, 0.3);
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-            animation: slideUp 0.5s ease-out;
-        }
-
-        @keyframes slideUp {
-            from { transform: translateY(50px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-
-        .promo-close {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            width: 32px;
-            height: 32px;
-            background: rgba(0,0,0,0.5);
-            color: white;
-            border-radius: 50%;
-            display: none;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            z-index: 10;
-            border: 1px solid rgba(255,255,255,0.2);
-        }
-
-        .promo-banner {
-            width: 100%;
-            height: 180px;
-            background: url('https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?q=80&w=1000&auto=format&fit=crop') center/cover;
-            position: relative;
-        }
-
-        .promo-banner::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(to top, #121212, transparent);
-        }
-
-        .promo-content { padding: 25px; text-align: center; }
-        .promo-title { font-size: 22px; font-weight: 900; margin-bottom: 10px; color: white; }
-        .promo-text { color: #a0a0a0; font-size: 14px; line-height: 1.5; margin-bottom: 20px; }
-        .promo-highlight { display: inline-block; background: var(--accent); color: white; padding: 5px 15px; border-radius: 20px; font-size: 12px; font-weight: 800; margin-bottom: 20px; }
-        .promo-btn { display: block; background: white; color: black; text-decoration: none; padding: 15px; border-radius: 12px; font-weight: 800; font-size: 14px; transition: var(--transition); }
-        .promo-btn:active { transform: scale(0.98); }
-        .timer-badge { margin-top: 15px; font-size: 12px; color: #666; font-weight: 600; }
-
-        /* NAV INFERIOR */
+        /* BARRA DE NAVEGAÇÃO INFERIOR */
         .nav {
             position: fixed;
             bottom: 0;
             left: 0;
             right: 0;
-            height: 75px;
+            height: 70px;
             background: var(--nav-bg);
             backdrop-filter: blur(20px);
             display: flex;
@@ -516,12 +672,80 @@
         .nav-item.active { color: var(--accent); }
         .nav-profile { width: 24px; height: 24px; border-radius: 50%; background: #333; display: flex; justify-content: center; align-items: center; overflow: hidden; }
         .nav-profile img { width: 100%; height: 100%; object-fit: cover; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
 </head>
 <body>
 
+    <!-- ELEMENTOS DE TEMA -->
+    <div class="theme-overlay" id="theme-overlay"></div>
+    <!-- ONBOARDING OVERLAY -->
+    <div id="onboarding-overlay">
+        <!-- PASSO 1: FILMES PREFERIDOS -->
+        <div class="onboarding-step active" id="step-movies">
+            <h1 class="onboarding-title">Escolha seus favoritos</h1>
+            <p class="onboarding-subtitle">Selecione no mínimo 3 filmes ou séries que você ama.</p>
+            
+            <div class="search-container">
+                <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--text-dim);"></i>
+                <input type="text" class="search-input" placeholder="Pesquisar filmes..." id="onboarding-search">
+            </div>
+
+            <div class="selection-grid" id="onboarding-movies-grid">
+                <!-- Injetado via JS -->
+            </div>
+        </div>
+
+        <!-- PASSO 2: CATEGORIAS PREFERIDAS -->
+        <div class="onboarding-step" id="step-categories">
+            <h1 class="onboarding-title">O que você gosta de assistir?</h1>
+            <p class="onboarding-subtitle">Escolha no mínimo 3 categorias preferidas.</p>
+            
+            <div class="category-selection" id="onboarding-categories-grid">
+                <!-- Injetado via JS -->
+            </div>
+        </div>
+
+        <!-- PASSO 3: TEMAS -->
+        <div class="onboarding-step" id="step-themes">
+            <h1 class="onboarding-title">Escolha seu estilo</h1>
+            <p class="onboarding-subtitle">Personalize a aparência do seu PKFilmes.</p>
+            
+            <div class="theme-selection">
+                <div class="theme-card selected" onclick="selectTheme('default', this)">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    <span>Padrão (Elegante)</span>
+                </div>
+                <div class="theme-card" onclick="selectTheme('harry-potter', this)">
+                    <i class="fa-solid fa-hat-wizard"></i>
+                    <span>Harry Potter</span>
+                </div>
+                <div class="theme-card" onclick="selectTheme('got', this)">
+                    <i class="fa-solid fa-dragon"></i>
+                    <span>Game of Thrones</span>
+                </div>
+                <div class="theme-card" onclick="selectTheme('lgbt', this)">
+                    <i class="fa-solid fa-rainbow"></i>
+                    <span>Orgulho LGBT</span>
+                </div>
+                <div class="theme-card" onclick="selectTheme('horror', this)">
+                    <i class="fa-solid fa-ghost"></i>
+                    <span>Terror</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="onboarding-footer">
+            <button class="btn-continue" id="btn-continue" onclick="nextStep()">CONTINUAR (0/3)</button>
+        </div>
+    </div>
+
     <header id="main-header">
-        <a href="início.html" class="logo-container">
+        <a href="#" class="logo-container">
             <span class="logo-pk">PK</span><span class="logo-filmes">FILMES</span>
         </a>
         <div class="nav-filters">
@@ -543,119 +767,284 @@
         </div>
     </div>
 
-    <!-- POP-UP DE ANÚNCIO -->
-    <div class="promo-overlay" id="promo-overlay">
-        <div class="promo-card">
-            <div class="promo-close" id="promo-close-btn" onclick="closePromo()">
-                <i class="fa-solid fa-xmark"></i>
-            </div>
-            <div class="promo-banner" id="promo-img"></div>
-            <div class="promo-content">
-                <h3 class="promo-title" id="promo-title">Aprenda a Criar Apps!</h3>
-                <p class="promo-text" id="promo-desc">Domine o desenvolvimento de aplicativos de streaming como este e transforme sua carreira.</p>
-                <span class="promo-highlight" id="promo-tag">VAGAS LIMITADAS - 60% OFF</span>
-	                <a href="https://pay.kiwify.com.br/M9YhK6Y" target="_blank" class="promo-btn" id="promo-link">
-                    GARANTIR MINHA VAGA <i class="fa-solid fa-rocket"></i>
-                </a>
-                <div class="timer-badge" id="promo-timer">Liberando em 8s</div>
-            </div>
-        </div>
-    </div>
-
     <main>
-        <!-- SKELETON (CARREGAMENTO) -->
-        <div id="loading-skeleton">
-            <div class="hero skeleton"></div>
-            <div class="section" style="padding: 20px;">
-                <div class="skeleton" style="width: 200px; height: 20px; margin-bottom: 15px;"></div>
-                <div style="display: flex; gap: 10px;">
-                    <div class="skeleton" style="width: 110px; height: 165px; border-radius: 8px;"></div>
-                    <div class="skeleton" style="width: 110px; height: 165px; border-radius: 8px;"></div>
-                    <div class="skeleton" style="width: 110px; height: 165px; border-radius: 8px;"></div>
-                </div>
-            </div>
-        </div>
-
         <!-- CONTEÚDO PRINCIPAL -->
-        <div id="real-content" style="display: none;">
+        <div id="real-content">
             <section class="hero" id="hero-section">
                 <div class="hero-media" id="hero-media-container"></div>
                 <div class="hero-content" id="hero-content-area"></div>
             </section>
             
-            <!-- ÁREA ONDE O "CONTINUAR ASSISTINDO" SERÁ INJETADO -->
             <div id="continue-watching-wrapper"></div>
-
-            <!-- ÁREA DAS CATEGORIAS AUTOMÁTICAS -->
             <div id="content-sections"></div>
         </div>
     </main>
 
-    <!-- BARRA DE NAVEGAÇÃO INFERIOR -->
     <nav class="nav">
-        <a href="início.html" class="nav-item active"><i class="fa-solid fa-house"></i><span>Início</span></a>
-        <a href="buscar.html" class="nav-item"><i class="fa-solid fa-magnifying-glass"></i><span>Buscar</span></a>
-        <a href="novidades.html" class="nav-item"><i class="fa-solid fa-wand-magic-sparkles"></i><span>Ranking</span></a>
-        <a href="perfil.html" class="nav-item"><div class="nav-profile" id="user-profile-icon"><i class="fa-solid fa-user"></i></div><span>Perfil</span></a>
+        <a href="#" class="nav-item active"><i class="fa-solid fa-house"></i><span>Início</span></a>
+        <a href="#" class="nav-item"><i class="fa-solid fa-magnifying-glass"></i><span>Buscar</span></a>
+        <a href="#" class="nav-item"><i class="fa-solid fa-crown"></i><span>Ranking</span></a>
+        <a href="#" class="nav-item"><div class="nav-profile" id="user-profile-icon"><i class="fa-solid fa-user"></i></div><span>Perfil</span></a>
     </nav>
 
-    <!-- FIREBASE E LÓGICA DO SISTEMA -->
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getDatabase, ref, get, child, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-
-        // CONFIGURAÇÃO DO FIREBASE
-        const firebaseConfig = {
-            apiKey: "AIzaSyBIQSqbbN-adfJjONc0pmTY4PZahwk6a6w",
-            authDomain: "nupcine.firebaseapp.com",
-            databaseURL: "https://nupcine-default-rtdb.firebaseio.com",
-            projectId: "nupcine",
-            storageBucket: "nupcine.appspot.com",
-            messagingSenderId: "602295443044",
-            appId: "1:602295443044:web:af618627a1dbe5b142c971",
-            measurementId: "G-YD3TPSJTCF"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
-        const auth = getAuth(app);
-
-        // API URL
         const API_URL = "https://pkfilmes.pages.dev/movies_data.json";
         
         let allData = [];
+        let selectedMovies = [];
+        let selectedCategories = [];
+        let selectedTheme = 'default';
+        let currentStep = 1;
         let currentFilter = 'all';
         let currentGenre = null;
-        let isMuted = true;
-        let isPaused = false;
-        let trailerTimeout = null;
-        let currentUser = null;
 
-        // NOMES CRIATIVOS PARA AS CATEGORIAS
-        const categoryNames = {
-            "Comédia": ["Comédia para morrer de rir", "Risadas sem controle", "Humor que cura o dia"],
-            "Ação": ["Ação sem freio", "Explosão atrás de explosão", "Adrenalina pura"],
-            "Terror": ["Terror pra perder o sono", "Medo em alta definição", "Pesadelos garantidos"],
-            "Aventura": ["Aventura além dos limites", "Jornada épica", "Explorando o impossível"],
-            "Drama": ["Drama que toca a alma", "Histórias intensas", "Emoção sem filtro"],
-            "Animação": ["Magia em movimento", "Diversão animada", "Mundos animados"],
-            "Romance": ["Romance de aquecer o coração", "Histórias de amor inesquecíveis", "Paixão em cena"]
+        // Assets dos temas
+        const themeAssets = {
+            'harry-potter': {
+                elements: [
+                    'https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExM3N2eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1z/3o7TKDkDbIDJieKbVm/giphy.gif', // Golden Snitch
+                    'https://www.transparentpng.com/download/harry-potter/harry-potter-transparent-background-8.png'
+                ],
+                color: '#e3a000'
+            },
+            'got': {
+                elements: [
+                    'https://www.transparentpng.com/download/game-of-thrones/game-of-thrones-png-images-12.png', // Iron Throne
+                    'https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExM3N2eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1z/l0HlTge8m619K75DO/giphy.gif' // Snow
+                ],
+                color: '#c0c0c0'
+            },
+            'lgbt': {
+                elements: [
+                    'https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExM3N2eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1z/3o7TKDkDbIDJieKbVm/giphy.gif', // Pride element
+                ],
+                color: '#ff0080'
+            },
+            'horror': {
+                elements: [
+                    'https://www.transparentpng.com/download/blood/blood-splatter-png-transparent-1.png',
+                    'https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExM3N2eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1z/3o7TKDkDbIDJieKbVm/giphy.gif' // Fog
+                ],
+                color: '#b30000'
+            }
         };
 
-        /* --- FUNÇÕES GLOBAIS --- */
+        async function init() {
+            try {
+                const res = await fetch(API_URL);
+                allData = await res.json();
+                
+                checkOnboarding();
+                renderOnboardingMovies();
+                renderOnboardingCategories();
+                
+                // Event listener para busca no onboarding
+                document.getElementById('onboarding-search').addEventListener('input', (e) => {
+                    renderOnboardingMovies(e.target.value);
+                });
+
+                applyTheme(localStorage.getItem('pk_theme') || 'default');
+                renderPage();
+            } catch (e) {
+                console.error("Erro ao carregar dados", e);
+            }
+        }
+
+        function checkOnboarding() {
+            const finished = localStorage.getItem('pk_onboarding_finished');
+            if (finished) {
+                document.getElementById('onboarding-overlay').style.display = 'none';
+            }
+        }
+
+        function renderOnboardingMovies(query = '') {
+            const grid = document.getElementById('onboarding-movies-grid');
+            let filtered = allData.slice(0, 30);
+            if (query) {
+                filtered = allData.filter(m => m.nome.toLowerCase().includes(query.toLowerCase())).slice(0, 30);
+            }
+
+            grid.innerHTML = filtered.map(movie => `
+                <div class="selectable-card ${selectedMovies.includes(movie.id) ? 'selected' : ''}" onclick="toggleMovieSelection('${movie.id}')">
+                    <img src="${movie.capa}" alt="${movie.nome}">
+                </div>
+            `).join('');
+            updateContinueButton();
+        }
+
+        window.toggleMovieSelection = (id) => {
+            if (selectedMovies.includes(id)) {
+                selectedMovies = selectedMovies.filter(mid => mid !== id);
+            } else {
+                selectedMovies.push(id);
+            }
+            renderOnboardingMovies(document.getElementById('onboarding-search').value);
+        };
+
+        function renderOnboardingCategories() {
+            const genres = new Set();
+            allData.forEach(item => {
+                if (item.generos) {
+                    item.generos.split(',').forEach(g => genres.add(g.trim()));
+                }
+            });
+
+            const grid = document.getElementById('onboarding-categories-grid');
+            grid.innerHTML = Array.from(genres).sort().map(genre => `
+                <div class="selectable-tag ${selectedCategories.includes(genre) ? 'selected' : ''}" onclick="toggleCategorySelection('${genre}')">
+                    ${genre}
+                </div>
+            `).join('');
+        }
+
+        window.toggleCategorySelection = (genre) => {
+            if (selectedCategories.includes(genre)) {
+                selectedCategories = selectedCategories.filter(g => g !== genre);
+            } else {
+                selectedCategories.push(genre);
+            }
+            renderOnboardingCategories();
+            updateContinueButton();
+        };
+
+        window.selectTheme = (theme, el) => {
+            selectedTheme = theme;
+            document.querySelectorAll('.theme-card').forEach(c => c.classList.remove('selected'));
+            el.classList.add('selected');
+            updateContinueButton();
+        };
+
+        function updateContinueButton() {
+            const btn = document.getElementById('btn-continue');
+            if (currentStep === 1) {
+                btn.innerText = `CONTINUAR (${selectedMovies.length}/3)`;
+                if (selectedMovies.length >= 3) btn.classList.add('active');
+                else btn.classList.remove('active');
+            } else if (currentStep === 2) {
+                btn.innerText = `CONTINUAR (${selectedCategories.length}/3)`;
+                if (selectedCategories.length >= 3) btn.classList.add('active');
+                else btn.classList.remove('active');
+            } else {
+                btn.innerText = `FINALIZAR`;
+                btn.classList.add('active');
+            }
+        }
+
+        window.nextStep = () => {
+            if (currentStep === 1 && selectedMovies.length >= 3) {
+                document.getElementById('step-movies').classList.remove('active');
+                document.getElementById('step-categories').classList.add('active');
+                currentStep = 2;
+            } else if (currentStep === 2 && selectedCategories.length >= 3) {
+                document.getElementById('step-categories').classList.remove('active');
+                document.getElementById('step-themes').classList.add('active');
+                currentStep = 3;
+            } else if (currentStep === 3) {
+                finishOnboarding();
+            }
+            updateContinueButton();
+        };
+
+        function finishOnboarding() {
+            localStorage.setItem('pk_onboarding_finished', 'true');
+            localStorage.setItem('pk_fav_movies', JSON.stringify(selectedMovies));
+            localStorage.setItem('pk_fav_categories', JSON.stringify(selectedCategories));
+            localStorage.setItem('pk_theme', selectedTheme);
+            
+            document.getElementById('onboarding-overlay').style.opacity = '0';
+            setTimeout(() => {
+                document.getElementById('onboarding-overlay').style.display = 'none';
+                applyTheme(selectedTheme);
+                renderPage();
+            }, 500);
+        }
+
+        function applyTheme(theme) {
+            document.body.className = '';
+            if (theme !== 'default') {
+                document.body.classList.add(`theme-${theme}`);
+            }
+            
+            const overlay = document.getElementById('theme-overlay');
+            overlay.innerHTML = '';
+            
+            if (themeAssets[theme]) {
+                const assets = themeAssets[theme];
+                // Adicionar elementos flutuantes
+                for (let i = 0; i < 5; i++) {
+                    const img = document.createElement('img');
+                    img.src = assets.elements[Math.floor(Math.random() * assets.elements.length)];
+                    img.className = 'theme-element';
+                    img.style.width = (Math.random() * 100 + 50) + 'px';
+                    img.style.top = Math.random() * 100 + '%';
+                    img.style.left = Math.random() * 100 + '%';
+                    overlay.appendChild(img);
+                    
+                    // Animação simples
+                    setInterval(() => {
+                        img.style.top = Math.random() * 100 + '%';
+                        img.style.left = Math.random() * 100 + '%';
+                        img.style.transform = `rotate(${Math.random() * 360}deg)`;
+                    }, 5000);
+                }
+            }
+        }
+
+        // Lógica de Renderização do Site (Simplificada do original)
+        function renderPage() {
+            let filtered = allData;
+            if (currentFilter !== 'all') filtered = filtered.filter(i => i.tipo === currentFilter);
+            if (currentGenre) filtered = filtered.filter(i => i.generos && i.generos.includes(currentGenre));
+
+            // Banner Hero
+            const heroItem = filtered[Math.floor(Math.random() * filtered.length)];
+            if (heroItem) {
+                document.getElementById('hero-media-container').innerHTML = `<img src="${heroItem.capa}" alt="Hero">`;
+                document.getElementById('hero-content-area').innerHTML = `
+                    <h1 class="hero-title-fallback">${heroItem.nome}</h1>
+                    <p class="hero-genres">${heroItem.generos}</p>
+                    <div class="hero-btns">
+                        <button class="btn btn-play"><i class="fa-solid fa-play"></i> Assistir Agora</button>
+                    </div>
+                `;
+            }
+
+            // Seções
+            const container = document.getElementById('content-sections');
+            container.innerHTML = '';
+            
+            const genres = {};
+            filtered.forEach(item => {
+                if (item.generos) {
+                    item.generos.split(',').forEach(g => {
+                        const genre = g.trim();
+                        if (!genres[genre]) genres[genre] = [];
+                        genres[genre].push(item);
+                    });
+                }
+            });
+
+            Object.keys(genres).forEach(genre => {
+                const section = document.createElement('div');
+                section.className = 'section';
+                section.innerHTML = `
+                    <div class="section-header"><h2 class="section-title">${genre}</h2></div>
+                    <div class="scroll-container">
+                        ${genres[genre].map(movie => `
+                            <div class="card">
+                                <div class="card-thumb"><img src="${movie.capa}" alt="${movie.nome}"></div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+                container.appendChild(section);
+            });
+        }
 
         window.setFilter = (type, btn) => {
             currentFilter = type;
-            currentGenre = null;
             document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-            renderPage();
-        };
-
-        window.setGenre = (genre) => {
-            currentGenre = genre;
-            toggleCategories();
             renderPage();
         };
 
@@ -663,272 +1052,7 @@
             document.getElementById('modal-categories').classList.toggle('active');
         };
 
-        window.closePromo = () => {
-            document.getElementById('promo-overlay').style.display = 'none';
-        };
-
-        onAuthStateChanged(auth, (user) => {
-            currentUser = user;
-            init();
-        });
-
-        async function init() {
-            try {
-                // Carregamento otimizado: Busca direta sem proxy se possível para velocidade
-                const res = await fetch(API_URL);
-                if (!res.ok) throw new Error(`Erro HTTP: ${res.status}`);
-                
-                allData = await res.json();
-                
-                if (!Array.isArray(allData)) allData = [];
-
-                // Extração de gêneros otimizada
-                const genres = new Set();
-                allData.forEach(item => {
-                    if (item.generos) {
-                        item.generos.split(',').forEach(g => {
-                            const genre = g.trim();
-                            if (genre && genre !== 'Talk' && genre !== 'Kids') genres.add(genre);
-                        });
-                    }
-                });
-
-                const grid = document.getElementById('category-grid');
-                if (grid) {
-                    grid.innerHTML = '<div class="category-item" onclick="setGenre(null)">Todos os Gêneros</div>';
-                    Array.from(genres).sort().forEach(g => {
-                        grid.innerHTML += `<div class="category-item" onclick="setGenre('${g}')">${g}</div>`;
-                    });
-                }
-
-                renderPage();
-                
-                document.getElementById('loading-skeleton').style.display = 'none';
-                document.getElementById('real-content').style.display = 'block';
-                
-                startPromo();
-            } catch (e) { 
-                console.error("Erro na inicialização:", e);
-                // Fallback para proxy se falhar direto
-                try {
-                    const proxyRes = await fetch("https://api.allorigins.win/raw?url=" + encodeURIComponent(API_URL));
-                    allData = await proxyRes.json();
-                    renderPage();
-                    document.getElementById('loading-skeleton').style.display = 'none';
-                    document.getElementById('real-content').style.display = 'block';
-                } catch(err) {
-                    console.error("Falha total no carregamento");
-                }
-            }
-        }
-
-        async function renderPage() {
-            let filtered = allData;
-            if (currentFilter !== 'all') filtered = filtered.filter(i => i.tipo === currentFilter);
-            if (currentGenre) filtered = filtered.filter(i => i.generos && i.generos.includes(currentGenre));
-
-            if (filtered.length === 0) {
-                document.getElementById('content-sections').innerHTML = '<p style="text-align:center; padding:20px; color:var(--text-dim);">Nenhum conteúdo encontrado.</p>';
-                return;
-            }
-
-            // Banner Aleatório
-            const heroItem = filtered[Math.floor(Math.random() * filtered.length)];
-            renderHero(heroItem);
-
-            // Continuar Assistindo
-            renderContinueWatching();
-
-            // Categorias
-            const container = document.getElementById('content-sections');
-            container.innerHTML = '';
-
-            const activeGenres = {};
-            filtered.forEach(item => {
-                if (item.generos) {
-                    item.generos.split(',').forEach(g => {
-                        const genre = g.trim();
-                        if (genre && genre !== 'Talk' && genre !== 'Kids') {
-                            if (!activeGenres[genre]) activeGenres[genre] = [];
-                            if (activeGenres[genre].length < 15) activeGenres[genre].push(item); // Limite de itens por seção para performance
-                        }
-                    });
-                }
-            });
-
-            Object.keys(activeGenres).sort(() => Math.random() - 0.5).forEach(genre => {
-                const displayNames = categoryNames[genre] || [`Tudo de ${genre}`];
-                const randomTitle = displayNames[Math.floor(Math.random() * displayNames.length)];
-                container.appendChild(createSection(randomTitle, activeGenres[genre]));
-            });
-        }
-
-        /* --- SISTEMA CONTINUAR ASSISTINDO (LOCALSTORAGE) --- */
-
-        function renderContinueWatching() {
-            const wrapper = document.getElementById('continue-watching-wrapper');
-            if (!wrapper) return;
-            wrapper.innerHTML = '';
-
-            const section = document.createElement('div');
-            section.className = 'continue-watching-section';
-            section.innerHTML = `
-                <div class="section-header"><h2 class="section-title">Continuar Assistindo</h2></div>
-                <div class="scroll-container" id="continue-list"></div>
-            `;
-
-            wrapper.appendChild(section);
-            const listContainer = section.querySelector('#continue-list');
-
-            // Lógica LocalStorage
-            const localProgress = JSON.parse(localStorage.getItem('user_progress') || '[]');
-            
-            if (localProgress.length > 0) {
-                localProgress.forEach(data => {
-                    const details = allData.find(i => i.id == data.id);
-                    if (details) {
-                        const card = createContinueCard(data, details);
-                        listContainer.appendChild(card);
-                    }
-                });
-            } else {
-                listContainer.innerHTML = '<p class="continue-empty-msg">Assista conteúdos para aparecer aqui.</p>';
-            }
-        }
-
-        function createContinueCard(data, details) {
-            const card = document.createElement('div');
-            card.className = 'continue-card';
-            
-            let thumb = details.banner || details.capa;
-            let title = details.titulo;
-            let meta = details.generos ? details.generos.split(',')[0] : '';
-            let link = `detalhes.html?id=${data.id}`;
-
-            if (data.season && data.episode) {
-                meta = `T${data.season} EP${data.episode}`;
-                link = `player.html?id=${data.id}&season=${data.season}&ep=${data.episode}`;
-            }
-
-            const progress = data.progress || 0;
-
-            card.innerHTML = `
-                <div class="continue-remove" onclick="event.stopPropagation(); removeFromLocal('${data.id}')">
-                    <i class="fa-solid fa-xmark"></i>
-                </div>
-                <div class="continue-thumb" style="background-image: url('${thumb}')" onclick="window.location.href='${link}'"></div>
-                <div class="continue-info" onclick="window.location.href='${link}'">
-                    <div class="continue-title-row">
-                        <span class="continue-name">${title}</span>
-                        <span class="continue-meta">${meta}</span>
-                    </div>
-                    <div class="continue-progress-container">
-                        <div class="continue-progress-bar" style="width: ${progress}%"></div>
-                    </div>
-                </div>
-            `;
-            return card;
-        }
-
-        window.removeFromLocal = (id) => {
-            let localProgress = JSON.parse(localStorage.getItem('user_progress') || '[]');
-            localProgress = localProgress.filter(i => i.id != id);
-            localStorage.setItem('user_progress', JSON.stringify(localProgress));
-            renderContinueWatching();
-        };
-
-        /* --- LÓGICA DO BANNER (HERO) --- */
-
-        function renderHero(item) {
-            const mediaContainer = document.getElementById('hero-media-container');
-            const contentArea = document.getElementById('hero-content-area');
-            if (!mediaContainer || !contentArea) return;
-            
-            clearTimeout(trailerTimeout);
-            mediaContainer.innerHTML = `<img src="${item.banner || item.capa}" id="hero-static-img">`;
-            
-            contentArea.innerHTML = `
-                ${item.logo ? `<img src="${item.logo}" class="hero-logo" alt="${item.titulo}">` : `<h1 class="hero-title-fallback">${item.titulo}</h1>`}
-                <div class="hero-genres">${item.generos || ''}</div>
-                <div class="hero-btns">
-                    <button class="btn btn-play" onclick="window.location.href='detalhes.html?id=${item.id}'">
-                        <i class="fa-solid fa-play"></i> Assistir
-                    </button>
-                    <button class="btn btn-control" id="hero-play-pause" onclick="toggleHeroPlayPause(this)">
-                        <i class="fa-solid fa-pause"></i>
-                    </button>
-                    <button class="btn btn-control" id="hero-mute" onclick="toggleHeroMute(this)">
-                        <i class="fa-solid fa-volume-xmark"></i>
-                    </button>
-                </div>
-            `;
-
-            if (item.trailer_id) {
-                trailerTimeout = setTimeout(() => startTrailer(item.trailer_id), 5000);
-            }
-        }
-
-        function startTrailer(id) {
-            const container = document.getElementById('hero-media-container');
-            if (!container) return;
-            container.innerHTML = `<iframe id="youtube-player" src="https://www.youtube.com/embed/${id}?autoplay=1&mute=1&controls=0&loop=1&playlist=${id}&enablejsapi=1" allow="autoplay"></iframe>`;
-        }
-
-        window.toggleHeroMute = (btn) => {
-            const iframe = document.getElementById('youtube-player');
-            if (!iframe) return;
-            isMuted = !isMuted;
-            iframe.contentWindow.postMessage(JSON.stringify({ event: 'command', func: isMuted ? 'mute' : 'unMute' }), '*');
-            btn.innerHTML = isMuted ? '<i class="fa-solid fa-volume-xmark"></i>' : '<i class="fa-solid fa-volume-high"></i>';
-        };
-
-        window.toggleHeroPlayPause = (btn) => {
-            const iframe = document.getElementById('youtube-player');
-            if (!iframe) return;
-            isPaused = !isPaused;
-            iframe.contentWindow.postMessage(JSON.stringify({ event: 'command', func: isPaused ? 'pauseVideo' : 'playVideo' }), '*');
-            btn.innerHTML = isPaused ? '<i class="fa-solid fa-play"></i>' : '<i class="fa-solid fa-pause"></i>';
-        };
-
-        /* --- UTILITÁRIOS --- */
-
-        function createSection(title, items) {
-            const section = document.createElement('div');
-            section.className = 'section';
-            section.innerHTML = `
-                <div class="section-header"><h2 class="section-title">${title}</h2></div>
-                <div class="scroll-container">
-                    ${items.map(item => `
-                        <div class="card" onclick="window.location.href='detalhes.html?id=${item.id}'">
-                            <div class="card-thumb"><img src="${item.capa || item.banner}" alt="${item.titulo}" loading="lazy"></div>
-                        </div>
-                    `).join('')}
-                </div>
-            `;
-            return section;
-        }
-
-        function startPromo() {
-            setTimeout(() => {
-                const overlay = document.getElementById('promo-overlay');
-                if (!overlay) return;
-                overlay.style.display = 'flex';
-                let seconds = 8;
-                const interval = setInterval(() => {
-                    seconds--;
-                    document.getElementById('promo-timer').innerText = `Liberando em ${seconds}s`;
-                    if (seconds <= 0) {
-                        clearInterval(interval);
-                        document.getElementById('promo-timer').style.display = 'none';
-                        document.getElementById('promo-close-btn').style.display = 'flex';
-                    }
-                }, 1000);
-            }, 2000);
-        }
-
-        window.addEventListener('scroll', () => {
-            document.getElementById('main-header').classList.toggle('scrolled', window.scrollY > 50);
-        });
+        init();
     </script>
 </body>
 </html>
