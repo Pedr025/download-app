@@ -20,7 +20,6 @@
             --transition: all 0.3s ease;
         }
         
-        /* BLOQUEIO DE SELEÇÃO E ESTILOS BASE */
         * { 
             box-sizing: border-box; 
             margin: 0; 
@@ -281,15 +280,6 @@
             font-weight: 600;
         }
 
-        .continue-ep-name {
-            font-size: 13px;
-            color: var(--text-dim);
-            margin-bottom: 12px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
         .continue-progress-container {
             width: 100%;
             height: 4px;
@@ -306,8 +296,9 @@
 
         /* SEÇÕES DE CATEGORIAS */
         .section { margin-bottom: 30px; position: relative; }
-        .section-header { padding: 0 20px; margin-bottom: 15px; }
+        .section-header { padding: 0 20px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
         .section-title { font-size: 18px; font-weight: 800; color: white; }
+        .section-more { color: var(--accent); font-size: 20px; cursor: pointer; }
         
         .scroll-container { 
             display: flex; 
@@ -343,31 +334,107 @@
             object-fit: cover;
         }
 
-        /* CARDS ESPECIAIS PARA SAGAS (ESTILO STACK) */
+        /* SAGAS - LAYOUT VERTICAL ESTILO CRUNCHYROLL */
         .saga-section { margin-bottom: 30px; padding: 0 20px; }
-        .saga-cards-container { display: flex; gap: 15px; overflow-x: auto; padding-bottom: 10px; scrollbar-width: none; }
-        .saga-cards-container::-webkit-scrollbar { display: none; }
-        .saga-card-item {
-            min-width: 200px; max-width: 200px; flex-shrink: 0; position: relative;
-            cursor: pointer; transition: var(--transition); border-radius: 12px;
-            overflow: hidden; height: 280px;
+        .saga-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .saga-title { font-size: 18px; font-weight: 800; color: white; }
+        .saga-show-more { color: var(--accent); font-size: 20px; cursor: pointer; }
+
+        .saga-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-height: 600px;
+            overflow: hidden;
         }
-        .saga-card-bg {
-            width: 100%; height: 100%; background-size: cover; background-position: center;
-            position: relative; display: flex; align-items: flex-end; padding: 15px;
+
+        .saga-list.expanded { max-height: none; }
+
+        .saga-item {
+            position: relative;
+            cursor: pointer;
+            border-radius: 12px;
+            overflow: hidden;
+            height: 140px;
+            display: flex;
+            align-items: flex-end;
+            transition: var(--transition);
         }
-        .saga-card-bg::before {
-            content: ''; position: absolute; inset: 0;
-            background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.3) 50%, transparent 100%);
+
+        .saga-item:active { transform: scale(0.98); }
+
+        .saga-item-bg {
+            position: absolute;
+            inset: 0;
+            background-size: cover;
+            background-position: center;
             z-index: 1;
         }
-        .saga-card-info { position: relative; z-index: 2; width: 100%; }
-        .saga-card-title { font-size: 14px; font-weight: 700; color: white; margin-bottom: 5px; line-height: 1.2; }
-        .saga-card-meta { font-size: 12px; color: rgba(255,255,255,0.7); }
-        .saga-card-badge {
-            position: absolute; top: 10px; right: 10px; background: var(--accent);
-            color: white; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; z-index: 3;
+
+        .saga-item-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.5) 50%, transparent 100%);
+            z-index: 2;
         }
+
+        .saga-item-stack {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .saga-item-stack:nth-child(2) {
+            transform: translateY(8px) translateX(8px) scale(0.95);
+            z-index: 0;
+            opacity: 0.8;
+        }
+
+        .saga-item-stack:nth-child(3) {
+            transform: translateY(16px) translateX(16px) scale(0.9);
+            z-index: -1;
+            opacity: 0.6;
+        }
+
+        .saga-item-info {
+            position: relative;
+            z-index: 3;
+            padding: 15px;
+            width: 100%;
+        }
+
+        .saga-item-name {
+            font-size: 15px;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 5px;
+        }
+
+        .saga-item-meta {
+            font-size: 12px;
+            color: rgba(255,255,255,0.7);
+        }
+
+        /* BOTÃO MOSTRAR MAIS */
+        .show-more-btn {
+            width: 100%;
+            padding: 15px;
+            background: rgba(138, 43, 226, 0.2);
+            border: 1px solid rgba(138, 43, 226, 0.5);
+            color: white;
+            font-weight: 700;
+            font-size: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-top: 10px;
+        }
+
+        .show-more-btn:active { background: rgba(138, 43, 226, 0.4); }
 
         /* MODAL DE GÊNEROS */
         .modal-categories {
@@ -416,6 +483,83 @@
 
         .category-item:active { transform: scale(0.95); background: var(--accent); }
 
+        /* MODAL DE SAGA - POP-UP */
+        .saga-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.95);
+            z-index: 2500;
+            display: none;
+            flex-direction: column;
+            animation: slideUp 0.3s ease;
+        }
+
+        .saga-modal.active { display: flex; }
+
+        .saga-modal-header {
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .saga-modal-title { font-size: 22px; font-weight: 800; }
+        .saga-modal-close { font-size: 24px; cursor: pointer; }
+
+        .saga-modal-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .saga-modal-item {
+            background: var(--surface);
+            padding: 15px;
+            border-radius: 12px;
+            display: flex;
+            gap: 15px;
+            cursor: pointer;
+            transition: var(--transition);
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .saga-modal-item:active { transform: scale(0.98); background: rgba(138, 43, 226, 0.2); }
+
+        .saga-modal-thumb {
+            width: 80px;
+            height: 120px;
+            border-radius: 8px;
+            background-size: cover;
+            background-position: center;
+            flex-shrink: 0;
+        }
+
+        .saga-modal-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .saga-modal-name {
+            font-size: 15px;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 5px;
+        }
+
+        .saga-modal-meta {
+            font-size: 12px;
+            color: var(--text-dim);
+        }
+
         /* BARRA DE NAVEGAÇÃO INFERIOR */
         .nav {
             position: fixed;
@@ -456,6 +600,11 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+
         .skeleton {
             background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
             background-size: 200% 100%;
@@ -469,7 +618,6 @@
     </style>
 </head>
 <body>
-
     <header id="main-header">
         <a href="inicio.html" class="logo-container">
             <span class="logo-pk">PK</span><span class="logo-filmes">FILMES</span>
@@ -488,6 +636,14 @@
             <i class="fa-solid fa-xmark close-modal" onclick="toggleCategories()"></i>
         </div>
         <div class="category-grid" id="category-grid"></div>
+    </div>
+
+    <div class="saga-modal" id="saga-modal">
+        <div class="saga-modal-header">
+            <h2 class="saga-modal-title" id="saga-modal-title">Saga</h2>
+            <i class="fa-solid fa-xmark saga-modal-close" onclick="closeSagaModal()"></i>
+        </div>
+        <div class="saga-modal-content" id="saga-modal-content"></div>
     </div>
 
     <main>
@@ -515,10 +671,11 @@
 
     <nav class="nav">
         <a href="inicio.html" class="nav-item active"><i class="fa-solid fa-house"></i><span>Início</span></a>
-        <a href="#" class="nav-item"><i class="fa-solid fa-magnifying-glass"></i><span>Buscar</span></a>
-        <a href="#" class="nav-item"><i class="fa-solid fa-crown"></i><span>Ranking</span></a>
-        <a href="#" class="nav-item"><div class="nav-profile" id="user-profile-icon"><i class="fa-solid fa-user"></i></div><span>Perfil</span></a>
+        <a href="buscar.html" class="nav-item"><i class="fa-solid fa-magnifying-glass"></i><span>Buscar</span></a>
+        <a href="novidades.html" class="nav-item"><i class="fa-solid fa-star"></i><span>Novidades</span></a>
+        <a href="perfil.html" class="nav-item"><div class="nav-profile" id="user-profile-icon"><i class="fa-solid fa-user"></i></div><span>Perfil</span></a>
     </nav>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
@@ -548,6 +705,7 @@
         let trailerTimeout = null;
         let currentUser = null;
         let usedMovieIds = new Set();
+        let sagaExpandedState = {};
 
         const sagaIds = {
             'Harry Potter': [671, 672, 673, 674, 675, 767, 12444, 12445],
@@ -743,18 +901,79 @@
         function createSagaSection(name, items) {
             const section = document.createElement('div');
             section.className = 'saga-section';
-            section.innerHTML = `<div class="section-header"><h2 class="section-title">🔥 Saga: ${name}</h2></div><div class="saga-cards-container">
-                ${items.map(item => `
-                    <div class="saga-card-item" onclick="window.location.href='detalhes.html?id=${item.id}'">
-                        <div class="saga-card-bg" style="background-image: url('${item.capa}')">
-                            <div class="saga-card-badge">SAGA</div>
-                            <div class="saga-card-info"><div class="saga-card-title">${item.nome}</div><div class="saga-card-meta">${item.generos ? item.generos.split(',')[0] : ''}</div></div>
-                        </div>
-                    </div>
-                `).join('')}
-            </div>`;
+            
+            const header = document.createElement('div');
+            header.className = 'saga-header';
+            header.innerHTML = `<h2 class="saga-title">🔥 ${name}</h2>`;
+            section.appendChild(header);
+
+            const listContainer = document.createElement('div');
+            listContainer.className = 'saga-list';
+            listContainer.id = `saga-list-${name}`;
+
+            const maxDisplay = 4;
+            items.slice(0, maxDisplay).forEach(item => {
+                const itemEl = createSagaItem(item);
+                listContainer.appendChild(itemEl);
+            });
+
+            section.appendChild(listContainer);
+
+            if (items.length > maxDisplay) {
+                const btn = document.createElement('button');
+                btn.className = 'show-more-btn';
+                btn.textContent = 'MOSTRAR MAIS';
+                btn.onclick = () => {
+                    listContainer.classList.add('expanded');
+                    items.slice(maxDisplay).forEach(item => {
+                        const itemEl = createSagaItem(item);
+                        listContainer.appendChild(itemEl);
+                    });
+                    btn.style.display = 'none';
+                };
+                section.appendChild(btn);
+            }
+
             return section;
         }
+
+        function createSagaItem(item) {
+            const div = document.createElement('div');
+            div.className = 'saga-item';
+            div.onclick = () => openSagaModal(item);
+            div.innerHTML = `
+                <div class="saga-item-bg" style="background-image: url('${item.capa}')"></div>
+                <div class="saga-item-overlay"></div>
+                <div class="saga-item-info">
+                    <div class="saga-item-name">${item.nome}</div>
+                    <div class="saga-item-meta">${item.generos ? item.generos.split(',')[0] : ''}</div>
+                </div>
+            `;
+            return div;
+        }
+
+        window.openSagaModal = (item) => {
+            const modal = document.getElementById('saga-modal');
+            const title = document.getElementById('saga-modal-title');
+            const content = document.getElementById('saga-modal-content');
+            
+            title.textContent = item.nome;
+            content.innerHTML = `
+                <div class="saga-modal-item" onclick="window.location.href='detalhes.html?id=${item.id}'">
+                    <div class="saga-modal-thumb" style="background-image: url('${item.capa}')"></div>
+                    <div class="saga-modal-info">
+                        <div class="saga-modal-name">${item.nome}</div>
+                        <div class="saga-modal-meta">${item.generos || 'Sem informação'}</div>
+                    </div>
+                </div>
+            `;
+            
+            modal.classList.add('active');
+        };
+
+        window.closeSagaModal = () => {
+            document.getElementById('saga-modal').classList.remove('active');
+        };
 
         function createSection(title, items) {
             const section = document.createElement('div');
