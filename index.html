@@ -110,7 +110,6 @@
             padding: 0 20px 40px 20px;
             overflow: hidden;
             background: #000;
-            margin-top: 120px;
         }
 
         .hero-media {
@@ -335,7 +334,7 @@
             object-fit: cover;
         }
 
-        /* ===== NOVO LAYOUT DE SAGAS ===== */
+        /* ===== SAGAS - LAYOUT IDÊNTICO AO CRUNCHYROLL ===== */
         .sagas-section {
             margin-bottom: 30px;
             padding: 0 20px;
@@ -345,7 +344,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
 
         .sagas-title {
@@ -357,114 +356,110 @@
         .sagas-container {
             display: flex;
             flex-direction: column;
-            gap: 16px;
+            gap: 12px;
         }
 
-        .saga-card {
+        .saga-item {
             display: flex;
-            gap: 16px;
+            gap: 12px;
             cursor: pointer;
             transition: var(--transition);
-            padding: 12px;
-            border-radius: 12px;
-            background: rgba(255,255,255,0.02);
-            border: 1px solid rgba(255,255,255,0.05);
-        }
-
-        .saga-card:active {
-            transform: scale(0.98);
-            background: rgba(138, 43, 226, 0.1);
-        }
-
-        /* Banner com efeito de camadas (blur) */
-        .saga-banner-wrapper {
             position: relative;
-            width: 140px;
-            height: 200px;
+        }
+
+        .saga-item:active {
+            opacity: 0.8;
+        }
+
+        /* Banner com efeito de camadas blur */
+        .saga-item-bg-wrapper {
+            position: relative;
+            width: 100px;
+            height: 140px;
             flex-shrink: 0;
         }
 
-        .saga-banner {
+        .saga-item-bg {
             width: 100%;
             height: 100%;
-            border-radius: 8px;
-            overflow: hidden;
+            border-radius: 6px;
             background-size: cover;
             background-position: center;
             position: relative;
             z-index: 3;
-            border: 2px solid rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
         }
 
-        /* Efeito de camadas blur atrás */
-        .saga-banner-wrapper::before,
-        .saga-banner-wrapper::after {
+        /* Camadas de blur atrás */
+        .saga-item-bg-wrapper::before,
+        .saga-item-bg-wrapper::after {
             content: '';
             position: absolute;
-            background-size: cover;
-            background-position: center;
-            border-radius: 8px;
+            border-radius: 6px;
         }
 
-        .saga-banner-wrapper::before {
+        .saga-item-bg-wrapper::before {
             width: 100%;
             height: 100%;
-            top: 8px;
-            left: 8px;
+            top: 6px;
+            left: 6px;
             z-index: 2;
-            filter: blur(4px);
-            opacity: 0.6;
+            background: inherit;
+            filter: blur(3px);
+            opacity: 0.5;
         }
 
-        .saga-banner-wrapper::after {
+        .saga-item-bg-wrapper::after {
             width: 100%;
             height: 100%;
-            top: 16px;
-            left: 16px;
+            top: 12px;
+            left: 12px;
             z-index: 1;
-            filter: blur(8px);
-            opacity: 0.3;
+            background: inherit;
+            filter: blur(6px);
+            opacity: 0.25;
         }
 
         /* Informações da saga */
-        .saga-info {
+        .saga-item-info {
             flex: 1;
             display: flex;
             flex-direction: column;
             justify-content: center;
-            padding: 8px 0;
+            padding: 4px 0;
         }
 
-        .saga-name {
-            font-size: 16px;
+        .saga-item-name {
+            font-size: 15px;
             font-weight: 700;
             color: white;
-            margin-bottom: 8px;
+            margin-bottom: 4px;
         }
 
-        .saga-genres {
-            font-size: 13px;
-            color: var(--text-dim);
-            margin-bottom: 6px;
-            line-height: 1.4;
-        }
-
-        .saga-count {
+        .saga-item-meta {
             font-size: 12px;
+            color: var(--text-dim);
+            line-height: 1.3;
+        }
+
+        .saga-item-count {
+            font-size: 11px;
             color: var(--accent);
             font-weight: 600;
+            margin-top: 4px;
         }
 
         /* Botão "Mostrar Mais" */
         .show-more-sagas-btn {
             width: 100%;
-            padding: 14px;
-            margin-top: 12px;
+            padding: 12px;
+            margin-top: 8px;
             background: rgba(138, 43, 226, 0.15);
             border: 2px solid var(--accent);
             color: var(--accent);
-            border-radius: 8px;
-            font-size: 14px;
+            border-radius: 6px;
+            font-size: 13px;
             font-weight: 700;
             cursor: pointer;
             transition: var(--transition);
@@ -707,7 +702,6 @@
 </head>
 <body>
 
-
     <header id="main-header">
         <a href="inicio.html" class="logo-container">
             <span class="logo-pk">PK</span><span class="logo-filmes">FILMES</span>
@@ -719,7 +713,6 @@
             <button class="filter-btn" onclick="toggleCategories()"><i class="fa-solid fa-layer-group"></i> Gêneros</button>
         </div>
     </header>
-
     <div class="modal-categories" id="modal-categories">
         <div class="modal-header">
             <h2 class="modal-title">Gêneros</h2>
@@ -905,17 +898,17 @@
             if (!wrapper) return;
             wrapper.innerHTML = '';
 
+            // Apenas sagas do localStorage
             const userSagas = JSON.parse(localStorage.getItem('pk_fav_sagas') || '[]');
-            const allSagas = Object.keys(sagaIds);
             
-            if (allSagas.length === 0) return;
+            if (userSagas.length === 0) return;
 
             const section = document.createElement('div');
             section.className = 'sagas-section';
 
             const header = document.createElement('div');
             header.className = 'sagas-header';
-            header.innerHTML = `<h2 class="sagas-title">🔥 Sagas Populares</h2>`;
+            header.innerHTML = `<h2 class="sagas-title">🔥 Sagas</h2>`;
             section.appendChild(header);
 
             const container = document.createElement('div');
@@ -923,22 +916,22 @@
             container.id = 'sagas-container';
 
             const maxDisplay = 4;
-            const sagasToShow = sagasExpanded ? allSagas : allSagas.slice(0, maxDisplay);
+            const sagasToShow = sagasExpanded ? userSagas : userSagas.slice(0, maxDisplay);
 
             sagasToShow.forEach(sagaName => {
                 const ids = sagaIds[sagaName] || [];
                 const sagaMovies = allData.filter(m => ids.includes(parseInt(m.id)) || ids.includes(m.id));
                 
                 if (sagaMovies.length > 0) {
-                    const card = createSagaCard(sagaName, sagaMovies);
-                    container.appendChild(card);
+                    const item = createSagaItem(sagaName, sagaMovies);
+                    container.appendChild(item);
                 }
             });
 
             section.appendChild(container);
 
             // Botão "Mostrar Mais"
-            if (!sagasExpanded && allSagas.length > maxDisplay) {
+            if (!sagasExpanded && userSagas.length > maxDisplay) {
                 const btn = document.createElement('button');
                 btn.className = 'show-more-sagas-btn';
                 btn.textContent = 'MOSTRAR MAIS';
@@ -952,48 +945,44 @@
             wrapper.appendChild(section);
         }
 
-        function createSagaCard(sagaName, items) {
-            const card = document.createElement('div');
-            card.className = 'saga-card';
+        function createSagaItem(sagaName, items) {
+            const item = document.createElement('div');
+            item.className = 'saga-item';
             
-            const bannerWrapper = document.createElement('div');
-            bannerWrapper.className = 'saga-banner-wrapper';
+            const bgWrapper = document.createElement('div');
+            bgWrapper.className = 'saga-item-bg-wrapper';
             
-            const banner = document.createElement('div');
-            banner.className = 'saga-banner';
-            banner.style.backgroundImage = `url('${items[0].capa}')`;
-            bannerWrapper.appendChild(banner);
-            
-            // Aplicar o mesmo background para o efeito blur
-            bannerWrapper.style.setProperty('--bg-image', `url('${items[0].capa}')`);
-            bannerWrapper.style.backgroundImage = `url('${items[0].capa}')`;
+            const bg = document.createElement('div');
+            bg.className = 'saga-item-bg';
+            bg.style.backgroundImage = `url('${items[0].capa}')`;
+            bgWrapper.appendChild(bg);
 
             const info = document.createElement('div');
-            info.className = 'saga-info';
+            info.className = 'saga-item-info';
             
             const name = document.createElement('div');
-            name.className = 'saga-name';
+            name.className = 'saga-item-name';
             name.textContent = sagaName;
             
-            const genres = document.createElement('div');
-            genres.className = 'saga-genres';
-            const genresList = items.slice(0, 2).map(item => item.generos ? item.generos.split(',')[0].trim() : '').filter(g => g).join(' • ');
-            genres.textContent = genresList || 'Diversos';
+            const meta = document.createElement('div');
+            meta.className = 'saga-item-meta';
+            const genresList = items.slice(0, 2).map(m => m.generos ? m.generos.split(',')[0].trim() : '').filter(g => g).join(' • ');
+            meta.textContent = genresList || 'Diversos';
             
             const count = document.createElement('div');
-            count.className = 'saga-count';
+            count.className = 'saga-item-count';
             count.textContent = `${items.length} ${items.length === 1 ? 'item' : 'itens'} disponível${items.length === 1 ? '' : 's'}`;
             
             info.appendChild(name);
-            info.appendChild(genres);
+            info.appendChild(meta);
             info.appendChild(count);
             
-            card.appendChild(bannerWrapper);
-            card.appendChild(info);
+            item.appendChild(bgWrapper);
+            item.appendChild(info);
             
-            card.onclick = () => openSagaModal(sagaName, items);
+            item.onclick = () => openSagaModal(sagaName, items);
             
-            return card;
+            return item;
         }
 
         function renderHero(item) {
@@ -1092,7 +1081,7 @@
                 </div>
             `).join('');
             
-	modal.classList.add('active');
+            modal.classList.add('active');
         };
 
         window.closeSagaModal = () => {
