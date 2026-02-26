@@ -1,107 +1,1041 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<title>Party - FilmesRave</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Watch Party - Assista Junto</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        :root { 
+            --accent: #0072d2;
+            --accent-light: #00a8ff;
+            --bg-dark: #040714;
+            --bg-darker: #020409;
+            --text-main: #f9f9f9;
+            --text-secondary: #b3b3b3;
+            --border-color: rgba(255, 255, 255, 0.1);
+            --disney-gradient: linear-gradient(to bottom, rgba(4, 7, 20, 0.8) 0%, transparent 20%, transparent 80%, rgba(4, 7, 20, 0.8) 100%);
+        }
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; }
+        body, html { width: 100%; height: 100%; background-color: var(--bg-darker); overflow: hidden; font-family: 'Avenir Next', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+
+        /* LAYOUT PRINCIPAL */
+        .watch-party-container {
+            display: flex;
+            width: 100%;
+            height: 100%;
+            gap: 0;
+            background: var(--bg-darker);
+        }
+
+        /* SEÇÃO DO PLAYER */
+        .player-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #000;
+            position: relative;
+            min-width: 0;
+        }
+
+        .player-wrapper {
+            flex: 1;
+            position: relative;
+            background: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            transition: object-fit 0.3s ease;
+        }
+
+        video.fullscreen-fill {
+            object-fit: cover;
+        }
+
+        .player-info {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 20px 30px;
+            background: linear-gradient(to bottom, rgba(0, 0, 0, 0.8), transparent);
+            z-index: 50;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .player-info.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .room-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .room-badge {
+            background: var(--accent);
+            color: white;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .viewers-count {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-main);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            backdrop-filter: blur(10px);
+        }
+
+        .room-title {
+            color: var(--text-main);
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        /* CONTROLES DO PLAYER */
+        .controls-overlay {
+            position: absolute;
+            inset: 0;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            background: var(--disney-gradient);
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.5s;
+        }
+
+        .controls-overlay.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .controls-overlay.locked .top-bar, 
+        .controls-overlay.locked .bottom-bar, 
+        .controls-overlay.locked .center-controls {
+            display: none !important;
+        }
+
+        .lock-screen-btn {
+            position: absolute;
+            left: 40px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 110;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #fff;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+        }
+
+        .controls-overlay.visible .lock-screen-btn {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .lock-screen-btn.active {
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+
+        /* BARRA SUPERIOR */
+        .top-bar {
+            padding: 35px 50px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .top-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .top-bar .back-btn {
+            color: #fff;
+            font-size: 22px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .top-bar h3 {
+            font-size: 20px;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .top-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .cast-btn, .fullscreen-fill-btn {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 20px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        /* CONTROLES CENTRAIS */
+        .center-controls {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            align-items: center;
+            gap: 80px;
+            z-index: 105;
+        }
+
+        .center-btn {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 40px;
+            cursor: pointer;
+            transition: transform 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .center-btn span {
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .play-pause-big {
+            width: 80px;
+            height: 80px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            font-size: 35px;
+        }
+
+        /* BARRA INFERIOR */
+        .bottom-bar {
+            padding: 15px 50px 40px 50px;
+        }
+
+        .seekbar-wrapper {
+            position: relative;
+            margin-bottom: 25px;
+        }
+
+        .seekbar-preview {
+            position: absolute;
+            bottom: 100%;
+            left: 0;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.95);
+            border: 2px solid var(--accent);
+            border-radius: 8px;
+            padding: 6px;
+            margin-bottom: 12px;
+            display: none;
+            z-index: 150;
+            pointer-events: none;
+        }
+
+        .seekbar-preview.active {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .seekbar-preview img {
+            width: 100px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 4px;
+            margin-bottom: 6px;
+        }
+
+        .seekbar-preview-time {
+            font-size: 12px;
+            color: #fff;
+            font-weight: bold;
+        }
+
+        .seekbar-container {
+            width: 100%;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.2);
+            position: relative;
+            border-radius: 2px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+
+        .seekbar-fill {
+            height: 100%;
+            background: var(--accent);
+            border-radius: 2px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+        }
+
+        .seekbar-handle {
+            width: 16px;
+            height: 16px;
+            background: #fff;
+            border-radius: 50%;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            margin-right: -8px;
+        }
+
+        .bottom-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .actions-left, .actions-right {
+            display: flex;
+            align-items: center;
+            gap: 35px;
+        }
+
+        .action-btn {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            opacity: 0.8;
+            transition: 0.3s;
+        }
+
+        .action-btn span {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .time-info {
+            font-size: 16px;
+            color: #fff;
+            font-weight: 500;
+        }
+
+        /* SEÇÃO DO CHAT */
+        .chat-section {
+            width: 380px;
+            background: var(--bg-dark);
+            border-left: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .chat-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chat-header h2 {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .chat-header-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .chat-header-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+        }
+
+        .chat-header-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-main);
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .chat-messages::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .chat-messages::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .message {
+            display: flex;
+            gap: 10px;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), var(--accent-light));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .message-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .message-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 4px;
+        }
+
+        .message-author {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .message-time {
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+
+        .message-text {
+            font-size: 13px;
+            color: var(--text-main);
+            word-wrap: break-word;
+            line-height: 1.4;
+        }
+
+        .message.system {
+            justify-content: center;
+            margin: 8px 0;
+        }
+
+        .message.system .message-text {
+            background: rgba(0, 114, 210, 0.15);
+            color: var(--accent-light);
+            padding: 8px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        /* INPUT DO CHAT */
+        .chat-input-wrapper {
+            padding: 16px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            gap: 8px;
+            align-items: flex-end;
+        }
+
+        .chat-input-field {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 10px 16px;
+            color: var(--text-main);
+            font-size: 13px;
+            font-family: inherit;
+            resize: none;
+            max-height: 80px;
+            transition: all 0.3s;
+        }
+
+        .chat-input-field:focus {
+            outline: none;
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--accent);
+            box-shadow: 0 0 12px rgba(0, 114, 210, 0.2);
+        }
+
+        .chat-input-field::placeholder {
+            color: var(--text-secondary);
+        }
+
+        .chat-send-btn {
+            background: var(--accent);
+            border: none;
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            transition: all 0.3s;
+            flex-shrink: 0;
+        }
+
+        .chat-send-btn:hover {
+            background: var(--accent-light);
+            transform: scale(1.05);
+        }
+
+        .chat-send-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* RESPONSIVO */
+        @media (max-width: 1200px) {
+            .chat-section {
+                width: 320px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .watch-party-container {
+                flex-direction: column;
+            }
+
+            .player-section {
+                height: 60%;
+            }
+
+            .chat-section {
+                width: 100%;
+                height: 40%;
+                border-left: none;
+                border-top: 1px solid var(--border-color);
+            }
+
+            .center-controls {
+                gap: 40px;
+            }
+
+            .center-btn {
+                font-size: 28px;
+            }
+
+            .play-pause-big {
+                width: 60px;
+                height: 60px;
+                font-size: 24px;
+            }
+        }
+    </style>
 </head>
 <body>
 
-<h2>Sala: <span id="room"></span></h2>
+    <div class="watch-party-container">
+        <!-- PLAYER SECTION -->
+        <div class="player-section">
+            <div class="player-wrapper" id="player-container">
+                <div class="player-info" id="player-info">
+                    <div class="room-info">
+                        <div class="room-badge">
+                            <i class="fas fa-video"></i>
+                            <span>Sala de Watch Party</span>
+                        </div>
+                        <div class="viewers-count" id="viewers-count">
+                            <i class="fas fa-users"></i>
+                            <span id="viewer-number">1</span>
+                        </div>
+                    </div>
+                    <div class="room-title" id="room-title">Assistindo Juntos</div>
+                </div>
 
-<video id="video" controls width="100%"></video>
+                <video id="video-player" playsinline preload="auto"></video>
+                <canvas id="preview-canvas" style="display:none;"></canvas>
 
-<div id="chat"></div>
+                <button class="lock-screen-btn" id="lock-btn"><i class="fa-solid fa-lock-open"></i></button>
 
-<input id="msg">
-<button onclick="send()">Enviar</button>
+                <div class="controls-overlay" id="controls-overlay">
+                    <div class="top-bar">
+                        <div class="top-left">
+                            <div class="back-btn" id="back-btn"><i class="fa-solid fa-chevron-left"></i></div>
+                            <h3 id="video-title">Carregando...</h3>
+                        </div>
+                        <div class="top-right">
+                            <button class="fullscreen-fill-btn" id="fullscreen-fill-btn"><i class="fa-solid fa-maximize"></i></button>
+                            <button class="cast-btn" id="cast-btn">
+                                <img src="https://cdn-icons-png.flaticon.com/512/566/566078.png" alt="Cast" style="width: 20px; height: 20px; filter: brightness(0) invert(1);">
+                            </button>
+                        </div>
+                    </div>
 
-<script>
+                    <div class="center-controls">
+                        <button class="center-btn" id="rewind-btn"><i class="fa-solid fa-rotate-left"></i><span>10s</span></button>
+                        <button class="center-btn play-pause-big" id="play-pause-btn"><i class="fa-solid fa-play"></i></button>
+                        <button class="center-btn" id="forward-btn"><i class="fa-solid fa-rotate-right"></i><span>10s</span></button>
+                    </div>
 
-const params = new URLSearchParams(location.search)
+                    <div class="bottom-bar">
+                        <div class="seekbar-wrapper" id="seekbar-wrapper">
+                            <div class="seekbar-preview" id="seekbar-preview">
+                                <img id="preview-img" src="" alt="Preview">
+                                <div class="seekbar-preview-time" id="preview-time">00:00</div>
+                            </div>
+                            <div class="seekbar-container" id="seekbar-container">
+                                <div class="seekbar-fill" id="seekbar-fill">
+                                    <div class="seekbar-handle"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bottom-actions">
+                            <div class="actions-left"><div class="time-info" id="time-info">00:00 / 00:00</div></div>
+                            <div class="actions-right">
+                                <button class="action-btn" id="fullscreen-btn"><i class="fa-solid fa-expand"></i><span>Tela Cheia</span></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-let room = params.get("room")
+           <!-- CHAT SECTION -->
+        <div class="chat-section">
+            <div class="chat-header">
+                <h2>
+                    <i class="fas fa-comments"></i>
+                    Chat ao Vivo
+                </h2>
+                <div class="chat-header-actions">
+                    <button class="chat-header-btn" id="chat-settings" title="Configurações">
+                        <i class="fas fa-sliders-h"></i>
+                    </button>
+                </div>
+            </div>
 
-if (!room) {
+            <div class="chat-messages" id="chat-messages">
+                <div class="message system">
+                    <div class="message-text">Bem-vindo à sala de watch party! 🎬</div>
+                </div>
+                <div class="message system">
+                    <div class="message-text">Compartilhe este link com seus amigos para assistir juntos</div>
+                </div>
+            </div>
 
-room = crypto.randomUUID()
+            <div class="chat-input-wrapper">
+                <textarea 
+                    class="chat-input-field" 
+                    id="chat-input" 
+                    placeholder="Digite sua mensagem..." 
+                    rows="1"
+                    maxlength="500"
+                ></textarea>
+                <button class="chat-send-btn" id="chat-send">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
 
-location.href =
-"/party.html?room=" + room
+    <script>
+        // ==================== PLAYER SETUP ====================
+        const video = document.getElementById('video-player');
+        const controls = document.getElementById('controls-overlay');
+        const playPauseBtn = document.getElementById('play-pause-btn');
+        const seekbarFill = document.getElementById('seekbar-fill');
+        const seekbarWrapper = document.getElementById('seekbar-wrapper');
+        const seekbarContainer = document.getElementById('seekbar-container');
+        const seekbarPreview = document.getElementById('seekbar-preview');
+        const previewImg = document.getElementById('preview-img');
+        const previewTime = document.getElementById('preview-time');
+        const timeInfo = document.getElementById('time-info');
+        const videoTitle = document.getElementById('video-title');
+        const lockBtn = document.getElementById('lock-btn');
+        const rewindBtn = document.getElementById('rewind-btn');
+        const forwardBtn = document.getElementById('forward-btn');
+        const fullscreenBtn = document.getElementById('fullscreen-btn');
+        const fullscreenFillBtn = document.getElementById('fullscreen-fill-btn');
+        const backBtn = document.getElementById('back-btn');
+        const castBtn = document.getElementById('cast-btn');
+        const playerInfo = document.getElementById('player-info');
 
-}
+        // ==================== CHAT SETUP ====================
+        const chatMessages = document.getElementById('chat-messages');
+        const chatInput = document.getElementById('chat-input');
+        const chatSendBtn = document.getElementById('chat-send');
+        const viewerNumber = document.getElementById('viewer-number');
 
-document.getElementById("room").innerText = room
+        // ==================== STATE ====================
+        let isLocked = false;
+        let isFillMode = false;
+        let isDragging = false;
+        let currentViewers = 1;
 
-const ws = new WebSocket(
-"wss://party.filmesrave.com/" + room
-)
+        // URL do vídeo MP4
+        const VIDEO_URL = 'https://awnagk.gviudclrb.com/vod/17A66128DBCB491987D456C30C43B149_media.mp4?dev_id=c714efe37e0ef598f0e83b0b9dca6cb2&user_id=417287582&trans_id=76288Y95ROn_vvJXcFi1SVms&expired=1740812482&app_id=uvnetmob&app_ver=10303&host=vddclocd.kmj51gtf.com&media_code=17A66128DBCB491987D456C30C43B149&auth_id=417287582_uvnetmob__1&client_ip=45.187.99.191&Expires=1740812482&KeyName=&Signature=KIEH3h1dqg4lv0FObJejg9IUWlM=';
 
-const video =
-document.getElementById("video")
+        // ==================== PLAYER INITIALIZATION ====================
+        function initPlayer() {
+            video.src = VIDEO_URL;
+            videoTitle.innerText = 'Assista Juntos - Watch Party';
 
-ws.onmessage = (event) => {
+            // Play/Pause
+            playPauseBtn.onclick = () => video.paused ? video.play() : video.pause();
+            video.addEventListener('play', () => {
+                playPauseBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
+            });
+            video.addEventListener('pause', () => {
+                playPauseBtn.innerHTML = '<i class="fa-solid fa-play"></i>';
+            });
 
-const data =
-JSON.parse(event.data)
+            // Rewind/Forward
+            rewindBtn.onclick = () => video.currentTime -= 10;
+            forwardBtn.onclick = () => video.currentTime += 10;
 
-if (data.type === "chat") {
+            // Lock button
+            lockBtn.onclick = toggleLock;
 
-document.getElementById("chat")
-.innerHTML +=
-"<p>" + data.message + "</p>"
+            // Fullscreen
+            fullscreenBtn.onclick = () => {
+                if (document.fullscreenElement) {
+                    document.exitFullscreen();
+                } else {
+                    document.documentElement.requestFullscreen().catch(() => {});
+                }
+            };
 
-}
+            fullscreenFillBtn.onclick = () => {
+                isFillMode = !isFillMode;
+                video.classList.toggle('fullscreen-fill', isFillMode);
+            };
 
-if (data.type === "sync") {
+            // Back button
+            backBtn.onclick = () => window.history.back();
 
-video.currentTime =
-data.data.time
+            // Cast button
+            castBtn.onclick = () => alert("Nenhum dispositivo de transmissão detectado.");
 
-if (data.data.playing)
-video.play()
-else
-video.pause()
+            // Seekbar events
+            const handleSeek = (e) => {
+                if (isLocked) return;
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const rect = seekbarContainer.getBoundingClientRect();
+                let pos = (clientX - rect.left) / rect.width;
+                pos = Math.max(0, Math.min(1, pos));
+                video.currentTime = pos * video.duration;
+                updatePreviewUI(pos);
+            };
 
-}
+            seekbarContainer.onmousedown = seekbarContainer.ontouchstart = (e) => {
+                isDragging = true;
+                seekbarPreview.classList.add('active');
+                handleSeek(e);
+            };
 
-}
+            window.onmousemove = window.ontouchmove = (e) => {
+                if (isDragging) handleSeek(e);
+            };
 
-function send() {
+            window.onmouseup = window.ontouchend = () => {
+                if (isDragging) {
+                    isDragging = false;
+                    seekbarPreview.classList.remove('active');
+                }
+            };
 
-const msg =
-document.getElementById("msg").value
+            // Video progress update
+            video.addEventListener('timeupdate', updateProgress);
 
-ws.send(JSON.stringify({
+            // Show/hide controls
+            const showEvents = ['mousemove', 'touchstart', 'mousedown'];
+            showEvents.forEach(e => document.addEventListener(e, showControls));
+            video.onclick = (e) => {
+                e.stopPropagation();
+                showControls();
+            };
 
-type: "chat",
-message: msg
+            // Start video
+            video.play().catch(() => {});
+        }
 
-}))
+        function updatePreviewUI(pos) {
+            const time = pos * video.duration;
+            previewTime.innerText = formatTime(time);
+            seekbarPreview.style.left = (pos * 100) + '%';
 
-}
+            try {
+                const canvas = document.getElementById('preview-canvas');
+                canvas.width = 100;
+                canvas.height = 60;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(video, 0, 0, 100, 60);
+                previewImg.src = canvas.toDataURL();
+            } catch (e) {
+                previewImg.src = 'https://via.placeholder.com/100x60?text=Preview';
+            }
+        }
 
-video.onplay = sync
-video.onpause = sync
-video.onseeked = sync
+        function updateProgress() {
+            const percent = (video.currentTime / video.duration) * 100;
+            seekbarFill.style.width = percent + '%';
+            timeInfo.innerText = `${formatTime(video.currentTime)} / ${formatTime(video.duration)}`;
+        }
 
-function sync() {
+        function toggleLock() {
+            isLocked = !isLocked;
+            lockBtn.innerHTML = isLocked ? '<i class="fa-solid fa-lock"></i>' : '<i class="fa-solid fa-lock-open"></i>';
+            lockBtn.classList.toggle('active', isLocked);
+            if (isLocked) controls.classList.remove('visible');
+        }
 
-ws.send(JSON.stringify({
+        let controlsTimeout;
+        function showControls() {
+            if (isLocked) return;
+            controls.classList.add('visible');
+            playerInfo.classList.add('visible');
+            clearTimeout(controlsTimeout);
+            controlsTimeout = setTimeout(() => {
+                if (!video.paused) {
+                    controls.classList.remove('visible');
+                    playerInfo.classList.remove('visible');
+                }
+            }, 4000);
+        }
 
-type: "sync",
+        function formatTime(s) {
+            if (isNaN(s)) return '00:00';
+            const h = Math.floor(s / 3600);
+            const m = Math.floor((s % 3600) / 60);
+            const sec = Math.floor(s % 60);
+            return h > 0 ? `${h}:${m.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}` : `${m.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
+        }
 
-data: {
+        // ==================== CHAT FUNCTIONALITY ====================
+        const userColors = [
+            '#0072d2', '#00a8ff', '#ff6b6b', '#4ecdc4', '#45b7d1',
+            '#f9ca24', '#6c5ce7', '#a29bfe', '#fd79a8', '#fdcb6e'
+        ];
 
-playing: !video.paused,
-time: video.currentTime
+        function getRandomColor() {
+            return userColors[Math.floor(Math.random() * userColors.length)];
+        }
 
-}
+        function getInitials(name) {
+            return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+        }
 
-}))
+        function addMessage(author, text, isSystem = false) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isSystem ? 'system' : ''}`;
 
-}
+            if (isSystem) {
+                messageDiv.innerHTML = `<div class="message-text">${text}</div>`;
+            } else {
+                const color = getRandomColor();
+                const initials = getInitials(author);
+                const now = new Date();
+                const timeStr = now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 
-</script>
+                messageDiv.innerHTML = `
+                    <div class="message-avatar" style="background: linear-gradient(135deg, ${color}, ${color}dd);">
+                        ${initials}
+                    </div>
+                    <div class="message-content">
+                        <div class="message-header">
+                            <span class="message-author">${author}</span>
+                            <span class="message-time">${timeStr}</span>
+                        </div>
+                        <div class="message-text">${escapeHtml(text)}</div>
+                    </div>
+                `;
+            }
 
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function escapeHtml(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text.replace(/[&<>"']/g, m => map[m]);
+        }
+
+        // Chat send
+        chatSendBtn.onclick = sendMessage;
+        chatInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        // Auto-resize textarea
+        chatInput.addEventListener('input', () => {
+            chatInput.style.height = 'auto';
+            chatInput.style.height = Math.min(chatInput.scrollHeight, 80) + 'px';
+        });
+
+        function sendMessage() {
+            const text = chatInput.value.trim();
+            if (!text) return;
+
+            // Generate random user name for demo
+            const names = ['Você', 'João', 'Maria', 'Pedro', 'Ana', 'Carlos', 'Lucia', 'Rafael', 'Sofia', 'Bruno'];
+            const author = text.includes('Você') ? 'Você' : names[Math.floor(Math.random() * names.length)];
+
+            addMessage(author, text);
+            chatInput.value = '';
+            chatInput.style.height = 'auto';
+
+            // Simulate other users typing
+            if (Math.random() > 0.5) {
+                setTimeout(() => {
+                    const randomNames = names.filter(n => n !== author);
+                    const randomAuthor = randomNames[Math.floor(Math.random() * randomNames.length)];
+                    const messages = [
+                        '😂 Muito bom!',
+                        'Concordo!',
+                        'Que legal!',
+                        'Adorei!',
+                        'Haha!',
+                        'Verdade!',
+                        'Exatamente!',
+                        '👍',
+                        'Boa!',
+                        'Que cena!'
+                    ];
+                    const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+                    addMessage(randomAuthor, randomMessage);
+                }, 800 + Math.random() * 1200);
+            }
+        }
+
+        // Simulate viewers joining
+        function simulateViewers() {
+            setInterval(() => {
+                if (Math.random() > 0.7) {
+                    currentViewers = Math.min(currentViewers + Math.floor(Math.random() * 3) + 1, 50);
+                } else if (currentViewers > 1 && Math.random() > 0.8) {
+                    currentViewers = Math.max(currentViewers - 1, 1);
+                }
+                viewerNumber.innerText = currentViewers;
+            }, 5000);
+        }
+
+        // ==================== INITIALIZATION ====================
+        window.addEventListener('load', () => {
+            initPlayer();
+            simulateViewers();
+
+            // Add some demo messages
+            setTimeout(() => {
+                addMessage('João', 'Opa, que legal essa feature!');
+            }, 2000);
+
+            setTimeout(() => {
+                addMessage('Maria', 'Verdade, adorei! 🎬');
+            }, 3500);
+        });
+    </script>
 </body>
 </html>
