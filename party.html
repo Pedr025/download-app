@@ -174,6 +174,9 @@
         <div class="modal-content">
             <h2 style="color: white; margin-bottom: 10px;">Watch Party</h2>
             <p style="color: #aaa; font-size: 14px;">Faça login para assistir com seus amigos</p>
+            <div id="login-loading" style="display:none; color: white; margin-top: 20px;">
+                <i class="fas fa-spinner fa-spin"></i> Autenticando...
+            </div>
             <button class="google-btn" id="google-login" style="background:white; color:black; border:none; padding:12px; border-radius:50px; width:100%; margin-top:20px; font-weight:bold; display:flex; align-items:center; justify-content:center; gap:10px; cursor:pointer;">
                 <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18"> Entrar com Google
             </button>
@@ -186,61 +189,78 @@
             <h3 style="color: white; margin-bottom: 15px;">Mudar Filme/Série</h3>
             <input type="text" id="admin-search" placeholder="Pesquisar..." style="width:100%; padding:12px; border-radius:8px; background:#333; border:none; color:white; outline:none;">
             <div class="search-results" id="admin-results"></div>
-            <button onclick="document.getElementById('admin-modal').classList.remove('active')" style="background:none; border:none; color:#aaa; margin-top:15px; cursor:pointer;">Fechar</button>
+            <button onclick="document.getElementById('admin-modal').classList.remove('active')" style="margin-top:20px; background:none; border:none; color:#aaa; cursor:pointer;">Fechar</button>
         </div>
     </div>
 
     <!-- MODAL ENQUETE -->
     <div class="modal" id="poll-modal">
         <div class="modal-content">
-            <h3 style="color: white; margin-bottom: 15px;">Criar Enquete de Votação</h3>
-            <input type="text" id="poll-msg" placeholder="Mensagem da enquete..." style="width:100%; padding:12px; margin-bottom:10px; border-radius:8px; background:#333; border:none; color:white;">
-            <input type="text" id="poll-search" placeholder="Pesquisar filme para opção..." style="width:100%; padding:12px; border-radius:8px; background:#333; border:none; color:white;">
+            <h3 style="color: white; margin-bottom: 15px;">Criar Enquete</h3>
+            <input type="text" id="poll-msg" placeholder="Pergunta da enquete..." style="width:100%; padding:12px; border-radius:8px; background:#333; border:none; color:white; outline:none; margin-bottom:10px;">
+            <div id="selected-options" style="display:flex; flex-wrap:wrap; gap:5px; margin-bottom:10px;"></div>
+            <input type="text" id="poll-search" placeholder="Buscar filmes para opções..." style="width:100%; padding:12px; border-radius:8px; background:#333; border:none; color:white; outline:none;">
             <div class="search-results" id="poll-results"></div>
-            <div id="selected-options" style="margin-top:10px; display:flex; gap:5px; flex-wrap:wrap;"></div>
-            <button class="send-btn" id="confirm-poll" style="width:100%; border-radius:8px; margin-top:15px;">LANÇAR ENQUETE</button>
-            <button onclick="document.getElementById('poll-modal').classList.remove('active')" style="background:none; border:none; color:#aaa; margin-top:15px; cursor:pointer;">Cancelar</button>
+            <button id="confirm-poll" style="width:100%; padding:12px; border-radius:8px; background:var(--accent); border:none; color:white; font-weight:bold; margin-top:15px; cursor:pointer;">Lançar Enquete</button>
+            <button onclick="document.getElementById('poll-modal').classList.remove('active')" style="margin-top:15px; background:none; border:none; color:#aaa; cursor:pointer;">Cancelar</button>
         </div>
     </div>
 
     <div class="watch-party-container">
+        <!-- LADO ESQUERDO: PLAYER -->
         <div class="player-section">
             <div class="player-wrapper" id="player-wrapper">
                 <video id="main-video" playsinline></video>
+                
                 <div class="player-info-overlay">
-                    <div class="room-badges">
-                        <div class="badge"><i class="fas fa-video"></i> WATCH PARTY</div>
-                        <div class="badge viewers"><i class="fas fa-users"></i> <span id="user-count">1</span> ONLINE</div>
-                        <div id="premium-badge-area"></div>
-                    </div>
-                    <button class="admin-btn" id="open-admin-panel"><i class="fas fa-exchange-alt"></i> MUDAR FILME</button>
+                    <div id="premium-badge-area"></div>
+                    <div class="badge viewers" id="viewer-count"><i class="fas fa-eye"></i> 1 assistindo</div>
                 </div>
+
                 <div class="bottom-controls">
-                    <div class="seekbar-container" id="seekbar"><div class="seekbar-fill" id="fill"></div></div>
+                    <div class="seekbar-container" id="seekbar">
+                        <div class="seekbar-fill" id="fill"></div>
+                    </div>
                     <div class="control-row">
-                        <div id="time-display">00:00 / 00:00</div>
-                        <i class="fas fa-expand" id="fs-btn" style="cursor: pointer;"></i>
+                        <div style="display:flex; align-items:center; gap:15px;">
+                            <i class="fas fa-play" id="play-pause" style="cursor:pointer;"></i>
+                            <span id="time-display">00:00 / 00:00</span>
+                        </div>
+                        <div style="display:flex; gap:15px;">
+                            <button class="admin-btn" onclick="document.getElementById('admin-modal').classList.add('active')">
+                                <i class="fas fa-film"></i> Mudar Filme
+                            </button>
+                            <i class="fas fa-expand" id="fs-btn" style="cursor:pointer;"></i>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-	        <div class="chat-section">
-            <div class="chat-bg-video"><video id="bg-video" muted playsinline></video></div>
+
+        <!-- LADO DIREITO: CHAT -->
+        <div class="chat-section">
+            <div class="chat-bg-video">
+                <video id="bg-video" muted loop playsinline></video>
+            </div>
+
             <div class="chat-header">
                 <div class="chat-title-area">
-                    <i class="fas fa-comments" style="color: var(--accent-light);"></i>
-                    <h2>Chat ao Vivo</h2>
-                    <div class="user-avatars" id="avatar-list"></div>
+                    <h2>Chat da Party</h2>
                 </div>
+                <div class="user-avatars" id="user-avatars"></div>
             </div>
+
             <div class="chat-messages" id="chat-box"></div>
+
             <div class="chat-input-area">
                 <div class="msg-limit-overlay" id="limit-overlay">
-                    <span style="color:white; font-size:12px;">Limite atingido! <b id="timer">01:30</b></span>
-                    <button class="premium-btn-small" onclick="window.location.href='premium.html'">REMOVER BLOQUEIO</button>
+                    <span style="color:white; font-size:12px;">Limite de 5 mensagens atingido!</span>
+                    <button class="premium-btn-small">Seja Premium</button>
                 </div>
-                <button class="poll-btn" id="open-poll-btn"><i class="fas fa-chart-bar"></i></button>
-                <div class="input-wrapper"><input type="text" id="chat-input" placeholder="Diga algo..."></div>
+                <button class="poll-btn" id="open-poll-btn"><i class="fas fa-poll"></i></button>
+                <div class="input-wrapper">
+                    <input type="text" id="chat-input" placeholder="Diga algo...">
+                </div>
                 <button class="send-btn" id="send-msg"><i class="fas fa-paper-plane"></i></button>
             </div>
         </div>
@@ -257,15 +277,19 @@
             messagingSenderId: "635179962057",
             appId: "1:635179962057:android:74e392a19328c77d450718"
         };
-
+        // Inicializar Firebase com persistência local explícita
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
+        
+        // Garantir persistência local para que o login não se perca ao fechar/recarregar a aba
+        auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+
         const db = firebase.database();
         const roomRef = db.ref('rooms/default_room');
         const API_URL = "https://pkfilmes.pages.dev/movies_data.json";
 
         // ADMINS
-        const ADMIN_EMAILS = ["grudentt@gmail.com"]; // Adicione mais e-mails aqui
+        const ADMIN_EMAILS = ["grudentt@gmail.com"];
 
         const video = document.getElementById('main-video');
         const bgVideo = document.getElementById('bg-video');
@@ -281,56 +305,88 @@
         let allMovies = [];
         let selectedPollOptions = [];
 
-        // --- AUTENTICAÇÃO ---
+        // --- TRATAMENTO DE REDIRECIONAMENTO DO GOOGLE ---
+        // Essencial para capturar o resultado do login após o retorno da tela do Google
+        auth.getRedirectResult().then((result) => {
+            if (result.user) {
+                console.log("Login via redirecionamento bem-sucedido:", result.user.email);
+            }
+        }).catch((error) => {
+            console.error("Erro no redirecionamento:", error);
+            alert("Erro ao completar login: " + error.message);
+        });
+
+        // --- MONITOR DE ESTADO DE AUTENTICAÇÃO ---
         auth.onAuthStateChanged(user => {
             if (user) {
                 currentUser = user;
                 checkUserRole();
             } else {
                 document.getElementById('login-modal').classList.add('active');
+                document.getElementById('google-login').style.display = 'flex';
+                document.getElementById('login-loading').style.display = 'none';
             }
         });
 
         document.getElementById('google-login').onclick = () => {
-            auth.signInWithRedirect(new firebase.auth.GoogleAuthProvider());
+            document.getElementById('google-login').style.display = 'none';
+            document.getElementById('login-loading').style.display = 'block';
+            const provider = new firebase.auth.GoogleAuthProvider();
+            auth.signInWithRedirect(provider);
         };
 
         async function checkUserRole() {
             const userRef = db.ref('users/' + currentUser.uid);
-            const snapshot = await userRef.get();
-            let data = snapshot.val();
-
-            if (!data) {
-                data = {
-                    name: currentUser.displayName,
-                    email: currentUser.email,
-                    photo: currentUser.photoURL,
-                    isPremium: false,
-                    lastPoll: 0
-                };
-                userRef.set(data);
-            }
-
-            userData = data;
-            userData.isAdmin = ADMIN_EMAILS.includes(currentUser.email);
             
-            if (userData.isAdmin) document.body.classList.add('admin-active');
-            if (userData.isPremium) {
-                document.getElementById('premium-badge-area').innerHTML = '<div class="badge premium"><i class="fas fa-crown"></i> PREMIUM</div>';
-            }
+            try {
+                const snapshot = await userRef.get();
+                let data = snapshot.val();
 
-            document.getElementById('login-modal').classList.remove('active');
-            initParty();
+                if (!data) {
+                    data = {
+                        name: currentUser.displayName || "Usuário",
+                        email: currentUser.email,
+                        photo: currentUser.photoURL || "",
+                        isPremium: false,
+                        lastPoll: 0
+                    };
+                    await userRef.set(data);
+                }
+
+                userData = data;
+                userData.isAdmin = ADMIN_EMAILS.includes(currentUser.email);
+                
+                if (userData.isAdmin) document.body.classList.add('admin-active');
+                if (userData.isPremium) {
+                    document.getElementById('premium-badge-area').innerHTML = '<div class="badge premium"><i class="fas fa-crown"></i> PREMIUM</div>';
+                }
+
+                document.getElementById('login-modal').classList.remove('active');
+                initParty();
+            } catch (e) {
+                console.error("Erro ao verificar papel do usuário:", e);
+                // Mesmo com erro, tenta iniciar a party com dados básicos
+                initParty();
+                document.getElementById('login-modal').classList.remove('active');
+            }
         }
 
         // --- INICIALIZAÇÃO ---
         async function initParty() {
-            const res = await fetch(API_URL);
-            allMovies = await res.json();
+            try {
+                const res = await fetch(API_URL);
+                allMovies = await res.json();
+            } catch (e) {
+                console.error("Erro ao carregar filmes:", e);
+            }
 
             // Presença
             const presenceRef = roomRef.child('users').child(currentUser.uid);
-            presenceRef.set({ name: currentUser.displayName, photo: currentUser.photoURL, initial: currentUser.displayName.charAt(0) });
+            presenceRef.set({ 
+                name: currentUser.displayName || "Usuário", 
+                photo: currentUser.photoURL || "", 
+                initial: (currentUser.displayName || "U").charAt(0) 
+            });
             presenceRef.onDisconnect().remove();
 
             // Sincronização
@@ -348,34 +404,27 @@
                 }
             });
 
-            // Chat & Ads
-            roomRef.child('chat').limitToLast(30).on('child_added', snapshot => {
-                renderMessage(snapshot.val());
-                totalMsgsSent++;
-                if (!userData.isPremium && totalMsgsSent % 5 === 0) renderAd();
-            });
-
-            // Avatares
+            // Usuários Online
             roomRef.child('users').on('value', snapshot => {
                 const users = snapshot.val() || {};
-                const list = document.getElementById('avatar-list');
-                list.innerHTML = '';
-                let i = 0;
-                for (let id in users) {
-                    if (i < 3) {
-                        const div = document.createElement('div');
-                        div.className = 'avatar-stack';
-                        if (users[id].photo) div.style.backgroundImage = `url(${users[id].photo})`;
-                        else div.innerText = users[id].initial;
-                        list.appendChild(div);
-                    }
-                    i++;
-                }
-                document.getElementById('user-count').innerText = i;
+                const userList = Object.values(users);
+                document.getElementById('viewer-count').innerHTML = `<i class="fas fa-eye"></i> ${userList.length} assistindo`;
+                
+                const avatars = document.getElementById('user-avatars');
+                avatars.innerHTML = userList.slice(0, 5).map(u => `
+                    <div class="avatar-stack" style="${u.photo ? `background-image:url(${u.photo})` : ''}">${u.photo ? '' : u.initial}</div>
+                `).join('') + (userList.length > 5 ? `<div class="avatar-stack">+${userList.length - 5}</div>` : '');
+            });
+
+            // Chat
+            roomRef.child('chat').limitToLast(50).on('child_added', snapshot => {
+                const msg = snapshot.val();
+                if (msg.type === 'poll') renderPoll(msg, snapshot.key);
+                else renderMsg(msg);
             });
         }
 
-        // --- CONTROLES ADMIN ---
+        // --- CONTROLES DE VÍDEO ---
         function updateSync(playing) {
             if (!userData.isAdmin) return;
             isLocalAction = true;
@@ -384,36 +433,39 @@
                 time: video.currentTime,
                 playing: playing,
                 sender: currentUser.uid
-            }).then(() => setTimeout(() => isLocalAction = false, 500));
+            });
+            setTimeout(() => isLocalAction = false, 500);
         }
 
-        video.onplay = () => { bgVideo.play().catch(()=>{}); updateSync(true); };
-        video.onpause = () => { bgVideo.pause(); updateSync(false); };
-        video.onseeked = () => updateSync(!video.paused);
-        video.ontimeupdate = () => {
-            const p = (video.currentTime / video.duration) * 100;
-            seekFill.style.width = p + '%';
-            document.getElementById('time-display').innerText = formatTime(video.currentTime) + ' / ' + formatTime(video.duration);
-            if (Math.abs(bgVideo.currentTime - video.currentTime) > 0.3) bgVideo.currentTime = video.currentTime;
+        document.getElementById('play-pause').onclick = () => {
+            if (!userData.isAdmin) return;
+            if (video.paused) {
+                video.play();
+                updateSync(true);
+            } else {
+                video.pause();
+                updateSync(false);
+            }
         };
+
+        video.onplay = () => document.getElementById('play-pause').className = 'fas fa-pause';
+        video.onpause = () => document.getElementById('play-pause').className = 'fas fa-play';
 
         document.getElementById('seekbar').onclick = (e) => {
             if (!userData.isAdmin) return;
             const rect = e.currentTarget.getBoundingClientRect();
-            video.currentTime = ((e.clientX - rect.left) / rect.width) * video.duration;
+            const pos = (e.clientX - rect.left) / rect.width;
+            video.currentTime = pos * video.duration;
+            updateSync(!video.paused);
         };
 
-        // --- MUDAR FILME (ADMIN) ---
-        document.getElementById('open-admin-panel').onclick = () => {
-            document.getElementById('admin-modal').classList.add('active');
-            renderSearchResults('', 'admin-results', (item) => {
-                video.src = item.link_mp4;
-                bgVideo.src = item.link_mp4;
-                updateSync(true);
-                document.getElementById('admin-modal').classList.remove('active');
-            });
+        video.ontimeupdate = () => {
+            const p = (video.currentTime / video.duration) * 100;
+            seekFill.style.width = p + '%';
+            document.getElementById('time-display').innerText = `${formatTime(video.currentTime)} / ${formatTime(video.duration)}`;
         };
 
+        // --- ADMIN BUSCA ---
         document.getElementById('admin-search').oninput = (e) => {
             renderSearchResults(e.target.value, 'admin-results', (item) => {
                 video.src = item.link_mp4;
@@ -423,95 +475,78 @@
             });
         };
 
-        // --- CHAT & LIMITS ---
+        // --- CHAT LOGIC ---
         document.getElementById('send-msg').onclick = sendMessage;
-        document.getElementById('chat-input').onkeypress = (e) => { if(e.key === 'Enter') sendMessage(); };
+        chatInput.onkeypress = (e) => e.key === 'Enter' && sendMessage();
 
         function sendMessage() {
-            if (!userData.isPremium && msgCount >= 2) return;
             const text = chatInput.value.trim();
             if (!text) return;
 
+            if (!userData.isPremium && msgCount >= 5) {
+                document.getElementById('limit-overlay').classList.add('active');
+                return;
+            }
+
             roomRef.child('chat').push({
                 uid: currentUser.uid,
-                name: currentUser.displayName,
-                photo: currentUser.photoURL,
+                name: currentUser.displayName || "Usuário",
+                photo: currentUser.photoURL || "",
                 text: text,
-                type: 'text'
+                timestamp: Date.now()
             });
 
             chatInput.value = '';
-            if (!userData.isPremium) {
-                msgCount++;
-                if (msgCount >= 2) startMsgTimer();
-            }
+            msgCount++;
+            totalMsgsSent++;
         }
 
-        function startMsgTimer() {
-            const overlay = document.getElementById('limit-overlay');
-            const timerEl = document.getElementById('timer');
-            overlay.classList.add('active');
-            let time = 90;
-            const int = setInterval(() => {
-                time--;
-                let m = Math.floor(time / 60), s = time % 60;
-                timerEl.innerText = `${m}:${s.toString().padStart(2,'0')}`;
-                if (time <= 0) {
-                    clearInterval(int);
-                    overlay.classList.remove('active');
-                    msgCount = 0;
-                }
-            }, 1000);
-        }
-
-        function renderMessage(msg) {
+        function renderMsg(msg) {
             const div = document.createElement('div');
             div.className = 'msg';
-            if (msg.type === 'poll') {
-                div.innerHTML = `
-                    <div class="poll-card">
-                        <div class="poll-creator"><img src="${msg.photo}"> Criada por ${msg.name}</div>
-                        <b>📊 ${msg.text}</b>
-                        ${msg.options.map(opt => `
-                            <div class="poll-option" onclick="handlePollVote('${opt.id}')">
-                                <img src="${opt.capa}">
-                                <span>${opt.titulo}</span>
-                            </div>
-                        `).join('')}
-                    </div>
-                `;
-            } else {
-                const avatar = msg.photo ? `style="background-image:url(${msg.photo})"` : '';
-                div.innerHTML = `
-                    <div class="msg-avatar" ${avatar}>${!msg.photo ? msg.name.charAt(0) : ''}</div>
-                    <div class="msg-body">
-                        <div class="msg-user">${msg.name}</div>
-                        <div class="msg-text">${msg.text}</div>
-                    </div>
-                `;
-            }
+            div.innerHTML = `
+                <div class="msg-avatar" style="${msg.photo ? `background-image:url(${msg.photo})` : ''}">${msg.photo ? '' : msg.name.charAt(0)}</div>
+                <div class="msg-body">
+                    <div class="msg-user">${msg.name}</div>
+                    <div class="msg-text">${msg.text}</div>
+                </div>
+            `;
             chatBox.appendChild(div);
             chatBox.scrollTop = chatBox.scrollHeight;
         }
 
-        function renderAd() {
+        function renderPoll(poll, key) {
             const div = document.createElement('div');
-            div.className = 'ad-banner';
+            div.className = 'poll-card';
             div.innerHTML = `
-                <div style="font-size:10px; color:#aaa; margin-bottom:5px;">Publicidade</div>
-                <ins class="adsbygoogle" style="display:inline-block;width:320px;height:50px" data-ad-client="ca-pub-xxx"></ins>
-                <div id="ad-container-${totalMsgsSent}"></div>
+                <div class="poll-creator">
+                    <img src="${poll.photo}"> <span>${poll.name} criou uma enquete</span>
+                </div>
+                <div style="font-weight:bold; margin-bottom:10px;">${poll.text}</div>
+                ${poll.options.map(opt => `
+                    <div class="poll-option" onclick="handlePollVote('${opt.id}')">
+                        <img src="${opt.capa}">
+                        <span>${opt.titulo}</span>
+                    </div>
+                `).join('')}
+                <div style="margin-top:10px; border-top:1px solid rgba(255,255,255,0.1); padding-top:10px;">
+                    <div style="font-size:10px; color:#aaa; margin-bottom:5px;">Publicidade</div>
+                    <ins class="adsbygoogle" style="display:inline-block;width:320px;height:50px" data-ad-client="ca-pub-xxx"></ins>
+                    <div id="ad-container-${totalMsgsSent}"></div>
+                </div>
             `;
             chatBox.appendChild(div);
             
             // Injetar script de anúncio
             const container = document.getElementById(`ad-container-${totalMsgsSent}`);
-            const s1 = document.createElement('script');
-            s1.innerHTML = `atOptions = {'key' : 'd743ea16ee8525c87e3b9f86c525d9ac','format' : 'iframe','height' : 50,'width' : 320,'params' : {}};`;
-            const s2 = document.createElement('script');
-            s2.src = "https://peacockvowel.com/d743ea16ee8525c87e3b9f86c525d9ac/invoke.js";
-            container.appendChild(s1);
-            container.appendChild(s2);
+            if (container) {
+                const s1 = document.createElement('script');
+                s1.innerHTML = `atOptions = {'key' : 'd743ea16ee8525c87e3b9f86c525d9ac','format' : 'iframe','height' : 50,'width' : 320,'params' : {}};`;
+                const s2 = document.createElement('script');
+                s2.src = "https://peacockvowel.com/d743ea16ee8525c87e3b9f86c525d9ac/invoke.js";
+                container.appendChild(s1);
+                container.appendChild(s2);
+            }
             
             chatBox.scrollTop = chatBox.scrollHeight;
         }
@@ -557,8 +592,8 @@
             roomRef.child('chat').push({
                 type: 'poll',
                 uid: currentUser.uid,
-                name: currentUser.displayName,
-                photo: currentUser.photoURL,
+                name: currentUser.displayName || "Usuário",
+                photo: currentUser.photoURL || "",
                 text: msg,
                 options: selectedPollOptions.map(o => ({ id: o.id, titulo: o.titulo, capa: o.capa, link: o.link_mp4 }))
             });
