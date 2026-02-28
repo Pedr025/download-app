@@ -165,21 +165,39 @@
         .search-item-info { display: flex; flex-direction: column; justify-content: center; }
         .search-item-title { font-size: 13px; font-weight: bold; color: white; }
         .search-item-type { font-size: 10px; color: var(--accent-light); }
+
+        /* DEBUG LOGS (OCULTO POR PADRÃO) */
+        #debug-console {
+            position: fixed; bottom: 0; left: 0; right: 0; height: 150px; 
+            background: rgba(0,0,0,0.8); color: #0f0; font-family: monospace; 
+            font-size: 10px; padding: 10px; overflow-y: auto; z-index: 3000; 
+            display: none; pointer-events: none;
+        }
     </style>
 </head>
 <body>
+
+    <div id="debug-console"></div>
 
     <!-- LOGIN MODAL -->
     <div class="modal" id="login-modal">
         <div class="modal-content">
             <h2 style="color: white; margin-bottom: 10px;">Watch Party</h2>
             <p style="color: #aaa; font-size: 14px;">Faça login para assistir com seus amigos</p>
+            <div id="login-status" style="color: #00a8ff; font-size: 12px; margin-top: 10px;">Aguardando...</div>
+            
+            <div id="login-options" style="margin-top:20px;">
+                <button class="google-btn" id="google-login-popup" style="background:white; color:black; border:none; padding:12px; border-radius:50px; width:100%; font-weight:bold; display:flex; align-items:center; justify-content:center; gap:10px; cursor:pointer; margin-bottom:10px;">
+                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18"> Entrar (Popup)
+                </button>
+                <button class="google-btn" id="google-login-redirect" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.2); padding:10px; border-radius:50px; width:100%; font-size:12px; display:flex; align-items:center; justify-content:center; gap:10px; cursor:pointer;">
+                    Problemas? Tentar Redirecionamento
+                </button>
+            </div>
+            
             <div id="login-loading" style="display:none; color: white; margin-top: 20px;">
                 <i class="fas fa-spinner fa-spin"></i> Autenticando...
             </div>
-            <button class="google-btn" id="google-login" style="background:white; color:black; border:none; padding:12px; border-radius:50px; width:100%; margin-top:20px; font-weight:bold; display:flex; align-items:center; justify-content:center; gap:10px; cursor:pointer;">
-                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18"> Entrar com Google
-            </button>
         </div>
     </div>
 
@@ -207,16 +225,13 @@
     </div>
 
     <div class="watch-party-container">
-        <!-- LADO ESQUERDO: PLAYER -->
         <div class="player-section">
             <div class="player-wrapper" id="player-wrapper">
                 <video id="main-video" playsinline></video>
-                
                 <div class="player-info-overlay">
                     <div id="premium-badge-area"></div>
                     <div class="badge viewers" id="viewer-count"><i class="fas fa-eye"></i> 1 assistindo</div>
                 </div>
-
                 <div class="bottom-controls">
                     <div class="seekbar-container" id="seekbar">
                         <div class="seekbar-fill" id="fill"></div>
@@ -237,21 +252,17 @@
             </div>
         </div>
 
-        <!-- LADO DIREITO: CHAT -->
         <div class="chat-section">
             <div class="chat-bg-video">
                 <video id="bg-video" muted loop playsinline></video>
             </div>
-
             <div class="chat-header">
                 <div class="chat-title-area">
                     <h2>Chat da Party</h2>
                 </div>
                 <div class="user-avatars" id="user-avatars"></div>
             </div>
-
             <div class="chat-messages" id="chat-box"></div>
-
             <div class="chat-input-area">
                 <div class="msg-limit-overlay" id="limit-overlay">
                     <span style="color:white; font-size:12px;">Limite de 5 mensagens atingido!</span>
@@ -267,6 +278,13 @@
     </div>
 
     <script>
+        function log(msg) {
+            const consoleDiv = document.getElementById('debug-console');
+            consoleDiv.innerHTML += `<div>[${new Date().toLocaleTimeString()}] ${msg}</div>`;
+            consoleDiv.scrollTop = consoleDiv.scrollHeight;
+            console.log(msg);
+        }
+
         // CONFIGURAÇÃO FIREBASE
         const firebaseConfig = {
             apiKey: "AIzaSyB0IJNOMSnpHEazCNA7Nu02gsbAUNvmIYE",
@@ -277,20 +295,13 @@
             messagingSenderId: "635179962057",
             appId: "1:635179962057:android:74e392a19328c77d450718"
         };
-        // Inicializar Firebase com persistência local explícita
-        firebase.initializeApp(firebaseConfig);
+	        firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
-        
-        // Garantir persistência local para que o login não se perca ao fechar/recarregar a aba
-        auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
-
         const db = firebase.database();
         const roomRef = db.ref('rooms/default_room');
         const API_URL = "https://pkfilmes.pages.dev/movies_data.json";
 
-        // ADMINS
         const ADMIN_EMAILS = ["grudentt@gmail.com"];
-
         const video = document.getElementById('main-video');
         const bgVideo = document.getElementById('bg-video');
         const seekFill = document.getElementById('fill');
@@ -305,44 +316,71 @@
         let allMovies = [];
         let selectedPollOptions = [];
 
-        // --- TRATAMENTO DE REDIRECIONAMENTO DO GOOGLE ---
-        // Essencial para capturar o resultado do login após o retorno da tela do Google
-        auth.getRedirectResult().then((result) => {
-            if (result.user) {
-                console.log("Login via redirecionamento bem-sucedido:", result.user.email);
-            }
-        }).catch((error) => {
-            console.error("Erro no redirecionamento:", error);
-            alert("Erro ao completar login: " + error.message);
+        // Definir persistência local imediatamente
+        auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).then(() => {
+            log("Persistência definida como LOCAL");
         });
 
-        // --- MONITOR DE ESTADO DE AUTENTICAÇÃO ---
+        // Monitorar estado de autenticação
         auth.onAuthStateChanged(user => {
             if (user) {
+                log("Usuário logado: " + user.email);
                 currentUser = user;
+                document.getElementById('login-status').innerText = "Logado como " + user.displayName;
                 checkUserRole();
             } else {
+                log("Nenhum usuário logado.");
                 document.getElementById('login-modal').classList.add('active');
-                document.getElementById('google-login').style.display = 'flex';
+                document.getElementById('login-options').style.display = 'block';
                 document.getElementById('login-loading').style.display = 'none';
+                document.getElementById('login-status').innerText = "Faça login para continuar";
             }
         });
 
-        document.getElementById('google-login').onclick = () => {
-            document.getElementById('google-login').style.display = 'none';
+        // Capturar resultado de redirecionamento (se houver)
+        auth.getRedirectResult().then((result) => {
+            if (result.user) {
+                log("Sucesso no redirecionamento: " + result.user.email);
+            }
+        }).catch((error) => {
+            log("Erro no redirecionamento: " + error.message);
+            if (error.code === 'auth/account-exists-with-different-credential') {
+                alert("Esta conta já existe com outro método de login.");
+            }
+        });
+
+        // LOGIN VIA POPUP (Mais estável para sites com domínios diferentes)
+        document.getElementById('google-login-popup').onclick = () => {
+            log("Iniciando login via Popup...");
+            const provider = new firebase.auth.GoogleAuthProvider();
+            document.getElementById('login-options').style.display = 'none';
             document.getElementById('login-loading').style.display = 'block';
+            
+            auth.signInWithPopup(provider).then((result) => {
+                log("Popup sucesso: " + result.user.email);
+            }).catch((error) => {
+                log("Popup erro: " + error.message);
+                document.getElementById('login-options').style.display = 'block';
+                document.getElementById('login-loading').style.display = 'none';
+                alert("Erro no login: " + error.message);
+            });
+        };
+
+        // LOGIN VIA REDIRECT (Alternativa)
+        document.getElementById('google-login-redirect').onclick = () => {
+            log("Iniciando login via Redirect...");
             const provider = new firebase.auth.GoogleAuthProvider();
             auth.signInWithRedirect(provider);
         };
 
         async function checkUserRole() {
+            log("Verificando dados no banco...");
             const userRef = db.ref('users/' + currentUser.uid);
-            
             try {
                 const snapshot = await userRef.get();
                 let data = snapshot.val();
-
                 if (!data) {
+                    log("Novo usuário, criando perfil...");
                     data = {
                         name: currentUser.displayName || "Usuário",
                         email: currentUser.email,
@@ -352,35 +390,28 @@
                     };
                     await userRef.set(data);
                 }
-
                 userData = data;
                 userData.isAdmin = ADMIN_EMAILS.includes(currentUser.email);
-                
                 if (userData.isAdmin) document.body.classList.add('admin-active');
                 if (userData.isPremium) {
                     document.getElementById('premium-badge-area').innerHTML = '<div class="badge premium"><i class="fas fa-crown"></i> PREMIUM</div>';
                 }
-
                 document.getElementById('login-modal').classList.remove('active');
                 initParty();
             } catch (e) {
-                console.error("Erro ao verificar papel do usuário:", e);
-                // Mesmo com erro, tenta iniciar a party com dados básicos
+                log("Erro no DB: " + e.message);
                 initParty();
                 document.getElementById('login-modal').classList.remove('active');
             }
         }
 
-        // --- INICIALIZAÇÃO ---
         async function initParty() {
+            log("Iniciando party...");
             try {
                 const res = await fetch(API_URL);
                 allMovies = await res.json();
-            } catch (e) {
-                console.error("Erro ao carregar filmes:", e);
-            }
+            } catch (e) { log("Erro API: " + e.message); }
 
-            // Presença
             const presenceRef = roomRef.child('users').child(currentUser.uid);
             presenceRef.set({ 
                 name: currentUser.displayName || "Usuário", 
@@ -389,34 +420,27 @@
             });
             presenceRef.onDisconnect().remove();
 
-            // Sincronização
             roomRef.child('sync').on('value', snapshot => {
-                if (isLocalAction || !userData.isAdmin && snapshot.val()?.sender !== currentUser.uid) {
-                    const data = snapshot.val();
-                    if (!data) return;
-                    if (video.src !== data.url) {
-                        video.src = data.url;
-                        bgVideo.src = data.url;
-                    }
+                const data = snapshot.val();
+                if (!data) return;
+                if (isLocalAction || (!userData.isAdmin && data.sender !== currentUser.uid)) {
+                    if (video.src !== data.url) { video.src = data.url; bgVideo.src = data.url; }
                     if (Math.abs(video.currentTime - data.time) > 2) video.currentTime = data.time;
                     if (data.playing && video.paused) video.play().catch(()=>{});
                     else if (!data.playing && !video.paused) video.pause();
                 }
             });
 
-            // Usuários Online
             roomRef.child('users').on('value', snapshot => {
                 const users = snapshot.val() || {};
                 const userList = Object.values(users);
                 document.getElementById('viewer-count').innerHTML = `<i class="fas fa-eye"></i> ${userList.length} assistindo`;
-                
                 const avatars = document.getElementById('user-avatars');
                 avatars.innerHTML = userList.slice(0, 5).map(u => `
                     <div class="avatar-stack" style="${u.photo ? `background-image:url(${u.photo})` : ''}">${u.photo ? '' : u.initial}</div>
                 `).join('') + (userList.length > 5 ? `<div class="avatar-stack">+${userList.length - 5}</div>` : '');
             });
 
-            // Chat
             roomRef.child('chat').limitToLast(50).on('child_added', snapshot => {
                 const msg = snapshot.val();
                 if (msg.type === 'poll') renderPoll(msg, snapshot.key);
@@ -424,7 +448,6 @@
             });
         }
 
-        // --- CONTROLES DE VÍDEO ---
         function updateSync(playing) {
             if (!userData.isAdmin) return;
             isLocalAction = true;
@@ -439,13 +462,8 @@
 
         document.getElementById('play-pause').onclick = () => {
             if (!userData.isAdmin) return;
-            if (video.paused) {
-                video.play();
-                updateSync(true);
-            } else {
-                video.pause();
-                updateSync(false);
-            }
+            if (video.paused) { video.play(); updateSync(true); } 
+            else { video.pause(); updateSync(false); }
         };
 
         video.onplay = () => document.getElementById('play-pause').className = 'fas fa-pause';
@@ -465,7 +483,6 @@
             document.getElementById('time-display').innerText = `${formatTime(video.currentTime)} / ${formatTime(video.duration)}`;
         };
 
-        // --- ADMIN BUSCA ---
         document.getElementById('admin-search').oninput = (e) => {
             renderSearchResults(e.target.value, 'admin-results', (item) => {
                 video.src = item.link_mp4;
@@ -475,19 +492,16 @@
             });
         };
 
-        // --- CHAT LOGIC ---
         document.getElementById('send-msg').onclick = sendMessage;
         chatInput.onkeypress = (e) => e.key === 'Enter' && sendMessage();
 
         function sendMessage() {
             const text = chatInput.value.trim();
             if (!text) return;
-
             if (!userData.isPremium && msgCount >= 5) {
                 document.getElementById('limit-overlay').classList.add('active');
                 return;
             }
-
             roomRef.child('chat').push({
                 uid: currentUser.uid,
                 name: currentUser.displayName || "Usuário",
@@ -495,7 +509,6 @@
                 text: text,
                 timestamp: Date.now()
             });
-
             chatInput.value = '';
             msgCount++;
             totalMsgsSent++;
@@ -529,29 +542,11 @@
                         <span>${opt.titulo}</span>
                     </div>
                 `).join('')}
-                <div style="margin-top:10px; border-top:1px solid rgba(255,255,255,0.1); padding-top:10px;">
-                    <div style="font-size:10px; color:#aaa; margin-bottom:5px;">Publicidade</div>
-                    <ins class="adsbygoogle" style="display:inline-block;width:320px;height:50px" data-ad-client="ca-pub-xxx"></ins>
-                    <div id="ad-container-${totalMsgsSent}"></div>
-                </div>
             `;
             chatBox.appendChild(div);
-            
-            // Injetar script de anúncio
-            const container = document.getElementById(`ad-container-${totalMsgsSent}`);
-            if (container) {
-                const s1 = document.createElement('script');
-                s1.innerHTML = `atOptions = {'key' : 'd743ea16ee8525c87e3b9f86c525d9ac','format' : 'iframe','height' : 50,'width' : 320,'params' : {}};`;
-                const s2 = document.createElement('script');
-                s2.src = "https://peacockvowel.com/d743ea16ee8525c87e3b9f86c525d9ac/invoke.js";
-                container.appendChild(s1);
-                container.appendChild(s2);
-            }
-            
             chatBox.scrollTop = chatBox.scrollHeight;
         }
 
-        // --- ENQUETES AVANÇADAS ---
         document.getElementById('open-poll-btn').onclick = () => {
             if (!userData.isPremium) {
                 const now = Date.now();
@@ -588,7 +583,6 @@
         document.getElementById('confirm-poll').onclick = () => {
             const msg = document.getElementById('poll-msg').value;
             if (!msg || selectedPollOptions.length === 0) return;
-            
             roomRef.child('chat').push({
                 type: 'poll',
                 uid: currentUser.uid,
@@ -597,25 +591,16 @@
                 text: msg,
                 options: selectedPollOptions.map(o => ({ id: o.id, titulo: o.titulo, capa: o.capa, link: o.link_mp4 }))
             });
-
-            if (!userData.isPremium) {
-                db.ref('users/' + currentUser.uid).update({ lastPoll: Date.now() });
-            }
-
+            if (!userData.isPremium) { db.ref('users/' + currentUser.uid).update({ lastPoll: Date.now() }); }
             document.getElementById('poll-modal').classList.remove('active');
         };
 
         window.handlePollVote = (id) => {
             if (!userData.isAdmin) return;
             const movie = allMovies.find(m => m.id == id);
-            if (movie) {
-                video.src = movie.link_mp4;
-                bgVideo.src = movie.link_mp4;
-                updateSync(true);
-            }
+            if (movie) { video.src = movie.link_mp4; bgVideo.src = movie.link_mp4; updateSync(true); }
         };
 
-        // --- BUSCA ---
         function renderSearchResults(query, targetId, onSelect) {
             const container = document.getElementById(targetId);
             const filtered = allMovies.filter(m => m.titulo.toLowerCase().includes(query.toLowerCase())).slice(0, 10);
@@ -638,6 +623,20 @@
         }
 
         document.getElementById('fs-btn').onclick = () => document.getElementById('player-wrapper').requestFullscreen();
+        
+        // Atalho para abrir console de debug (pressionar 'D' 3 vezes rápido)
+        let dCount = 0;
+        window.addEventListener('keydown', (e) => {
+            if (e.key.toLowerCase() === 'd') {
+                dCount++;
+                if (dCount === 3) {
+                    const dbg = document.getElementById('debug-console');
+                    dbg.style.display = dbg.style.display === 'none' ? 'block' : 'none';
+                    dCount = 0;
+                }
+                setTimeout(() => dCount = 0, 1000);
+            }
+        });
     </script>
 </body>
 </html>
