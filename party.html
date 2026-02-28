@@ -3,8 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Watch Party Pro - 2026</title>
+    <title>Watch Party Pro - Firebase Sync</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+
     <style>
         :root { 
             --accent: #0072d2;
@@ -22,33 +28,27 @@
         /* LAYOUT PRINCIPAL */
         .watch-party-container {
             display: flex;
-            flex-direction: column; /* Estilo YouTube: Player em cima, Chat embaixo no mobile */
+            flex-direction: column;
             width: 100%;
             height: 100%;
             background: #000;
         }
 
         @media (min-width: 1024px) {
-            .watch-party-container {
-                flex-direction: row; /* Desktop: Lado a lado */
-            }
+            .watch-party-container { flex-direction: row; }
         }
 
         /* SEÇÃO DO PLAYER */
         .player-section {
             position: relative;
             width: 100%;
-            aspect-ratio: 16 / 9; /* Proporção YouTube */
+            aspect-ratio: 16 / 9;
             background: #000;
             z-index: 10;
         }
 
         @media (min-width: 1024px) {
-            .player-section {
-                flex: 1;
-                height: 100%;
-                aspect-ratio: auto;
-            }
+            .player-section { flex: 1; height: 100%; aspect-ratio: auto; }
         }
 
         .player-wrapper {
@@ -58,18 +58,12 @@
             overflow: hidden;
         }
 
-        video {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-        }
+        video { width: 100%; height: 100%; object-fit: contain; }
 
-        /* CORREÇÃO DOS BOTÕES NO TOPO */
+        /* OVERLAYS */
         .player-info-overlay {
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
+            top: 0; left: 0; right: 0;
             padding: 15px;
             background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
             z-index: 100;
@@ -82,16 +76,7 @@
         }
 
         .player-wrapper:hover .player-info-overlay,
-        .player-wrapper.show-controls .player-info-overlay {
-            opacity: 1;
-        }
-
-        .room-badges {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            pointer-events: auto;
-        }
+        .player-wrapper.show-controls .player-info-overlay { opacity: 1; }
 
         .badge {
             background: rgba(0, 114, 210, 0.8);
@@ -105,93 +90,24 @@
             align-items: center;
             gap: 6px;
             width: fit-content;
-        }
-
-        .badge.viewers {
-            background: rgba(255, 255, 255, 0.15);
-        }
-
-        .top-right-actions {
-            display: flex;
-            gap: 12px;
             pointer-events: auto;
         }
 
-        .icon-btn {
-            background: rgba(255,255,255,0.1);
-            border: none;
-            color: white;
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            backdrop-filter: blur(10px);
-        }
+        .badge.viewers { background: rgba(255, 255, 255, 0.15); margin-top: 8px; }
 
-        /* CONTROLES DO PLAYER */
-        .controls-overlay {
+        /* CONTROLES SIMPLIFICADOS */
+        .bottom-controls {
             position: absolute;
-            inset: 0;
-            background: radial-gradient(circle, transparent 20%, rgba(0,0,0,0.4) 100%);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 90;
+            bottom: 0; left: 0; right: 0;
+            padding: 10px 20px 20px;
+            background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+            z-index: 100;
             opacity: 0;
             transition: opacity 0.3s;
         }
 
-        .player-wrapper:hover .controls-overlay,
-        .player-wrapper.show-controls .controls-overlay {
-            opacity: 1;
-        }
-
-        .center-btns {
-            display: flex;
-            gap: 40px;
-            align-items: center;
-        }
-
-        .play-btn-big {
-            width: 64px;
-            height: 64px;
-            background: white;
-            color: black;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            border: none;
-            cursor: pointer;
-        }
-
-        .skip-btn {
-            background: none;
-            border: none;
-            color: white;
-            font-size: 24px;
-            cursor: pointer;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .skip-btn span { font-size: 10px; font-weight: bold; }
-
-        .bottom-controls {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            padding: 10px 20px 20px;
-            background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
-        }
+        .player-wrapper:hover .bottom-controls,
+        .player-wrapper.show-controls .bottom-controls { opacity: 1; }
 
         .seekbar-container {
             width: 100%;
@@ -202,11 +118,7 @@
             position: relative;
         }
 
-        .seekbar-fill {
-            height: 100%;
-            background: var(--accent);
-            width: 0%;
-        }
+        .seekbar-fill { height: 100%; background: var(--accent); width: 0%; }
 
         .control-row {
             display: flex;
@@ -216,7 +128,7 @@
             font-size: 13px;
         }
 
-        /* SEÇÃO DO CHAT COM BLUR */
+        /* CHAT COM BLUR */
         .chat-section {
             flex: 1;
             display: flex;
@@ -226,20 +138,15 @@
             background: transparent;
         }
 
-        /* Fundo do chat com vídeo espelhado e blur */
         .chat-bg-video {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0; width: 100%; height: 100%;
             z-index: -1;
             overflow: hidden;
         }
 
         .chat-bg-video video {
-            width: 100%;
-            height: 100%;
+            width: 100%; height: 100%;
             object-fit: cover;
             filter: blur(40px) brightness(0.4);
             transform: scale(1.2);
@@ -255,26 +162,12 @@
             backdrop-filter: blur(10px);
         }
 
-        .chat-title-area {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
+        .chat-title-area { display: flex; align-items: center; gap: 12px; }
+        .chat-title-area h2 { font-size: 15px; color: white; }
 
-        .chat-title-area h2 {
-            font-size: 15px;
-            color: white;
-        }
-
-        /* AVATARES NO TOPO DO CHAT */
-        .user-avatars {
-            display: flex;
-            align-items: center;
-        }
-
+        .user-avatars { display: flex; align-items: center; }
         .avatar-stack {
-            width: 24px;
-            height: 24px;
+            width: 24px; height: 24px;
             border-radius: 50%;
             border: 2px solid #000;
             margin-left: -8px;
@@ -285,8 +178,8 @@
             font-size: 9px;
             color: white;
             font-weight: bold;
+            background-size: cover;
         }
-
         .avatar-stack:first-child { margin-left: 0; }
 
         .chat-messages {
@@ -298,17 +191,9 @@
             gap: 12px;
         }
 
-        .msg {
-            display: flex;
-            gap: 10px;
-            animation: fadeIn 0.3s ease;
-        }
-
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-
+        .msg { display: flex; gap: 10px; animation: fadeIn 0.3s ease; }
         .msg-avatar {
-            width: 32px;
-            height: 32px;
+            width: 32px; height: 32px;
             border-radius: 50%;
             flex-shrink: 0;
             background: #333;
@@ -318,19 +203,13 @@
             font-size: 12px;
             color: white;
             font-weight: bold;
+            background-size: cover;
         }
-
-        .msg-body {
-            background: rgba(255,255,255,0.05);
-            padding: 8px 12px;
-            border-radius: 12px;
-            max-width: 85%;
-        }
-
+        .msg-body { background: rgba(255,255,255,0.05); padding: 8px 12px; border-radius: 12px; max-width: 85%; }
         .msg-user { font-size: 12px; font-weight: bold; color: var(--accent-light); margin-bottom: 2px; }
         .msg-text { font-size: 13px; color: white; line-height: 1.4; }
 
-        /* INPUT DO CHAT */
+        /* INPUT */
         .chat-input-area {
             padding: 15px;
             background: rgba(0,0,0,0.3);
@@ -358,9 +237,8 @@
             outline: none;
         }
 
-        .send-btn {
-            width: 40px;
-            height: 40px;
+        .send-btn, .poll-btn {
+            width: 40px; height: 40px;
             background: var(--accent);
             border: none;
             border-radius: 50%;
@@ -370,68 +248,47 @@
             justify-content: center;
             cursor: pointer;
         }
+        .poll-btn { background: rgba(255,255,255,0.1); }
 
-        .poll-btn {
-            width: 40px;
-            height: 40px;
-            background: rgba(255,255,255,0.1);
-            border: none;
-            border-radius: 50%;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-        }
-
-        /* POPUP DE ENQUETE */
+        /* LOGIN POPUP */
         .modal {
             position: fixed;
             inset: 0;
-            background: rgba(0,0,0,0.8);
-            z-index: 1000;
+            background: rgba(0,0,0,0.9);
+            z-index: 2000;
             display: none;
             align-items: center;
             justify-content: center;
             padding: 20px;
+            backdrop-filter: blur(10px);
         }
-
         .modal.active { display: flex; }
-
         .modal-content {
             background: #1a1d29;
             width: 100%;
-            max-width: 400px;
-            border-radius: 20px;
-            padding: 25px;
+            max-width: 350px;
+            border-radius: 24px;
+            padding: 40px 30px;
+            text-align: center;
             border: 1px solid var(--border-color);
         }
-
-        .modal-content h3 { color: white; margin-bottom: 20px; }
-        .modal-content input {
-            width: 100%;
-            background: rgba(255,255,255,0.05);
-            border: 1px solid var(--border-color);
-            padding: 12px;
-            border-radius: 10px;
-            color: white;
-            margin-bottom: 10px;
-            outline: none;
-        }
-
-        .create-poll-btn {
-            width: 100%;
-            background: var(--accent);
-            color: white;
+        .google-btn {
+            background: white;
+            color: #000;
             border: none;
-            padding: 12px;
-            border-radius: 10px;
+            padding: 12px 24px;
+            border-radius: 50px;
             font-weight: bold;
-            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
             cursor: pointer;
+            margin-top: 20px;
         }
 
-        /* ENQUETE NO CHAT */
+        /* ENQUETE */
         .poll-card {
             background: linear-gradient(135deg, #0072d2, #003d7a);
             border-radius: 15px;
@@ -439,169 +296,263 @@
             margin: 10px 0;
             color: white;
         }
-
         .poll-option {
             background: rgba(255,255,255,0.1);
             padding: 10px;
             border-radius: 8px;
             margin-top: 8px;
             cursor: pointer;
-            transition: 0.2s;
             font-size: 13px;
         }
-
-        .poll-option:hover { background: rgba(255,255,255,0.2); }
     </style>
 </head>
 <body>
 
+    <!-- LOGIN MODAL -->
+    <div class="modal" id="login-modal">
+        <div class="modal-content">
+            <h2 style="color: white; margin-bottom: 10px;">Watch Party</h2>
+            <p style="color: #aaa; font-size: 14px;">Faça login para assistir com seus amigos</p>
+            <button class="google-btn" id="google-login">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18">
+                Entrar com Google
+            </button>
+        </div>
+    </div>
+    <!-- POLL MODAL -->
+    <div class="modal" id="poll-modal">
+        <div class="modal-content">
+            <h3 style="color: white; margin-bottom: 20px;">Criar Enquete</h3>
+            <input type="text" id="poll-q" placeholder="Pergunta..." style="width:100%; padding:12px; margin-bottom:10px; border-radius:8px; background:#333; border:none; color:white;">
+            <input type="text" id="poll-o1" placeholder="Opção 1" style="width:100%; padding:12px; margin-bottom:10px; border-radius:8px; background:#333; border:none; color:white;">
+            <input type="text" id="poll-o2" placeholder="Opção 2" style="width:100%; padding:12px; margin-bottom:10px; border-radius:8px; background:#333; border:none; color:white;">
+            <button class="send-btn" id="confirm-poll" style="width:100%; border-radius:8px;">LANÇAR</button>
+            <button onclick="document.getElementById('poll-modal').classList.remove('active')" style="background:none; border:none; color:#aaa; margin-top:15px; cursor:pointer;">Cancelar</button>
+        </div>
+    </div>
+
     <div class="watch-party-container">
-        <!-- PLAYER SECTION -->
         <div class="player-section">
             <div class="player-wrapper" id="player-wrapper">
                 <video id="main-video" playsinline></video>
                 
-                <!-- Info Topo -->
                 <div class="player-info-overlay">
                     <div class="room-badges">
-                        <div class="badge">
-                            <i class="fas fa-video"></i> SALA DE WATCH PARTY
-                        </div>
-                        <div class="badge viewers">
-                            <i class="fas fa-users"></i> <span id="count">12</span> ASSISTINDO JUNTOS
-                        </div>
-                    </div>
-                    <div class="top-right-actions">
-                        <button class="icon-btn"><i class="fas fa-share-alt"></i></button>
-                        <button class="icon-btn"><i class="fas fa-cog"></i></button>
+                        <div class="badge"><i class="fas fa-video"></i> WATCH PARTY</div>
+                        <div class="badge viewers"><i class="fas fa-users"></i> <span id="user-count">1</span> ONLINE</div>
                     </div>
                 </div>
 
-                <!-- Controles Centrais -->
-                <div class="controls-overlay">
-                    <div class="center-btns">
-                        <button class="skip-btn" id="rewind"><i class="fas fa-undo"></i><span>10s</span></button>
-                        <button class="play-btn-big" id="play-toggle"><i class="fas fa-play"></i></button>
-                        <button class="skip-btn" id="forward"><i class="fas fa-redo"></i><span>10s</span></button>
+                <div class="bottom-controls">
+                    <div class="seekbar-container" id="seekbar">
+                        <div class="seekbar-fill" id="fill"></div>
                     </div>
-
-                    <div class="bottom-controls">
-                        <div class="seekbar-container" id="seekbar">
-                            <div class="seekbar-fill" id="fill"></div>
-                        </div>
-                        <div class="control-row">
-                            <div id="time-display">00:00 / 00:00</div>
-                            <div style="display: flex; gap: 20px;">
-                                <i class="fas fa-closed-captioning"></i>
-                                <i class="fas fa-expand" id="fs-btn" style="cursor: pointer;"></i>
-                            </div>
-                        </div>
+                    <div class="control-row">
+                        <div id="time-display">00:00 / 00:00</div>
+                        <i class="fas fa-expand" id="fs-btn" style="cursor: pointer;"></i>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- CHAT SECTION -->
         <div class="chat-section">
-            <!-- Fundo com Blur -->
-            <div class="chat-bg-video">
-                <video id="bg-video" muted playsinline></video>
-            </div>
-
+            <div class="chat-bg-video"><video id="bg-video" muted playsinline></video></div>
             <div class="chat-header">
                 <div class="chat-title-area">
                     <i class="fas fa-comments" style="color: var(--accent-light);"></i>
                     <h2>Chat ao Vivo</h2>
-                    <div class="user-avatars">
-                        <div class="avatar-stack" style="background: #ff4757;">JD</div>
-                        <div class="avatar-stack" style="background: #2ed573;">MA</div>
-                        <div class="avatar-stack" style="background: #ffa502;">PR</div>
-                        <div class="avatar-stack" style="background: #333;">+9</div>
-                    </div>
-                </div>
-                <i class="fas fa-ellipsis-v" style="color: white; cursor: pointer;"></i>
-            </div>
-
-            <div class="chat-messages" id="chat-box">
-                <div class="msg">
-                    <div class="msg-avatar" style="background: #ff4757;">JD</div>
-                    <div class="msg-body">
-                        <div class="msg-user">João Silva</div>
-                        <div class="msg-text">E aí galera! O filme tá top demais 🍿</div>
-                    </div>
+                    <div class="user-avatars" id="avatar-list"></div>
                 </div>
             </div>
-
+            <div class="chat-messages" id="chat-box"></div>
             <div class="chat-input-area">
-                <button class="poll-btn" id="open-poll" title="Criar Enquete">
-                    <i class="fas fa-chart-bar"></i>
-                </button>
-                <div class="input-wrapper">
-                    <input type="text" id="chat-input" placeholder="Diga algo...">
-                </div>
-                <button class="send-btn" id="send-msg">
-                    <i class="fas fa-paper-plane"></i>
-                </button>
+                <button class="poll-btn" id="open-poll"><i class="fas fa-chart-bar"></i></button>
+                <div class="input-wrapper"><input type="text" id="chat-input" placeholder="Diga algo..."></div>
+                <button class="send-btn" id="send-msg"><i class="fas fa-paper-plane"></i></button>
             </div>
-        </div>
-    </div>
-
-    <!-- MODAL ENQUETE -->
-    <div class="modal" id="poll-modal">
-        <div class="modal-content">
-            <h3>Criar Nova Enquete</h3>
-            <input type="text" id="poll-q" placeholder="Pergunta da enquete...">
-            <input type="text" id="poll-o1" placeholder="Opção 1">
-            <input type="text" id="poll-o2" placeholder="Opção 2">
-            <button class="create-poll-btn" id="confirm-poll">LANÇAR ENQUETE</button>
-            <button style="background: none; border: none; color: #aaa; width: 100%; margin-top: 10px; cursor: pointer;" id="close-poll">Cancelar</button>
         </div>
     </div>
 
     <script>
+        // CONFIGURAÇÃO FIREBASE (Extraída do seu JSON)
+        const firebaseConfig = {
+            apiKey: "AIzaSyB0IJNOMSnpHEazCNA7Nu02gsbAUNvmIYE",
+            authDomain: "nupmatch---filmes-com-amigos.firebaseapp.com",
+            databaseURL: "https://nupmatch---filmes-com-amigos-default-rtdb.firebaseio.com",
+            projectId: "nupmatch---filmes-com-amigos",
+            storageBucket: "nupmatch---filmes-com-amigos.firebasestorage.app",
+            messagingSenderId: "635179962057",
+            appId: "1:635179962057:android:74e392a19328c77d450718"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.database();
+        const roomRef = db.ref('rooms/default_room'); // Apenas uma sala por enquanto
+
         const video = document.getElementById('main-video');
         const bgVideo = document.getElementById('bg-video');
-        const playBtn = document.getElementById('play-toggle');
         const seekFill = document.getElementById('fill');
-        const timeDisplay = document.getElementById('time-display');
         const chatBox = document.getElementById('chat-box');
         const chatInput = document.getElementById('chat-input');
-        const playerWrapper = document.getElementById('player-wrapper');
-
         const VIDEO_URL = 'https://awnagk.gviudclrb.com/vod/17A66128DBCB491987D456C30C43B149_media.mp4?dev_id=c714efe37e0ef598f0e83b0b9dca6cb2&user_id=417287582&trans_id=76288Y95ROn_vvJXcFi1SVms&expired=1740812482&app_id=uvnetmob&app_ver=10303&host=vddclocd.kmj51gtf.com&media_code=17A66128DBCB491987D456C30C43B149&auth_id=417287582_uvnetmob__1&client_ip=45.187.99.191&Expires=1740812482&KeyName=&Signature=KIEH3h1dqg4lv0FObJejg9IUWlM=';
 
-        // Sincronizar vídeo principal com o fundo (blur)
-        video.src = VIDEO_URL;
-        bgVideo.src = VIDEO_URL;
+        let currentUser = null;
+        let isLocalAction = false;
 
-        video.onplay = () => {
-            bgVideo.play();
-            playBtn.innerHTML = '<i class="fas fa-pause"></i>';
+        // --- AUTENTICAÇÃO ---
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                currentUser = user;
+                document.getElementById('login-modal').classList.remove('active');
+                initParty();
+            } else {
+                document.getElementById('login-modal').classList.add('active');
+            }
+        });
+
+        document.getElementById('google-login').onclick = () => {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            auth.signInWithPopup(provider);
         };
-        video.onpause = () => {
-            bgVideo.pause();
-            playBtn.innerHTML = '<i class="fas fa-play"></i>';
-        };
+
+        // --- INICIALIZAÇÃO ---
+        function initParty() {
+            video.src = VIDEO_URL;
+            bgVideo.src = VIDEO_URL;
+
+            // Presença Online
+            const userPresenceRef = roomRef.child('users').child(currentUser.uid);
+            userPresenceRef.set({
+                name: currentUser.displayName,
+                photo: currentUser.photoURL,
+                initial: currentUser.displayName.charAt(0)
+            });
+            userPresenceRef.onDisconnect().remove();
+
+            // Sincronização de Vídeo (Otimizada)
+            roomRef.child('sync').on('value', snapshot => {
+                if (isLocalAction) return;
+                const data = snapshot.val();
+                if (!data) return;
+
+                if (Math.abs(video.currentTime - data.time) > 2) {
+                    video.currentTime = data.time;
+                }
+                if (data.playing && video.paused) video.play();
+                else if (!data.playing && !video.paused) video.pause();
+            });
+
+            // Chat em Tempo Real
+            roomRef.child('chat').limitToLast(20).on('child_added', snapshot => {
+                const msg = snapshot.val();
+                renderMessage(msg);
+            });
+
+            // Lista de Avatares
+            roomRef.child('users').on('value', snapshot => {
+                const users = snapshot.val() || {};
+                const list = document.getElementById('avatar-list');
+                const count = document.getElementById('user-count');
+                list.innerHTML = '';
+                let i = 0;
+                for (let id in users) {
+                    if (i < 3) {
+                        const div = document.createElement('div');
+                        div.className = 'avatar-stack';
+                        if (users[id].photo) div.style.backgroundImage = `url(${users[id].photo})`;
+                        else div.innerText = users[id].initial;
+                        list.appendChild(div);
+                    }
+                    i++;
+                }
+                if (i > 3) {
+                    const div = document.createElement('div');
+                    div.className = 'avatar-stack';
+                    div.innerText = `+${i-3}`;
+                    list.appendChild(div);
+                }
+                count.innerText = i;
+            });
+        }
+
+        // --- CONTROLES DE VÍDEO ---
+        function updateSync(playing) {
+            isLocalAction = true;
+            roomRef.child('sync').set({
+                time: video.currentTime,
+                playing: playing,
+                sender: currentUser.uid
+            }).then(() => {
+                setTimeout(() => isLocalAction = false, 500);
+            });
+        }
+
+        video.onplay = () => { bgVideo.play(); updateSync(true); };
+        video.onpause = () => { bgVideo.pause(); updateSync(false); };
+        video.onseeked = () => updateSync(!video.paused);
+
         video.ontimeupdate = () => {
             const p = (video.currentTime / video.duration) * 100;
             seekFill.style.width = p + '%';
-            timeDisplay.innerText = formatTime(video.currentTime) + ' / ' + formatTime(video.duration);
-            if (Math.abs(bgVideo.currentTime - video.currentTime) > 0.3) {
-                bgVideo.currentTime = video.currentTime;
-            }
+            document.getElementById('time-display').innerText = formatTime(video.currentTime) + ' / ' + formatTime(video.duration);
+            if (Math.abs(bgVideo.currentTime - video.currentTime) > 0.3) bgVideo.currentTime = video.currentTime;
         };
 
-        playBtn.onclick = () => video.paused ? video.play() : video.pause();
-        document.getElementById('rewind').onclick = () => video.currentTime -= 10;
-        document.getElementById('forward').onclick = () => video.currentTime += 10;
-        document.getElementById('fs-btn').onclick = () => playerWrapper.requestFullscreen();
+        document.getElementById('seekbar').onclick = (e) => {
+            const rect = e.target.getBoundingClientRect();
+            const pos = (e.clientX - rect.left) / rect.width;
+            video.currentTime = pos * video.duration;
+        };
 
-                // Mostrar controles ao tocar (mobile)
-        let hideTimeout;
-        playerWrapper.onclick = () => {
-            playerWrapper.classList.add('show-controls');
-            clearTimeout(hideTimeout);
-            hideTimeout = setTimeout(() => playerWrapper.classList.remove('show-controls'), 3000);
+        document.getElementById('fs-btn').onclick = () => document.getElementById('player-wrapper').requestFullscreen();
+
+        // --- CHAT ---
+        document.getElementById('send-msg').onclick = sendMessage;
+        document.getElementById('chat-input').onkeypress = (e) => { if(e.key === 'Enter') sendMessage(); };
+
+        function sendMessage() {
+            const text = chatInput.value.trim();
+            if (!text) return;
+            roomRef.child('chat').push({
+                uid: currentUser.uid,
+                name: currentUser.displayName,
+                photo: currentUser.photoURL,
+                text: text,
+                type: 'text'
+            });
+            chatInput.value = '';
+        }
+
+        function renderMessage(msg) {
+            const div = document.createElement('div');
+            div.className = 'msg';
+            if (msg.type === 'poll') {
+                div.innerHTML = `<div class="poll-card"><b>📊 ${msg.q}</b><div class="poll-option">${msg.o1}</div><div class="poll-option">${msg.o2}</div></div>`;
+            } else {
+                const avatar = msg.photo ? `style="background-image:url(${msg.photo})"` : '';
+                const initial = msg.photo ? '' : msg.name.charAt(0);
+                div.innerHTML = `
+                    <div class="msg-avatar" ${avatar}>${initial}</div>
+                    <div class="msg-body">
+                        <div class="msg-user">${msg.name}</div>
+                        <div class="msg-text">${msg.text}</div>
+                    </div>
+                `;
+            }
+            chatBox.appendChild(div);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        // --- ENQUETES ---
+        document.getElementById('open-poll').onclick = () => document.getElementById('poll-modal').classList.add('active');
+        document.getElementById('confirm-poll').onclick = () => {
+            const q = document.getElementById('poll-q').value;
+            const o1 = document.getElementById('poll-o1').value;
+            const o2 = document.getElementById('poll-o2').value;
+            if (!q || !o1 || !o2) return;
+            roomRef.child('chat').push({ type: 'poll', q, o1, o2 });
+            document.getElementById('poll-modal').classList.remove('active');
         };
 
         function formatTime(s) {
@@ -610,48 +561,13 @@
             return m.toString().padStart(2, '0') + ':' + sec.toString().padStart(2, '0');
         }
 
-        // Chat
-        document.getElementById('send-msg').onclick = () => {
-            if (!chatInput.value) return;
-            const div = document.createElement('div');
-            div.className = 'msg';
-            div.innerHTML = `
-                <div class="msg-avatar" style="background: var(--accent);">VC</div>
-                <div class="msg-body">
-                    <div class="msg-user">Você</div>
-                    <div class="msg-text">${chatInput.value}</div>
-                </div>
-            `;
-            chatBox.appendChild(div);
-            chatBox.scrollTop = chatBox.scrollHeight;
-            chatInput.value = '';
+        // Mostrar controles mobile
+        let hideT;
+        document.getElementById('player-wrapper').onclick = () => {
+            document.getElementById('player-wrapper').classList.add('show-controls');
+            clearTimeout(hideT);
+            hideT = setTimeout(() => document.getElementById('player-wrapper').classList.remove('show-controls'), 3000);
         };
-
-        // Enquetes
-        const modal = document.getElementById('poll-modal');
-        document.getElementById('open-poll').onclick = () => modal.classList.add('active');
-        document.getElementById('close-poll').onclick = () => modal.classList.remove('active');
-        
-        document.getElementById('confirm-poll').onclick = () => {
-            const q = document.getElementById('poll-q').value;
-            const o1 = document.getElementById('poll-o1').value;
-            const o2 = document.getElementById('poll-o2').value;
-            if (!q || !o1 || !o2) return;
-
-            const div = document.createElement('div');
-            div.innerHTML = `
-                <div class="poll-card">
-                    <div style="font-weight: bold; margin-bottom: 10px;"><i class="fas fa-chart-bar"></i> ${q}</div>
-                    <div class="poll-option">${o1}</div>
-                    <div class="poll-option">${o2}</div>
-                </div>
-            `;
-            chatBox.appendChild(div);
-            chatBox.scrollTop = chatBox.scrollHeight;
-            modal.classList.remove('active');
-        };
-
-        video.play().catch(() => {});
     </script>
 </body>
 </html>
