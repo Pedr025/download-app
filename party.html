@@ -2,7 +2,9 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no, maximum-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="true">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Watch Party Pro - Premium & Admin</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     
@@ -24,17 +26,18 @@
         }
         
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; }
-        body, html { width: 100%; height: 100%; background-color: #000; overflow: hidden; font-family: 'Avenir Next', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+        html { width: 100%; height: 100%; }
+        body { width: 100%; height: 100vh; height: 100dvh; background-color: #000; overflow: hidden; font-family: 'Avenir Next', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; }
 
         /* LAYOUT PRINCIPAL */
-        .watch-party-container { display: flex; flex-direction: column; width: 100%; height: 100%; background: #000; }
+        .watch-party-container { display: flex; flex-direction: column; width: 100%; height: 100%; background: #000; position: fixed; top: 0; left: 0; right: 0; bottom: 0; }
         @media (min-width: 1024px) { .watch-party-container { flex-direction: row; } }
 
         /* PLAYER SECTION */
-        .player-section { position: relative; width: 100%; aspect-ratio: 16 / 9; background: #000; z-index: 10; }
+        .player-section { position: relative; width: 100%; flex: 0 0 auto; aspect-ratio: 16 / 9; background: #000; z-index: 10; min-height: 0; }
         @media (min-width: 1024px) { .player-section { flex: 1; height: 100%; aspect-ratio: auto; } }
-        .player-wrapper { width: 100%; height: 100%; position: relative; overflow: hidden; }
-        video { width: 100%; height: 100%; object-fit: contain; }
+        .player-wrapper { width: 100%; height: 100%; position: relative; overflow: hidden; display: block; }
+        video { width: 100% !important; height: 100% !important; object-fit: contain; display: block; background: #000; }
 
         /* OVERLAYS */
         .player-info-overlay {
@@ -75,14 +78,14 @@
         .admin-active .admin-btn { display: flex; }
 
         /* CHAT SECTION */
-        .chat-section { flex: 1; display: flex; flex-direction: column; position: relative; overflow: hidden; background: transparent; }
+        .chat-section { flex: 1; display: flex; flex-direction: column; position: relative; overflow: hidden; background: transparent; min-height: 0; }
         .chat-bg-video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; overflow: hidden; }
         .chat-bg-video video { width: 100%; height: 100%; object-fit: cover; filter: blur(40px) brightness(0.4); transform: scale(1.2); }
 
         .chat-header {
             padding: 15px 20px; border-bottom: 1px solid var(--border-color);
             display: flex; justify-content: space-between; align-items: center;
-            background: rgba(0,0,0,0.2); backdrop-filter: blur(10px);
+            background: rgba(0,0,0,0.2); backdrop-filter: blur(10px); flex-shrink: 0;
         }
         .chat-title-area { display: flex; align-items: center; gap: 12px; }
         .chat-title-area h2 { font-size: 15px; color: white; }
@@ -95,15 +98,15 @@
         }
         .avatar-stack:first-child { margin-left: 0; }
 
-        .chat-messages { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 12px; }
-        .msg { display: flex; gap: 10px; animation: fadeIn 0.3s ease; position: relative; cursor: pointer; }
+        .chat-messages { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 15px; display: flex; flex-direction: column; gap: 12px; min-height: 0; }
+        .msg { display: flex; gap: 10px; animation: fadeIn 0.3s ease; position: relative; cursor: pointer; flex-shrink: 0; }
         .msg:hover { background: rgba(255,255,255,0.05); border-radius: 8px; padding: 5px; }
         .msg-avatar {
             width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0; background: #333;
             display: flex; align-items: center; justify-content: center; font-size: 12px;
             color: white; font-weight: bold; background-size: cover;
         }
-        .msg-body { background: rgba(255,255,255,0.05); padding: 8px 12px; border-radius: 12px; max-width: 85%; position: relative; }
+        .msg-body { background: rgba(255,255,255,0.05); padding: 8px 12px; border-radius: 12px; max-width: 85%; position: relative; word-wrap: break-word; }
         .msg-user { font-size: 12px; font-weight: bold; color: var(--accent-light); margin-bottom: 2px; }
         .msg-text { font-size: 13px; color: white; line-height: 1.4; }
 
@@ -115,14 +118,19 @@
         .active-reply-bar {
             background: rgba(0,114,210,0.1); border-top: 1px solid var(--accent);
             padding: 8px 15px; display: none; justify-content: space-between; align-items: center;
-            font-size: 12px; color: white;
+            font-size: 12px; color: white; flex-shrink: 0;
         }
 
         /* INPUT AREA & LIMITS */
-        .chat-input-area { padding: 15px; background: rgba(0,0,0,0.3); backdrop-filter: blur(20px); display: flex; flex-direction: column; gap: 10px; position: relative; }
-        .input-row { display: flex; gap: 10px; align-items: center; width: 100%; }
-        .input-wrapper { flex: 1; background: rgba(255,255,255,0.1); border-radius: 24px; padding: 8px 16px; display: flex; align-items: center; transition: 0.3s; }
-        .input-wrapper input { flex: 1; background: none; border: none; color: white; font-size: 14px; outline: none; }
+        .chat-input-area { padding: 15px; background: rgba(0,0,0,0.3); backdrop-filter: blur(20px); display: flex; flex-direction: column; gap: 10px; position: relative; flex-shrink: 0; }
+        .input-row { display: flex; gap: 10px; align-items: flex-end; width: 100%; }
+        .input-wrapper { flex: 1; background: rgba(255,255,255,0.1); border-radius: 24px; padding: 10px 16px; display: flex; align-items: center; transition: 0.3s; min-height: 40px; }
+        .input-wrapper input { 
+            flex: 1; background: none; border: none; color: white; font-size: 14px; outline: none; 
+            -webkit-appearance: none; -webkit-border-radius: 0; padding: 8px 0;
+            width: 100%; min-height: 40px; font-size: 16px;
+        }
+        .input-wrapper input::placeholder { color: rgba(255,255,255,0.5); }
 
         /* BLOQUEIO CHAT TIMER */
         .chat-lock-overlay {
@@ -140,7 +148,7 @@
         .send-btn, .poll-btn {
             width: 40px; height: 40px; background: var(--accent); border: none;
             border-radius: 50%; color: white; display: flex; align-items: center;
-            justify-content: center; cursor: pointer;
+            justify-content: center; cursor: pointer; flex-shrink: 0;
         }
         .poll-btn { background: rgba(255,255,255,0.1); }
 
@@ -226,6 +234,14 @@
         .btn-close-premium { background: rgba(255,255,255,0.1); color: white; }
 
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* FIX PARA iOS - Prevenir zoom ao focar em input */
+        @supports (padding: max(0px)) {
+            .input-wrapper input {
+                padding-left: max(10px, env(safe-area-inset-left));
+                padding-right: max(10px, env(safe-area-inset-right));
+            }
+        }
     </style>
 </head>
 <body>
@@ -305,7 +321,7 @@
         <!-- PLAYER -->
         <div class="player-section">
             <div class="player-wrapper" id="player-wrapper">
-                <video id="main-video" playsinline webkit-playsinline></video>
+                <video id="main-video" playsinline webkit-playsinline controls controlsList="nodownload"></video>
                 <div class="player-info-overlay">
                     <div id="premium-badge-area"></div>
                     <div class="badge viewers" id="viewer-count"><i class="fas fa-eye"></i> 1 assistindo</div>
@@ -358,11 +374,11 @@
                 </div>
 
                 <div class="input-row">
-                    <button class="poll-btn" id="open-poll-btn"><i class="fas fa-poll"></i></button>
+                    <button class="poll-btn" id="open-poll-btn" type="button"><i class="fas fa-poll"></i></button>
                     <div class="input-wrapper">
-                        <input type="text" id="chat-input" placeholder="Diga algo...">
+                        <input type="text" id="chat-input" placeholder="Diga algo..." autocomplete="off">
                     </div>
-                    <button class="send-btn" id="send-msg"><i class="fas fa-paper-plane"></i></button>
+                    <button class="send-btn" id="send-msg" type="button"><i class="fas fa-paper-plane"></i></button>
                 </div>
             </div>
         </div>
@@ -399,12 +415,12 @@
         let userData = { isPremium: false, isAdmin: false };
         let localMsgCount = 0;
         let globalMsgCounter = 0;
-        let adShownCount = 0; // Contador para limitar anúncios
+        let adShownCount = 0;
         let isChatLocked = false;
         let activeReply = null;
         let allMovies = [];
         let selectedPollOptions = [];
-        let currentMsgForModeration = null; // Para armazenar dados da mensagem em moderação
+        let currentMsgForModeration = null;
 
         // --- AUTENTICAÇÃO ---
         auth.onAuthStateChanged(user => {
@@ -479,7 +495,6 @@
                 const msg = snapshot.val();
                 globalMsgCounter++;
                 
-                // Anúncio a cada 15 mensagens globais (máximo 1 por sessão para não-premium)
                 if (!userData.isPremium && globalMsgCounter % 15 === 0 && adShownCount < 1) {
                     renderAd();
                     adShownCount++;
@@ -534,6 +549,7 @@
 
             roomRef.child('chat').push(msgData);
             chatInput.value = '';
+            chatInput.blur();
         }
 
         function lockChat() {
@@ -602,10 +618,9 @@
             div.className = 'msg';
             div.id = 'msg-' + key;
             
-            // Adicionar evento de clique para moderação (admin)
             if (userData.isAdmin) {
                 div.onclick = (e) => {
-                    if (e.target.closest('.reply-btn')) return; // Não abrir popup se clicar em "Responder"
+                    if (e.target.closest('.reply-btn')) return;
                     openModerationPopup(msg, key);
                 };
             }
@@ -706,9 +721,9 @@
                     tipo: o.tipo,
                     episodios: o.episodios || null
                 })),
-                votes: {} // Inicializar votos
+                votes: {}
             });
-	document.getElementById('poll-modal').classList.remove('active');
+            document.getElementById('poll-modal').classList.remove('active');
             document.getElementById('poll-msg').value = '';
             selectedPollOptions = [];
         };
@@ -741,20 +756,16 @@
             chatBox.appendChild(div);
             chatBox.scrollTop = chatBox.scrollHeight;
         }
-
-        window.handlePollVote = (movieId, pollKey) => {
-            // Qualquer usuário pode votar, mas apenas admin pode mudar o vídeo
+	        window.handlePollVote = (movieId, pollKey) => {
             roomRef.child('chat').child(pollKey).get().then(snap => {
                 const poll = snap.val();
                 const option = poll.options.find(o => o.id == movieId);
                 
                 if (option) {
-                    // Registrar voto do usuário
                     const votes = poll.votes || {};
                     votes[currentUser.uid] = movieId;
                     roomRef.child('chat').child(pollKey).update({ votes });
                     
-                    // Se for admin, pode mudar o vídeo
                     if (userData.isAdmin) {
                         if (option.tipo === 'serie') {
                             showEpisodes(option);
@@ -841,8 +852,13 @@
         }
 
         // --- EVENTOS BÁSICOS ---
-        document.getElementById('send-msg').onclick = sendMessage;
-        chatInput.onkeypress = (e) => e.key === 'Enter' && sendMessage();
+        document.getElementById('send-msg').addEventListener('click', sendMessage);
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
         
         document.getElementById('play-pause').onclick = () => {
             if (!userData.isAdmin) return;
@@ -879,6 +895,13 @@
             if (document.fullscreenElement) {
                 video.style.width = '100%';
                 video.style.height = '100%';
+            }
+        });
+
+        // Prevenir zoom ao focar em input no iOS
+        document.addEventListener('touchstart', function(e) {
+            if (e.target.tagName === 'INPUT') {
+                e.target.style.fontSize = '16px';
             }
         });
     </script>
