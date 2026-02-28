@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Watch Party Pro - Firebase Sync</title>
+    <title>Watch Party Pro - Premium & Admin</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     
     <!-- Firebase SDKs -->
@@ -20,290 +20,151 @@
             --text-main: #f9f9f9;
             --text-secondary: #b3b3b3;
             --border-color: rgba(255, 255, 255, 0.1);
+            --premium-gold: #ffcc00;
         }
         
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; }
         body, html { width: 100%; height: 100%; background-color: #000; overflow: hidden; font-family: 'Avenir Next', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
 
         /* LAYOUT PRINCIPAL */
-        .watch-party-container {
-            display: flex;
-            flex-direction: column;
-            width: 100%;
-            height: 100%;
-            background: #000;
-        }
+        .watch-party-container { display: flex; flex-direction: column; width: 100%; height: 100%; background: #000; }
+        @media (min-width: 1024px) { .watch-party-container { flex-direction: row; } }
 
-        @media (min-width: 1024px) {
-            .watch-party-container { flex-direction: row; }
-        }
-
-        /* SEÇÃO DO PLAYER */
-        .player-section {
-            position: relative;
-            width: 100%;
-            aspect-ratio: 16 / 9;
-            background: #000;
-            z-index: 10;
-        }
-
-        @media (min-width: 1024px) {
-            .player-section { flex: 1; height: 100%; aspect-ratio: auto; }
-        }
-
-        .player-wrapper {
-            width: 100%;
-            height: 100%;
-            position: relative;
-            overflow: hidden;
-        }
-
+        /* PLAYER SECTION */
+        .player-section { position: relative; width: 100%; aspect-ratio: 16 / 9; background: #000; z-index: 10; }
+        @media (min-width: 1024px) { .player-section { flex: 1; height: 100%; aspect-ratio: auto; } }
+        .player-wrapper { width: 100%; height: 100%; position: relative; overflow: hidden; }
         video { width: 100%; height: 100%; object-fit: contain; }
 
         /* OVERLAYS */
         .player-info-overlay {
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            padding: 15px;
+            position: absolute; top: 0; left: 0; right: 0; padding: 15px;
             background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
-            z-index: 100;
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            pointer-events: none;
-            opacity: 0;
-            transition: opacity 0.3s;
+            z-index: 100; display: flex; justify-content: space-between; align-items: flex-start;
+            pointer-events: none; opacity: 0; transition: opacity 0.3s;
         }
-
-        .player-wrapper:hover .player-info-overlay,
-        .player-wrapper.show-controls .player-info-overlay { opacity: 1; }
+        .player-wrapper:hover .player-info-overlay, .player-wrapper.show-controls .player-info-overlay { opacity: 1; }
 
         .badge {
-            background: rgba(0, 114, 210, 0.8);
-            backdrop-filter: blur(10px);
-            color: white;
-            padding: 6px 12px;
-            border-radius: 8px;
-            font-size: 11px;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            width: fit-content;
-            pointer-events: auto;
+            background: rgba(0, 114, 210, 0.8); backdrop-filter: blur(10px); color: white;
+            padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 700;
+            display: flex; align-items: center; gap: 6px; width: fit-content; pointer-events: auto;
         }
-
         .badge.viewers { background: rgba(255, 255, 255, 0.15); margin-top: 8px; }
+        .badge.premium { background: linear-gradient(45deg, #ffcc00, #ff9900); color: #000; }
 
-        /* CONTROLES SIMPLIFICADOS */
+        /* CONTROLES (ADMIN ONLY) */
         .bottom-controls {
-            position: absolute;
-            bottom: 0; left: 0; right: 0;
-            padding: 10px 20px 20px;
+            position: absolute; bottom: 0; left: 0; right: 0; padding: 10px 20px 20px;
             background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
-            z-index: 100;
-            opacity: 0;
-            transition: opacity 0.3s;
+            z-index: 100; opacity: 0; transition: opacity 0.3s; pointer-events: none;
         }
+        .admin-active .bottom-controls { pointer-events: auto; }
+        .player-wrapper:hover .bottom-controls, .player-wrapper.show-controls .bottom-controls { opacity: 1; }
 
-        .player-wrapper:hover .bottom-controls,
-        .player-wrapper.show-controls .bottom-controls { opacity: 1; }
-
-        .seekbar-container {
-            width: 100%;
-            height: 4px;
-            background: rgba(255,255,255,0.2);
-            margin-bottom: 15px;
-            cursor: pointer;
-            position: relative;
-        }
-
+        .seekbar-container { width: 100%; height: 4px; background: rgba(255,255,255,0.2); margin-bottom: 15px; cursor: pointer; position: relative; }
         .seekbar-fill { height: 100%; background: var(--accent); width: 0%; }
+        .control-row { display: flex; justify-content: space-between; align-items: center; color: white; font-size: 13px; }
 
-        .control-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            color: white;
-            font-size: 13px;
+        /* BOTÃO MUDAR FILME (ADMIN) */
+        .admin-btn {
+            background: var(--accent); color: white; border: none; padding: 8px 15px;
+            border-radius: 20px; font-size: 12px; font-weight: bold; cursor: pointer;
+            display: none; align-items: center; gap: 8px; pointer-events: auto;
         }
+        .admin-active .admin-btn { display: flex; }
 
-        /* CHAT COM BLUR */
-        .chat-section {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            position: relative;
-            overflow: hidden;
-            background: transparent;
-        }
-
-        .chat-bg-video {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            z-index: -1;
-            overflow: hidden;
-        }
-
-        .chat-bg-video video {
-            width: 100%; height: 100%;
-            object-fit: cover;
-            filter: blur(40px) brightness(0.4);
-            transform: scale(1.2);
-        }
+        /* CHAT SECTION */
+        .chat-section { flex: 1; display: flex; flex-direction: column; position: relative; overflow: hidden; background: transparent; }
+        .chat-bg-video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; overflow: hidden; }
+        .chat-bg-video video { width: 100%; height: 100%; object-fit: cover; filter: blur(40px) brightness(0.4); transform: scale(1.2); }
 
         .chat-header {
-            padding: 15px 20px;
-            border-bottom: 1px solid var(--border-color);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: rgba(0,0,0,0.2);
-            backdrop-filter: blur(10px);
+            padding: 15px 20px; border-bottom: 1px solid var(--border-color);
+            display: flex; justify-content: space-between; align-items: center;
+            background: rgba(0,0,0,0.2); backdrop-filter: blur(10px);
         }
-
         .chat-title-area { display: flex; align-items: center; gap: 12px; }
         .chat-title-area h2 { font-size: 15px; color: white; }
 
         .user-avatars { display: flex; align-items: center; }
         .avatar-stack {
-            width: 24px; height: 24px;
-            border-radius: 50%;
-            border: 2px solid #000;
-            margin-left: -8px;
-            background: var(--accent);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 9px;
-            color: white;
-            font-weight: bold;
-            background-size: cover;
+            width: 24px; height: 24px; border-radius: 50%; border: 2px solid #000;
+            margin-left: -8px; background: var(--accent); display: flex; align-items: center;
+            justify-content: center; font-size: 9px; color: white; font-weight: bold; background-size: cover;
         }
         .avatar-stack:first-child { margin-left: 0; }
 
-        .chat-messages {
-            flex: 1;
-            overflow-y: auto;
-            padding: 15px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
+        .chat-messages { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 12px; }
         .msg { display: flex; gap: 10px; animation: fadeIn 0.3s ease; }
         .msg-avatar {
-            width: 32px; height: 32px;
-            border-radius: 50%;
-            flex-shrink: 0;
-            background: #333;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-            color: white;
-            font-weight: bold;
-            background-size: cover;
+            width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0; background: #333;
+            display: flex; align-items: center; justify-content: center; font-size: 12px;
+            color: white; font-weight: bold; background-size: cover;
         }
         .msg-body { background: rgba(255,255,255,0.05); padding: 8px 12px; border-radius: 12px; max-width: 85%; }
         .msg-user { font-size: 12px; font-weight: bold; color: var(--accent-light); margin-bottom: 2px; }
         .msg-text { font-size: 13px; color: white; line-height: 1.4; }
 
-        /* INPUT */
-        .chat-input-area {
-            padding: 15px;
-            background: rgba(0,0,0,0.3);
-            backdrop-filter: blur(20px);
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
+        /* INPUT AREA & LIMITS */
+        .chat-input-area { padding: 15px; background: rgba(0,0,0,0.3); backdrop-filter: blur(20px); display: flex; gap: 10px; align-items: center; position: relative; }
+        .input-wrapper { flex: 1; background: rgba(255,255,255,0.1); border-radius: 24px; padding: 8px 16px; display: flex; align-items: center; }
+        .input-wrapper input { flex: 1; background: none; border: none; color: white; font-size: 14px; outline: none; }
 
-        .input-wrapper {
-            flex: 1;
-            background: rgba(255,255,255,0.1);
-            border-radius: 24px;
-            padding: 8px 16px;
-            display: flex;
-            align-items: center;
+        .msg-limit-overlay {
+            position: absolute; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px);
+            display: none; align-items: center; justify-content: center; flex-direction: column;
+            z-index: 50; border-radius: 10px; gap: 10px;
         }
-
-        .input-wrapper input {
-            flex: 1;
-            background: none;
-            border: none;
-            color: white;
-            font-size: 14px;
-            outline: none;
+        .msg-limit-overlay.active { display: flex; }
+        .premium-btn-small {
+            background: var(--premium-gold); color: #000; border: none; padding: 5px 15px;
+            border-radius: 15px; font-size: 11px; font-weight: bold; cursor: pointer;
         }
 
         .send-btn, .poll-btn {
-            width: 40px; height: 40px;
-            background: var(--accent);
-            border: none;
-            border-radius: 50%;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
+            width: 40px; height: 40px; background: var(--accent); border: none;
+            border-radius: 50%; color: white; display: flex; align-items: center;
+            justify-content: center; cursor: pointer;
         }
         .poll-btn { background: rgba(255,255,255,0.1); }
 
-        /* LOGIN POPUP */
+        /* MODALS */
         .modal {
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.9);
-            z-index: 2000;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            backdrop-filter: blur(10px);
+            position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 2000;
+            display: none; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(10px);
         }
         .modal.active { display: flex; }
         .modal-content {
-            background: #1a1d29;
-            width: 100%;
-            max-width: 350px;
-            border-radius: 24px;
-            padding: 40px 30px;
-            text-align: center;
-            border: 1px solid var(--border-color);
-        }
-        .google-btn {
-            background: white;
-            color: #000;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 50px;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            width: 100%;
-            cursor: pointer;
-            margin-top: 20px;
+            background: #1a1d29; width: 100%; max-width: 400px; border-radius: 24px;
+            padding: 30px; text-align: center; border: 1px solid var(--border-color);
+            max-height: 80vh; overflow-y: auto;
         }
 
-        /* ENQUETE */
-        .poll-card {
-            background: linear-gradient(135deg, #0072d2, #003d7a);
-            border-radius: 15px;
-            padding: 15px;
-            margin: 10px 0;
-            color: white;
-        }
+        /* ENQUETE AVANÇADA */
+        .poll-card { background: linear-gradient(135deg, #0072d2, #003d7a); border-radius: 15px; padding: 15px; margin: 10px 0; color: white; position: relative; }
+        .poll-creator { display: flex; align-items: center; gap: 8px; font-size: 10px; margin-bottom: 8px; opacity: 0.8; }
+        .poll-creator img { width: 16px; height: 16px; border-radius: 50%; }
         .poll-option {
-            background: rgba(255,255,255,0.1);
-            padding: 10px;
-            border-radius: 8px;
-            margin-top: 8px;
-            cursor: pointer;
-            font-size: 13px;
+            background: rgba(255,255,255,0.1); padding: 10px; border-radius: 8px;
+            margin-top: 8px; cursor: pointer; font-size: 13px; display: flex; align-items: center; gap: 10px;
         }
+        .poll-option img { width: 30px; height: 40px; object-fit: cover; border-radius: 4px; }
+
+        /* BANNER ANÚNCIO */
+        .ad-banner { background: rgba(255,255,255,0.05); padding: 10px; border-radius: 10px; margin: 10px 0; text-align: center; }
+
+        /* BUSCA DE FILMES NO MODAL */
+        .search-results { margin-top: 15px; display: flex; flex-direction: column; gap: 10px; text-align: left; }
+        .search-item {
+            display: flex; gap: 10px; background: rgba(255,255,255,0.05); padding: 8px;
+            border-radius: 8px; cursor: pointer; transition: 0.2s;
+        }
+        .search-item:hover { background: rgba(255,255,255,0.1); }
+        .search-item img { width: 40px; height: 60px; object-fit: cover; border-radius: 4px; }
+        .search-item-info { display: flex; flex-direction: column; justify-content: center; }
+        .search-item-title { font-size: 13px; font-weight: bold; color: white; }
+        .search-item-type { font-size: 10px; color: var(--accent-light); }
     </style>
 </head>
 <body>
@@ -313,20 +174,31 @@
         <div class="modal-content">
             <h2 style="color: white; margin-bottom: 10px;">Watch Party</h2>
             <p style="color: #aaa; font-size: 14px;">Faça login para assistir com seus amigos</p>
-            <button class="google-btn" id="google-login">
-                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18">
-                Entrar com Google
+            <button class="google-btn" id="google-login" style="background:white; color:black; border:none; padding:12px; border-radius:50px; width:100%; margin-top:20px; font-weight:bold; display:flex; align-items:center; justify-content:center; gap:10px; cursor:pointer;">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18"> Entrar com Google
             </button>
         </div>
     </div>
-    <!-- POLL MODAL -->
+
+    <!-- MODAL MUDAR CONTEÚDO (ADMIN) -->
+    <div class="modal" id="admin-modal">
+        <div class="modal-content">
+            <h3 style="color: white; margin-bottom: 15px;">Mudar Filme/Série</h3>
+            <input type="text" id="admin-search" placeholder="Pesquisar..." style="width:100%; padding:12px; border-radius:8px; background:#333; border:none; color:white; outline:none;">
+            <div class="search-results" id="admin-results"></div>
+            <button onclick="document.getElementById('admin-modal').classList.remove('active')" style="background:none; border:none; color:#aaa; margin-top:15px; cursor:pointer;">Fechar</button>
+        </div>
+    </div>
+
+    <!-- MODAL ENQUETE -->
     <div class="modal" id="poll-modal">
         <div class="modal-content">
-            <h3 style="color: white; margin-bottom: 20px;">Criar Enquete</h3>
-            <input type="text" id="poll-q" placeholder="Pergunta..." style="width:100%; padding:12px; margin-bottom:10px; border-radius:8px; background:#333; border:none; color:white;">
-            <input type="text" id="poll-o1" placeholder="Opção 1" style="width:100%; padding:12px; margin-bottom:10px; border-radius:8px; background:#333; border:none; color:white;">
-            <input type="text" id="poll-o2" placeholder="Opção 2" style="width:100%; padding:12px; margin-bottom:10px; border-radius:8px; background:#333; border:none; color:white;">
-            <button class="send-btn" id="confirm-poll" style="width:100%; border-radius:8px;">LANÇAR</button>
+            <h3 style="color: white; margin-bottom: 15px;">Criar Enquete de Votação</h3>
+            <input type="text" id="poll-msg" placeholder="Mensagem da enquete..." style="width:100%; padding:12px; margin-bottom:10px; border-radius:8px; background:#333; border:none; color:white;">
+            <input type="text" id="poll-search" placeholder="Pesquisar filme para opção..." style="width:100%; padding:12px; border-radius:8px; background:#333; border:none; color:white;">
+            <div class="search-results" id="poll-results"></div>
+            <div id="selected-options" style="margin-top:10px; display:flex; gap:5px; flex-wrap:wrap;"></div>
+            <button class="send-btn" id="confirm-poll" style="width:100%; border-radius:8px; margin-top:15px;">LANÇAR ENQUETE</button>
             <button onclick="document.getElementById('poll-modal').classList.remove('active')" style="background:none; border:none; color:#aaa; margin-top:15px; cursor:pointer;">Cancelar</button>
         </div>
     </div>
@@ -335,18 +207,16 @@
         <div class="player-section">
             <div class="player-wrapper" id="player-wrapper">
                 <video id="main-video" playsinline></video>
-                
                 <div class="player-info-overlay">
                     <div class="room-badges">
                         <div class="badge"><i class="fas fa-video"></i> WATCH PARTY</div>
                         <div class="badge viewers"><i class="fas fa-users"></i> <span id="user-count">1</span> ONLINE</div>
+                        <div id="premium-badge-area"></div>
                     </div>
+                    <button class="admin-btn" id="open-admin-panel"><i class="fas fa-exchange-alt"></i> MUDAR FILME</button>
                 </div>
-
                 <div class="bottom-controls">
-                    <div class="seekbar-container" id="seekbar">
-                        <div class="seekbar-fill" id="fill"></div>
-                    </div>
+                    <div class="seekbar-container" id="seekbar"><div class="seekbar-fill" id="fill"></div></div>
                     <div class="control-row">
                         <div id="time-display">00:00 / 00:00</div>
                         <i class="fas fa-expand" id="fs-btn" style="cursor: pointer;"></i>
@@ -354,8 +224,7 @@
                 </div>
             </div>
         </div>
-
-        <div class="chat-section">
+	        <div class="chat-section">
             <div class="chat-bg-video"><video id="bg-video" muted playsinline></video></div>
             <div class="chat-header">
                 <div class="chat-title-area">
@@ -366,7 +235,11 @@
             </div>
             <div class="chat-messages" id="chat-box"></div>
             <div class="chat-input-area">
-                <button class="poll-btn" id="open-poll"><i class="fas fa-chart-bar"></i></button>
+                <div class="msg-limit-overlay" id="limit-overlay">
+                    <span style="color:white; font-size:12px;">Limite atingido! <b id="timer">01:30</b></span>
+                    <button class="premium-btn-small" onclick="window.location.href='premium.html'">REMOVER BLOQUEIO</button>
+                </div>
+                <button class="poll-btn" id="open-poll-btn"><i class="fas fa-chart-bar"></i></button>
                 <div class="input-wrapper"><input type="text" id="chat-input" placeholder="Diga algo..."></div>
                 <button class="send-btn" id="send-msg"><i class="fas fa-paper-plane"></i></button>
             </div>
@@ -374,7 +247,7 @@
     </div>
 
     <script>
-        // CONFIGURAÇÃO FIREBASE (Extraída do seu JSON)
+        // CONFIGURAÇÃO FIREBASE
         const firebaseConfig = {
             apiKey: "AIzaSyB0IJNOMSnpHEazCNA7Nu02gsbAUNvmIYE",
             authDomain: "nupmatch---filmes-com-amigos.firebaseapp.com",
@@ -388,72 +261,104 @@
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.database();
-        const roomRef = db.ref('rooms/default_room'); // Apenas uma sala por enquanto
+        const roomRef = db.ref('rooms/default_room');
+        const API_URL = "https://pkfilmes.pages.dev/movies_data.json";
+
+        // ADMINS
+        const ADMIN_EMAILS = ["grudentt@gmail.com"]; // Adicione mais e-mails aqui
 
         const video = document.getElementById('main-video');
         const bgVideo = document.getElementById('bg-video');
         const seekFill = document.getElementById('fill');
         const chatBox = document.getElementById('chat-box');
         const chatInput = document.getElementById('chat-input');
-        const VIDEO_URL = 'https://awnagk.gviudclrb.com/vod/17A66128DBCB491987D456C30C43B149_media.mp4?dev_id=c714efe37e0ef598f0e83b0b9dca6cb2&user_id=417287582&trans_id=76288Y95ROn_vvJXcFi1SVms&expired=1740812482&app_id=uvnetmob&app_ver=10303&host=vddclocd.kmj51gtf.com&media_code=17A66128DBCB491987D456C30C43B149&auth_id=417287582_uvnetmob__1&client_ip=45.187.99.191&Expires=1740812482&KeyName=&Signature=KIEH3h1dqg4lv0FObJejg9IUWlM=';
-
+        
         let currentUser = null;
+        let userData = { isPremium: false, isAdmin: false };
+        let msgCount = 0;
+        let totalMsgsSent = 0;
         let isLocalAction = false;
+        let allMovies = [];
+        let selectedPollOptions = [];
 
         // --- AUTENTICAÇÃO ---
         auth.onAuthStateChanged(user => {
             if (user) {
                 currentUser = user;
-                document.getElementById('login-modal').classList.remove('active');
-                initParty();
+                checkUserRole();
             } else {
                 document.getElementById('login-modal').classList.add('active');
             }
         });
 
         document.getElementById('google-login').onclick = () => {
-            const provider = new firebase.auth.GoogleAuthProvider();
-            auth.signInWithPopup(provider);
+            auth.signInWithRedirect(new firebase.auth.GoogleAuthProvider());
         };
 
+        async function checkUserRole() {
+            const userRef = db.ref('users/' + currentUser.uid);
+            const snapshot = await userRef.get();
+            let data = snapshot.val();
+
+            if (!data) {
+                data = {
+                    name: currentUser.displayName,
+                    email: currentUser.email,
+                    photo: currentUser.photoURL,
+                    isPremium: false,
+                    lastPoll: 0
+                };
+                userRef.set(data);
+            }
+
+            userData = data;
+            userData.isAdmin = ADMIN_EMAILS.includes(currentUser.email);
+            
+            if (userData.isAdmin) document.body.classList.add('admin-active');
+            if (userData.isPremium) {
+                document.getElementById('premium-badge-area').innerHTML = '<div class="badge premium"><i class="fas fa-crown"></i> PREMIUM</div>';
+            }
+
+            document.getElementById('login-modal').classList.remove('active');
+            initParty();
+        }
+
         // --- INICIALIZAÇÃO ---
-        function initParty() {
-            video.src = VIDEO_URL;
-            bgVideo.src = VIDEO_URL;
+        async function initParty() {
+            const res = await fetch(API_URL);
+            allMovies = await res.json();
 
-            // Presença Online
-            const userPresenceRef = roomRef.child('users').child(currentUser.uid);
-            userPresenceRef.set({
-                name: currentUser.displayName,
-                photo: currentUser.photoURL,
-                initial: currentUser.displayName.charAt(0)
-            });
-            userPresenceRef.onDisconnect().remove();
+            // Presença
+            const presenceRef = roomRef.child('users').child(currentUser.uid);
+            presenceRef.set({ name: currentUser.displayName, photo: currentUser.photoURL, initial: currentUser.displayName.charAt(0) });
+            presenceRef.onDisconnect().remove();
 
-            // Sincronização de Vídeo (Otimizada)
+            // Sincronização
             roomRef.child('sync').on('value', snapshot => {
-                if (isLocalAction) return;
-                const data = snapshot.val();
-                if (!data) return;
-
-                if (Math.abs(video.currentTime - data.time) > 2) {
-                    video.currentTime = data.time;
+                if (isLocalAction || !userData.isAdmin && snapshot.val()?.sender !== currentUser.uid) {
+                    const data = snapshot.val();
+                    if (!data) return;
+                    if (video.src !== data.url) {
+                        video.src = data.url;
+                        bgVideo.src = data.url;
+                    }
+                    if (Math.abs(video.currentTime - data.time) > 2) video.currentTime = data.time;
+                    if (data.playing && video.paused) video.play().catch(()=>{});
+                    else if (!data.playing && !video.paused) video.pause();
                 }
-                if (data.playing && video.paused) video.play();
-                else if (!data.playing && !video.paused) video.pause();
             });
 
-            // Chat em Tempo Real
-            roomRef.child('chat').limitToLast(20).on('child_added', snapshot => {
-                const msg = snapshot.val();
-                renderMessage(msg);
+            // Chat & Ads
+            roomRef.child('chat').limitToLast(30).on('child_added', snapshot => {
+                renderMessage(snapshot.val());
+                totalMsgsSent++;
+                if (!userData.isPremium && totalMsgsSent % 5 === 0) renderAd();
             });
 
-            // Lista de Avatares
+            // Avatares
             roomRef.child('users').on('value', snapshot => {
                 const users = snapshot.val() || {};
                 const list = document.getElementById('avatar-list');
-                const count = document.getElementById('user-count');
                 list.innerHTML = '';
                 let i = 0;
                 for (let id in users) {
@@ -466,32 +371,25 @@
                     }
                     i++;
                 }
-                if (i > 3) {
-                    const div = document.createElement('div');
-                    div.className = 'avatar-stack';
-                    div.innerText = `+${i-3}`;
-                    list.appendChild(div);
-                }
-                count.innerText = i;
+                document.getElementById('user-count').innerText = i;
             });
         }
 
-        // --- CONTROLES DE VÍDEO ---
+        // --- CONTROLES ADMIN ---
         function updateSync(playing) {
+            if (!userData.isAdmin) return;
             isLocalAction = true;
             roomRef.child('sync').set({
+                url: video.src,
                 time: video.currentTime,
                 playing: playing,
                 sender: currentUser.uid
-            }).then(() => {
-                setTimeout(() => isLocalAction = false, 500);
-            });
+            }).then(() => setTimeout(() => isLocalAction = false, 500));
         }
 
-        video.onplay = () => { bgVideo.play(); updateSync(true); };
+        video.onplay = () => { bgVideo.play().catch(()=>{}); updateSync(true); };
         video.onpause = () => { bgVideo.pause(); updateSync(false); };
         video.onseeked = () => updateSync(!video.paused);
-
         video.ontimeupdate = () => {
             const p = (video.currentTime / video.duration) * 100;
             seekFill.style.width = p + '%';
@@ -500,20 +398,40 @@
         };
 
         document.getElementById('seekbar').onclick = (e) => {
-            const rect = e.target.getBoundingClientRect();
-            const pos = (e.clientX - rect.left) / rect.width;
-            video.currentTime = pos * video.duration;
+            if (!userData.isAdmin) return;
+            const rect = e.currentTarget.getBoundingClientRect();
+            video.currentTime = ((e.clientX - rect.left) / rect.width) * video.duration;
         };
 
-        document.getElementById('fs-btn').onclick = () => document.getElementById('player-wrapper').requestFullscreen();
+        // --- MUDAR FILME (ADMIN) ---
+        document.getElementById('open-admin-panel').onclick = () => {
+            document.getElementById('admin-modal').classList.add('active');
+            renderSearchResults('', 'admin-results', (item) => {
+                video.src = item.link_mp4;
+                bgVideo.src = item.link_mp4;
+                updateSync(true);
+                document.getElementById('admin-modal').classList.remove('active');
+            });
+        };
 
-        // --- CHAT ---
+        document.getElementById('admin-search').oninput = (e) => {
+            renderSearchResults(e.target.value, 'admin-results', (item) => {
+                video.src = item.link_mp4;
+                bgVideo.src = item.link_mp4;
+                updateSync(true);
+                document.getElementById('admin-modal').classList.remove('active');
+            });
+        };
+
+        // --- CHAT & LIMITS ---
         document.getElementById('send-msg').onclick = sendMessage;
         document.getElementById('chat-input').onkeypress = (e) => { if(e.key === 'Enter') sendMessage(); };
 
         function sendMessage() {
+            if (!userData.isPremium && msgCount >= 2) return;
             const text = chatInput.value.trim();
             if (!text) return;
+
             roomRef.child('chat').push({
                 uid: currentUser.uid,
                 name: currentUser.displayName,
@@ -521,19 +439,51 @@
                 text: text,
                 type: 'text'
             });
+
             chatInput.value = '';
+            if (!userData.isPremium) {
+                msgCount++;
+                if (msgCount >= 2) startMsgTimer();
+            }
+        }
+
+        function startMsgTimer() {
+            const overlay = document.getElementById('limit-overlay');
+            const timerEl = document.getElementById('timer');
+            overlay.classList.add('active');
+            let time = 90;
+            const int = setInterval(() => {
+                time--;
+                let m = Math.floor(time / 60), s = time % 60;
+                timerEl.innerText = `${m}:${s.toString().padStart(2,'0')}`;
+                if (time <= 0) {
+                    clearInterval(int);
+                    overlay.classList.remove('active');
+                    msgCount = 0;
+                }
+            }, 1000);
         }
 
         function renderMessage(msg) {
             const div = document.createElement('div');
             div.className = 'msg';
             if (msg.type === 'poll') {
-                div.innerHTML = `<div class="poll-card"><b>📊 ${msg.q}</b><div class="poll-option">${msg.o1}</div><div class="poll-option">${msg.o2}</div></div>`;
+                div.innerHTML = `
+                    <div class="poll-card">
+                        <div class="poll-creator"><img src="${msg.photo}"> Criada por ${msg.name}</div>
+                        <b>📊 ${msg.text}</b>
+                        ${msg.options.map(opt => `
+                            <div class="poll-option" onclick="handlePollVote('${opt.id}')">
+                                <img src="${opt.capa}">
+                                <span>${opt.titulo}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
             } else {
                 const avatar = msg.photo ? `style="background-image:url(${msg.photo})"` : '';
-                const initial = msg.photo ? '' : msg.name.charAt(0);
                 div.innerHTML = `
-                    <div class="msg-avatar" ${avatar}>${initial}</div>
+                    <div class="msg-avatar" ${avatar}>${!msg.photo ? msg.name.charAt(0) : ''}</div>
                     <div class="msg-body">
                         <div class="msg-user">${msg.name}</div>
                         <div class="msg-text">${msg.text}</div>
@@ -544,30 +494,115 @@
             chatBox.scrollTop = chatBox.scrollHeight;
         }
 
-        // --- ENQUETES ---
-        document.getElementById('open-poll').onclick = () => document.getElementById('poll-modal').classList.add('active');
+        function renderAd() {
+            const div = document.createElement('div');
+            div.className = 'ad-banner';
+            div.innerHTML = `
+                <div style="font-size:10px; color:#aaa; margin-bottom:5px;">Publicidade</div>
+                <ins class="adsbygoogle" style="display:inline-block;width:320px;height:50px" data-ad-client="ca-pub-xxx"></ins>
+                <div id="ad-container-${totalMsgsSent}"></div>
+            `;
+            chatBox.appendChild(div);
+            
+            // Injetar script de anúncio
+            const container = document.getElementById(`ad-container-${totalMsgsSent}`);
+            const s1 = document.createElement('script');
+            s1.innerHTML = `atOptions = {'key' : 'd743ea16ee8525c87e3b9f86c525d9ac','format' : 'iframe','height' : 50,'width' : 320,'params' : {}};`;
+            const s2 = document.createElement('script');
+            s2.src = "https://peacockvowel.com/d743ea16ee8525c87e3b9f86c525d9ac/invoke.js";
+            container.appendChild(s1);
+            container.appendChild(s2);
+            
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        // --- ENQUETES AVANÇADAS ---
+        document.getElementById('open-poll-btn').onclick = () => {
+            if (!userData.isPremium) {
+                const now = Date.now();
+                if (now - (userData.lastPoll || 0) < 3600000) {
+                    alert("Usuários não Premium só podem criar 1 enquete por hora!");
+                    return;
+                }
+            }
+            document.getElementById('poll-modal').classList.add('active');
+            selectedPollOptions = [];
+            renderSelectedOptions();
+            renderSearchResults('', 'poll-results', (item) => {
+                if (selectedPollOptions.length >= 3) return;
+                selectedPollOptions.push(item);
+                renderSelectedOptions();
+            });
+        };
+
+        document.getElementById('poll-search').oninput = (e) => {
+            renderSearchResults(e.target.value, 'poll-results', (item) => {
+                if (selectedPollOptions.length >= 3) return;
+                selectedPollOptions.push(item);
+                renderSelectedOptions();
+            });
+        };
+
+        function renderSelectedOptions() {
+            const area = document.getElementById('selected-options');
+            area.innerHTML = selectedPollOptions.map(opt => `
+                <div style="background:var(--accent); padding:5px 10px; border-radius:15px; font-size:10px; color:white;">${opt.titulo}</div>
+            `).join('');
+        }
+
         document.getElementById('confirm-poll').onclick = () => {
-            const q = document.getElementById('poll-q').value;
-            const o1 = document.getElementById('poll-o1').value;
-            const o2 = document.getElementById('poll-o2').value;
-            if (!q || !o1 || !o2) return;
-            roomRef.child('chat').push({ type: 'poll', q, o1, o2 });
+            const msg = document.getElementById('poll-msg').value;
+            if (!msg || selectedPollOptions.length === 0) return;
+            
+            roomRef.child('chat').push({
+                type: 'poll',
+                uid: currentUser.uid,
+                name: currentUser.displayName,
+                photo: currentUser.photoURL,
+                text: msg,
+                options: selectedPollOptions.map(o => ({ id: o.id, titulo: o.titulo, capa: o.capa, link: o.link_mp4 }))
+            });
+
+            if (!userData.isPremium) {
+                db.ref('users/' + currentUser.uid).update({ lastPoll: Date.now() });
+            }
+
             document.getElementById('poll-modal').classList.remove('active');
         };
 
+        window.handlePollVote = (id) => {
+            if (!userData.isAdmin) return;
+            const movie = allMovies.find(m => m.id == id);
+            if (movie) {
+                video.src = movie.link_mp4;
+                bgVideo.src = movie.link_mp4;
+                updateSync(true);
+            }
+        };
+
+        // --- BUSCA ---
+        function renderSearchResults(query, targetId, onSelect) {
+            const container = document.getElementById(targetId);
+            const filtered = allMovies.filter(m => m.titulo.toLowerCase().includes(query.toLowerCase())).slice(0, 10);
+            container.innerHTML = filtered.map(item => `
+                <div class="search-item" onclick='handleSelect(${JSON.stringify(item).replace(/'/g, "&apos;")})'>
+                    <img src="${item.capa}">
+                    <div class="search-item-info">
+                        <div class="search-item-title">${item.titulo}</div>
+                        <div class="search-item-type">${item.tipo === 'serie' ? 'Série' : 'Filme'}</div>
+                    </div>
+                </div>
+            `).join('');
+            window.handleSelect = onSelect;
+        }
+
         function formatTime(s) {
-            const m = Math.floor(s / 60);
-            const sec = Math.floor(s % 60);
+            if (isNaN(s)) return "00:00";
+            const m = Math.floor(s / 60), sec = Math.floor(s % 60);
             return m.toString().padStart(2, '0') + ':' + sec.toString().padStart(2, '0');
         }
 
-        // Mostrar controles mobile
-        let hideT;
-        document.getElementById('player-wrapper').onclick = () => {
-            document.getElementById('player-wrapper').classList.add('show-controls');
-            clearTimeout(hideT);
-            hideT = setTimeout(() => document.getElementById('player-wrapper').classList.remove('show-controls'), 3000);
-        };
+        document.getElementById('fs-btn').onclick = () => document.getElementById('player-wrapper').requestFullscreen();
     </script>
 </body>
 </html>
