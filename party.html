@@ -96,7 +96,8 @@
         .avatar-stack:first-child { margin-left: 0; }
 
         .chat-messages { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 12px; }
-        .msg { display: flex; gap: 10px; animation: fadeIn 0.3s ease; position: relative; }
+        .msg { display: flex; gap: 10px; animation: fadeIn 0.3s ease; position: relative; cursor: pointer; }
+        .msg:hover { background: rgba(255,255,255,0.05); border-radius: 8px; padding: 5px; }
         .msg-avatar {
             width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0; background: #333;
             display: flex; align-items: center; justify-content: center; font-size: 12px;
@@ -105,10 +106,6 @@
         .msg-body { background: rgba(255,255,255,0.05); padding: 8px 12px; border-radius: 12px; max-width: 85%; position: relative; }
         .msg-user { font-size: 12px; font-weight: bold; color: var(--accent-light); margin-bottom: 2px; }
         .msg-text { font-size: 13px; color: white; line-height: 1.4; }
-        
-        /* DELETE BTN (ADMIN) */
-        .del-msg { position: absolute; right: -25px; top: 5px; color: #ff4444; font-size: 10px; cursor: pointer; display: none; }
-        .admin-active .del-msg { display: block; }
 
         /* REPLY SYSTEM */
         .reply-preview { background: rgba(0,0,0,0.3); border-left: 3px solid var(--accent); padding: 4px 8px; margin-bottom: 5px; border-radius: 4px; font-size: 11px; color: #aaa; cursor: pointer; }
@@ -171,25 +168,64 @@
         .poll-option {
             background: rgba(255,255,255,0.1); padding: 10px; border-radius: 8px;
             margin-top: 8px; cursor: pointer; font-size: 13px; display: flex; align-items: center; gap: 10px;
-            transition: 0.2s;
+            transition: 0.2s; position: relative;
         }
         .poll-option:hover { background: rgba(255,255,255,0.2); }
         .poll-option img { width: 30px; height: 40px; object-fit: cover; border-radius: 4px; }
+        .poll-vote-count { margin-left: auto; background: rgba(0,0,0,0.3); padding: 4px 8px; border-radius: 6px; font-size: 11px; }
 
-        /* BANNER ANÚNCIO */
+        /* BANNER ANÚNCIO - LIMITE DE 1 */
         .ad-banner { background: rgba(255,255,255,0.05); padding: 10px; border-radius: 10px; margin: 10px 0; text-align: center; border: 1px solid var(--border-color); }
 
         /* BUSCA DE FILMES NO MODAL */
         .search-results { margin-top: 15px; display: flex; flex-direction: column; gap: 10px; text-align: left; }
         .search-item {
-            display: flex; gap: 10px; background: rgba(255,255,255,0.05); padding: 8px;
-            border-radius: 8px; cursor: pointer; transition: 0.2s;
+            display: flex; gap: 10px; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; cursor: pointer; transition: 0.2s;
         }
         .search-item:hover { background: rgba(255,255,255,0.1); }
         .search-item img { width: 40px; height: 60px; object-fit: cover; border-radius: 4px; }
         .search-item-info { display: flex; flex-direction: column; justify-content: center; }
         .search-item-title { font-size: 13px; font-weight: bold; color: white; }
         .search-item-type { font-size: 10px; color: var(--accent-light); }
+
+        /* POP-UP DE MODERAÇÃO */
+        .moderation-popup {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 3000;
+            display: none; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(10px);
+        }
+        .moderation-popup.active { display: flex; }
+        .moderation-content {
+            background: #1a1d29; width: 100%; max-width: 350px; border-radius: 24px;
+            padding: 30px; text-align: center; border: 1px solid var(--border-color);
+        }
+        .moderation-content h3 { color: white; margin-bottom: 20px; }
+        .moderation-content .user-info { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; margin-bottom: 20px; }
+        .moderation-content .user-info p { color: #aaa; font-size: 13px; margin: 5px 0; }
+        .moderation-buttons { display: flex; gap: 10px; flex-direction: column; }
+        .moderation-buttons button { padding: 12px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; font-size: 13px; }
+        .btn-delete { background: #ff4444; color: white; }
+        .btn-ban { background: #ff8800; color: white; }
+        .btn-cancel { background: rgba(255,255,255,0.1); color: white; }
+
+        /* POP-UP PREMIUM */
+        .premium-popup {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 3000;
+            display: none; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(10px);
+        }
+        .premium-popup.active { display: flex; }
+        .premium-content {
+            background: linear-gradient(135deg, #1a1d29, #2a2d39); width: 100%; max-width: 350px; border-radius: 24px;
+            padding: 30px; text-align: center; border: 2px solid var(--premium-gold);
+        }
+        .premium-content h3 { color: var(--premium-gold); margin-bottom: 15px; font-size: 18px; }
+        .premium-content p { color: #aaa; font-size: 13px; margin-bottom: 20px; line-height: 1.5; }
+        .premium-content .premium-icon { font-size: 48px; color: var(--premium-gold); margin-bottom: 15px; }
+        .premium-buttons { display: flex; gap: 10px; flex-direction: column; }
+        .premium-buttons button { padding: 12px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; font-size: 13px; }
+        .btn-upgrade { background: var(--premium-gold); color: #000; }
+        .btn-close-premium { background: rgba(255,255,255,0.1); color: white; }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
 <body>
@@ -214,7 +250,8 @@
             <button onclick="document.getElementById('admin-modal').classList.remove('active')" style="margin-top:20px; background:none; border:none; color:#aaa; cursor:pointer;">Fechar</button>
         </div>
     </div>
-      <!-- MODAL SELEÇÃO DE EPISÓDIOS -->
+    
+    <!-- MODAL SELEÇÃO DE EPISÓDIOS -->
     <div class="modal" id="episodes-modal">
         <div class="modal-content">
             <h3 id="series-title" style="color: white; margin-bottom: 15px;">Escolha o Episódio</h3>
@@ -236,11 +273,39 @@
         </div>
     </div>
 
-    <div class="watch-party-container">
+    <!-- POP-UP DE MODERAÇÃO (ADMIN) -->
+    <div class="moderation-popup" id="moderation-popup">
+        <div class="moderation-content">
+            <h3>Gerenciar Mensagem</h3>
+            <div class="user-info">
+                <p><strong id="mod-user-name">Usuário</strong></p>
+                <p id="mod-user-email" style="font-size: 11px; color: #666;"></p>
+            </div>
+            <div class="moderation-buttons">
+                <button class="btn-delete" onclick="deleteMsgFromPopup()"><i class="fas fa-trash"></i> Deletar Mensagem</button>
+                <button class="btn-ban" onclick="banUserFromPopup()"><i class="fas fa-ban"></i> Banir Usuário</button>
+                <button class="btn-cancel" onclick="closeModeration()">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- POP-UP PREMIUM -->
+    <div class="premium-popup" id="premium-popup">
+        <div class="premium-content">
+            <div class="premium-icon"><i class="fas fa-crown"></i></div>
+            <h3>Recurso Premium</h3>
+            <p>Apenas usuários Premium podem criar enquetes. Desbloqueia este e muitos outros recursos exclusivos!</p>
+            <div class="premium-buttons">
+                <button class="btn-upgrade" onclick="goToPremium()"><i class="fas fa-star"></i> Se Tornar Premium</button>
+                <button class="btn-close-premium" onclick="closePremiumPopup()">Cancelar</button>
+            </div>
+        </div>
+    </div>
+	    <div class="watch-party-container">
         <!-- PLAYER -->
         <div class="player-section">
             <div class="player-wrapper" id="player-wrapper">
-                <video id="main-video" playsinline></video>
+                <video id="main-video" playsinline webkit-playsinline></video>
                 <div class="player-info-overlay">
                     <div id="premium-badge-area"></div>
                     <div class="badge viewers" id="viewer-count"><i class="fas fa-eye"></i> 1 assistindo</div>
@@ -268,7 +333,7 @@
         <!-- CHAT -->
         <div class="chat-section">
             <div class="chat-bg-video">
-                <video id="bg-video" muted loop playsinline></video>
+                <video id="bg-video" muted loop playsinline webkit-playsinline></video>
             </div>
             <div class="chat-header">
                 <div class="chat-title-area">
@@ -283,7 +348,7 @@
                 <div class="chat-lock-overlay" id="chat-lock">
                     <span>Muitas mensagens! Aguarde:</span>
                     <div class="lock-timer" id="lock-timer">02:00</div>
-                    <button class="premium-btn-small">Remover Limite com Premium</button>
+                    <button class="premium-btn-small" onclick="goToPremium()">Remover Limite com Premium</button>
                 </div>
                 
                 <!-- BARRA DE REPLY -->
@@ -332,12 +397,14 @@
         
         let currentUser = null;
         let userData = { isPremium: false, isAdmin: false };
-        let localMsgCount = 0; // Para o timer individual
-        let globalMsgCounter = 0; // Para anúncios a cada 10 msgs
+        let localMsgCount = 0;
+        let globalMsgCounter = 0;
+        let adShownCount = 0; // Contador para limitar anúncios
         let isChatLocked = false;
         let activeReply = null;
         let allMovies = [];
         let selectedPollOptions = [];
+        let currentMsgForModeration = null; // Para armazenar dados da mensagem em moderação
 
         // --- AUTENTICAÇÃO ---
         auth.onAuthStateChanged(user => {
@@ -364,7 +431,6 @@
                 data = { name: currentUser.displayName, email: currentUser.email, photo: currentUser.photoURL, isPremium: isAdmin, lastPoll: 0 };
                 userRef.set(data);
             } else if (isAdmin && !data.isPremium) {
-                // Forçar premium para admins
                 db.ref('users/' + currentUser.uid).update({ isPremium: true });
                 data.isPremium = true;
             }
@@ -382,8 +448,13 @@
         }
 
         async function initParty() {
-            const res = await fetch(API_URL);
-            allMovies = await res.json();
+            try {
+                const res = await fetch(API_URL);
+                allMovies = await res.json();
+            } catch (e) {
+                console.error("Erro ao carregar filmes:", e);
+                allMovies = [];
+            }
 
             // Presença
             const presenceRef = roomRef.child('users').child(currentUser.uid);
@@ -394,7 +465,10 @@
             roomRef.child('sync').on('value', snapshot => {
                 const data = snapshot.val();
                 if (!data) return;
-                if (video.src !== data.url) { video.src = data.url; bgVideo.src = data.url; }
+                if (video.src !== data.url) { 
+                    video.src = data.url; 
+                    bgVideo.src = data.url; 
+                }
                 if (Math.abs(video.currentTime - data.time) > 2) video.currentTime = data.time;
                 if (data.playing && video.paused) video.play().catch(()=>{});
                 else if (!data.playing && !video.paused) video.pause();
@@ -405,9 +479,10 @@
                 const msg = snapshot.val();
                 globalMsgCounter++;
                 
-                // Anúncio a cada 10 mensagens globais (se não for premium)
-                if (!userData.isPremium && globalMsgCounter % 10 === 0) {
+                // Anúncio a cada 15 mensagens globais (máximo 1 por sessão para não-premium)
+                if (!userData.isPremium && globalMsgCounter % 15 === 0 && adShownCount < 1) {
                     renderAd();
+                    adShownCount++;
                 }
 
                 if (msg.type === 'poll') renderPoll(msg, snapshot.key);
@@ -423,7 +498,13 @@
             // Usuários Online
             roomRef.child('users').on('value', snapshot => {
                 const users = Object.values(snapshot.val() || {});
-                document.getElementById('viewer-count').innerHTML = `<i class="fas fa-eye"></i> ${users.length} assistindo`;
+                document.getElementById('viewer-count').innerHTML = 
+                    `<i class="fas fa-eye"></i> ${users.length} ${users.length === 1 ? 'assistindo' : 'assistindo'}`;
+                
+                const avatarArea = document.getElementById('user-avatars');
+                avatarArea.innerHTML = users.slice(0, 5).map(u => 
+                    `<div class="avatar-stack" style="${u.photo ? `background-image:url(${u.photo})` : ''}" title="${u.name}">${u.photo ? '' : u.initial}</div>`
+                ).join('');
             });
         }
 
@@ -478,6 +559,31 @@
             roomRef.child('chat').child(key).remove();
         }
 
+        function deleteMsgFromPopup() {
+            if (currentMsgForModeration) {
+                deleteMsg(currentMsgForModeration.key);
+                closeModeration();
+            }
+        }
+
+        function banUserFromPopup() {
+            if (currentMsgForModeration) {
+                const bannedRef = db.ref('banned_users/' + currentMsgForModeration.uid);
+                bannedRef.set({ 
+                    name: currentMsgForModeration.name, 
+                    bannedAt: Date.now(),
+                    bannedBy: currentUser.uid 
+                });
+                alert(`Usuário ${currentMsgForModeration.name} foi banido!`);
+                closeModeration();
+            }
+        }
+
+        function closeModeration() {
+            document.getElementById('moderation-popup').classList.remove('active');
+            currentMsgForModeration = null;
+        }
+
         // --- SISTEMA DE REPLY ---
         function setReply(name, text) {
             activeReply = { name, text };
@@ -495,6 +601,15 @@
             const div = document.createElement('div');
             div.className = 'msg';
             div.id = 'msg-' + key;
+            
+            // Adicionar evento de clique para moderação (admin)
+            if (userData.isAdmin) {
+                div.onclick = (e) => {
+                    if (e.target.closest('.reply-btn')) return; // Não abrir popup se clicar em "Responder"
+                    openModerationPopup(msg, key);
+                };
+            }
+            
             div.innerHTML = `
                 <div class="msg-avatar" style="${msg.photo ? `background-image:url(${msg.photo})` : ''}">${msg.photo ? '' : msg.name.charAt(0)}</div>
                 <div class="msg-body">
@@ -502,11 +617,17 @@
                     <div class="msg-user">${msg.name}</div>
                     <div class="msg-text">${msg.text}</div>
                     <span class="reply-btn" onclick="setReply('${msg.name}', '${msg.text.replace(/'/g, "\\'")}')"><i class="fas fa-reply"></i> Responder</span>
-                    <i class="fas fa-trash del-msg" onclick="deleteMsg('${key}')"></i>
                 </div>
             `;
             chatBox.appendChild(div);
             chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function openModerationPopup(msg, key) {
+            currentMsgForModeration = { ...msg, key };
+            document.getElementById('mod-user-name').innerText = msg.name;
+            document.getElementById('mod-user-email').innerText = msg.text.substring(0, 50) + '...';
+            document.getElementById('moderation-popup').classList.add('active');
         }
 
         function renderAd() {
@@ -515,7 +636,7 @@
             div.innerHTML = `
                 <div style="font-size:10px; color:#aaa; margin-bottom:5px;">Publicidade</div>
                 <div style="color:white; font-size:12px; margin: 10px 0;">Patrocinado: Conheça nossos planos Premium!</div>
-                <ins class="adsbygoogle" style="display:inline-block;width:320px;height:50px" data-ad-client="ca-pub-xxx"></ins>
+                <p style="color:#666; font-size:11px;">Desfrute de recursos exclusivos e sem anúncios.</p>
             `;
             chatBox.appendChild(div);
             chatBox.scrollTop = chatBox.scrollHeight;
@@ -524,7 +645,7 @@
         // --- ENQUETE ---
         document.getElementById('open-poll-btn').onclick = () => {
             if (!userData.isPremium) {
-                alert("Apenas usuários Premium/Admins podem criar enquetes!");
+                document.getElementById('premium-popup').classList.add('active');
                 return;
             }
             document.getElementById('poll-modal').classList.add('active');
@@ -555,10 +676,18 @@
 
         function renderSelectedOptions() {
             const area = document.getElementById('selected-options');
-            area.innerHTML = selectedPollOptions.map(opt => `
-                <div style="background:var(--accent); padding:5px 10px; border-radius:15px; font-size:10px; color:white;">${opt.titulo}</div>
+            area.innerHTML = selectedPollOptions.map((opt, idx) => `
+                <div style="background:var(--accent); padding:5px 10px; border-radius:15px; font-size:10px; color:white; display:flex; align-items:center; gap:5px;">
+                    ${opt.titulo}
+                    <i class="fas fa-times" style="cursor:pointer;" onclick="removePollOption(${idx})"></i>
+                </div>
             `).join('');
         }
+
+        window.removePollOption = (idx) => {
+            selectedPollOptions.splice(idx, 1);
+            renderSelectedOptions();
+        };
 
         document.getElementById('confirm-poll').onclick = () => {
             const msg = document.getElementById('poll-msg').value;
@@ -576,50 +705,63 @@
                     link: o.link_mp4,
                     tipo: o.tipo,
                     episodios: o.episodios || null
-                }))
+                })),
+                votes: {} // Inicializar votos
             });
-            document.getElementById('poll-modal').classList.remove('active');
+	document.getElementById('poll-modal').classList.remove('active');
+            document.getElementById('poll-msg').value = '';
+            selectedPollOptions = [];
         };
 
         function renderPoll(poll, key) {
             const div = document.createElement('div');
             div.className = 'poll-card';
             div.id = 'msg-' + key;
+            
+            const totalVotes = Object.keys(poll.votes || {}).length;
+            
             div.innerHTML = `
                 <div class="poll-creator">
                     <img src="${poll.photo}"> <span>${poll.name} criou uma enquete</span>
-                    <i class="fas fa-trash del-msg" onclick="deleteMsg('${key}')" style="margin-left:auto; pointer-events:auto;"></i>
                 </div>
                 <div style="font-weight:bold; margin-bottom:10px;">${poll.text}</div>
-                ${poll.options.map(opt => `
-                    <div class="poll-option" onclick="handlePollVote('${opt.id}', '${key}')">
-                        <img src="${opt.capa}">
-                        <span>${opt.titulo}</span>
-                    </div>
-                `).join('')}
+                ${poll.options.map(opt => {
+                    const optionVotes = Object.values(poll.votes || {}).filter(v => v === opt.id).length;
+                    const votePercentage = totalVotes > 0 ? Math.round((optionVotes / totalVotes) * 100) : 0;
+                    return `
+                        <div class="poll-option" onclick="handlePollVote('${opt.id}', '${key}')">
+                            <img src="${opt.capa}">
+                            <span>${opt.titulo}</span>
+                            <div class="poll-vote-count">${optionVotes} ${optionVotes === 1 ? 'voto' : 'votos'} (${votePercentage}%)</div>
+                        </div>
+                    `;
+                }).join('')}
+                <div style="font-size:10px; color:#aaa; margin-top:10px; text-align:center;">Total: ${totalVotes} ${totalVotes === 1 ? 'voto' : 'votos'}</div>
             `;
             chatBox.appendChild(div);
             chatBox.scrollTop = chatBox.scrollHeight;
         }
 
         window.handlePollVote = (movieId, pollKey) => {
-            if (!userData.isAdmin) {
-                alert("Apenas administradores podem encerrar a votação e mudar o vídeo!");
-                return;
-            }
-            
-            // Buscar o filme nas opções da enquete
+            // Qualquer usuário pode votar, mas apenas admin pode mudar o vídeo
             roomRef.child('chat').child(pollKey).get().then(snap => {
                 const poll = snap.val();
                 const option = poll.options.find(o => o.id == movieId);
+                
                 if (option) {
-                    if (option.tipo === 'serie') {
-                        showEpisodes(option);
-                    } else {
-                        updateVideo(option.link);
+                    // Registrar voto do usuário
+                    const votes = poll.votes || {};
+                    votes[currentUser.uid] = movieId;
+                    roomRef.child('chat').child(pollKey).update({ votes });
+                    
+                    // Se for admin, pode mudar o vídeo
+                    if (userData.isAdmin) {
+                        if (option.tipo === 'serie') {
+                            showEpisodes(option);
+                        } else {
+                            updateVideo(option.link);
+                        }
                     }
-                    // Opcional: deletar a enquete após votar
-                    // roomRef.child('chat').child(pollKey).remove();
                 }
             });
         };
@@ -633,7 +775,8 @@
                 document.getElementById('admin-modal').classList.remove('active');
             }
         }
-	        function showEpisodes(serie) {
+
+        function showEpisodes(serie) {
             document.getElementById('series-title').innerText = serie.titulo;
             const container = document.getElementById('episodes-container');
             container.innerHTML = '';
@@ -642,7 +785,6 @@
                 serie.episodios.forEach((ep) => {
                     const btn = document.createElement('div');
                     btn.className = 'ep-item';
-                    // Formato T1 EP1 baseado no JSON
                     const label = `T${ep.temporada || 1} EP${ep.episodio || '?'}`;
                     btn.innerText = label;
                     btn.onclick = () => {
@@ -689,6 +831,15 @@
             `).join('');
         };
 
+        // --- FUNÇÕES PREMIUM ---
+        function goToPremium() {
+            window.location.href = 'premium.html';
+        }
+
+        function closePremiumPopup() {
+            document.getElementById('premium-popup').classList.remove('active');
+        }
+
         // --- EVENTOS BÁSICOS ---
         document.getElementById('send-msg').onclick = sendMessage;
         chatInput.onkeypress = (e) => e.key === 'Enter' && sendMessage();
@@ -710,7 +861,26 @@
             return m.toString().padStart(2,'0') + ":" + sec.toString().padStart(2,'0');
         }
         
-        document.getElementById('fs-btn').onclick = () => document.getElementById('player-wrapper').requestFullscreen();
+        document.getElementById('fs-btn').onclick = () => {
+            const elem = document.getElementById('player-wrapper');
+            if (elem.requestFullscreen) {
+                elem.requestFullscreen();
+            } else if (elem.webkitRequestFullscreen) {
+                elem.webkitRequestFullscreen();
+            } else if (elem.mozRequestFullScreen) {
+                elem.mozRequestFullScreen();
+            } else if (elem.msRequestFullscreen) {
+                elem.msRequestFullscreen();
+            }
+        };
+
+        // Suporte para iOS - Permitir fullscreen no vídeo
+        video.addEventListener('fullscreenchange', () => {
+            if (document.fullscreenElement) {
+                video.style.width = '100%';
+                video.style.height = '100%';
+            }
+        });
     </script>
 </body>
 </html>
