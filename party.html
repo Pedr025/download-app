@@ -106,6 +106,10 @@
         .msg-user { font-size: 12px; font-weight: bold; color: var(--accent-light); margin-bottom: 2px; }
         .msg-text { font-size: 13px; color: white; line-height: 1.4; }
         
+        /* DELETE BTN (ADMIN) */
+        .del-msg { position: absolute; right: -25px; top: 5px; color: #ff4444; font-size: 10px; cursor: pointer; display: none; }
+        .admin-active .del-msg { display: block; }
+
         /* REPLY SYSTEM */
         .reply-preview { background: rgba(0,0,0,0.3); border-left: 3px solid var(--accent); padding: 4px 8px; margin-bottom: 5px; border-radius: 4px; font-size: 11px; color: #aaa; cursor: pointer; }
         .reply-btn { font-size: 10px; color: #666; cursor: pointer; margin-top: 4px; display: inline-block; }
@@ -156,9 +160,24 @@
         }
         
         /* EPISODES GRID */
-        .episodes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(60px, 1fr)); gap: 10px; margin-top: 15px; }
-        .ep-item { background: rgba(255,255,255,0.1); padding: 10px; border-radius: 8px; color: white; cursor: pointer; font-size: 12px; transition: 0.2s; }
+        .episodes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 10px; margin-top: 15px; }
+        .ep-item { background: rgba(255,255,255,0.1); padding: 10px; border-radius: 8px; color: white; cursor: pointer; font-size: 11px; transition: 0.2s; text-align: center; }
         .ep-item:hover { background: var(--accent); }
+
+        /* ENQUETE AVANÇADA */
+        .poll-card { background: linear-gradient(135deg, #0072d2, #003d7a); border-radius: 15px; padding: 15px; margin: 10px 0; color: white; position: relative; }
+        .poll-creator { display: flex; align-items: center; gap: 8px; font-size: 10px; margin-bottom: 8px; opacity: 0.8; }
+        .poll-creator img { width: 16px; height: 16px; border-radius: 50%; }
+        .poll-option {
+            background: rgba(255,255,255,0.1); padding: 10px; border-radius: 8px;
+            margin-top: 8px; cursor: pointer; font-size: 13px; display: flex; align-items: center; gap: 10px;
+            transition: 0.2s;
+        }
+        .poll-option:hover { background: rgba(255,255,255,0.2); }
+        .poll-option img { width: 30px; height: 40px; object-fit: cover; border-radius: 4px; }
+
+        /* BANNER ANÚNCIO */
+        .ad-banner { background: rgba(255,255,255,0.05); padding: 10px; border-radius: 10px; margin: 10px 0; text-align: center; border: 1px solid var(--border-color); }
 
         /* BUSCA DE FILMES NO MODAL */
         .search-results { margin-top: 15px; display: flex; flex-direction: column; gap: 10px; text-align: left; }
@@ -195,8 +214,7 @@
             <button onclick="document.getElementById('admin-modal').classList.remove('active')" style="margin-top:20px; background:none; border:none; color:#aaa; cursor:pointer;">Fechar</button>
         </div>
     </div>
-    
-    <!-- MODAL SELEÇÃO DE EPISÓDIOS -->
+      <!-- MODAL SELEÇÃO DE EPISÓDIOS -->
     <div class="modal" id="episodes-modal">
         <div class="modal-content">
             <h3 id="series-title" style="color: white; margin-bottom: 15px;">Escolha o Episódio</h3>
@@ -247,7 +265,7 @@
             </div>
         </div>
 
-   	        <!-- CHAT -->
+        <!-- CHAT -->
         <div class="chat-section">
             <div class="chat-bg-video">
                 <video id="bg-video" muted loop playsinline></video>
@@ -303,7 +321,9 @@
         const roomRef = db.ref('rooms/default_room');
         const API_URL = "https://pkfilmes.pages.dev/movies_data.json";
 
-        const ADMIN_EMAILS = ["grudentt@gmail.com"];
+        // LISTA DE ADMINS
+        const ADMIN_EMAILS = ["grudentt@gmail.com", "nz.pett@gmail.com"];
+        
         const video = document.getElementById('main-video');
         const bgVideo = document.getElementById('bg-video');
         const seekFill = document.getElementById('fill');
@@ -312,10 +332,12 @@
         
         let currentUser = null;
         let userData = { isPremium: false, isAdmin: false };
-        let msgCount = 0;
+        let localMsgCount = 0; // Para o timer individual
+        let globalMsgCounter = 0; // Para anúncios a cada 10 msgs
         let isChatLocked = false;
         let activeReply = null;
         let allMovies = [];
+        let selectedPollOptions = [];
 
         // --- AUTENTICAÇÃO ---
         auth.onAuthStateChanged(user => {
@@ -335,16 +357,26 @@
             const userRef = db.ref('users/' + currentUser.uid);
             const snapshot = await userRef.get();
             let data = snapshot.val();
+            
+            const isAdmin = ADMIN_EMAILS.includes(currentUser.email);
+
             if (!data) {
-                data = { name: currentUser.displayName, email: currentUser.email, photo: currentUser.photoURL, isPremium: false, lastPoll: 0 };
+                data = { name: currentUser.displayName, email: currentUser.email, photo: currentUser.photoURL, isPremium: isAdmin, lastPoll: 0 };
                 userRef.set(data);
+            } else if (isAdmin && !data.isPremium) {
+                // Forçar premium para admins
+                db.ref('users/' + currentUser.uid).update({ isPremium: true });
+                data.isPremium = true;
             }
+
             userData = data;
-            userData.isAdmin = ADMIN_EMAILS.includes(currentUser.email);
+            userData.isAdmin = isAdmin;
+            
             if (userData.isAdmin) document.body.classList.add('admin-active');
             if (userData.isPremium) {
                 document.getElementById('premium-badge-area').innerHTML = '<div class="badge premium"><i class="fas fa-crown"></i> PREMIUM</div>';
             }
+            
             document.getElementById('login-modal').classList.remove('active');
             initParty();
         }
@@ -368,10 +400,24 @@
                 else if (!data.playing && !video.paused) video.pause();
             });
 
-            // Chat
+            // Chat & Contador Global
             roomRef.child('chat').limitToLast(50).on('child_added', snapshot => {
                 const msg = snapshot.val();
-                renderMsg(msg, snapshot.key);
+                globalMsgCounter++;
+                
+                // Anúncio a cada 10 mensagens globais (se não for premium)
+                if (!userData.isPremium && globalMsgCounter % 10 === 0) {
+                    renderAd();
+                }
+
+                if (msg.type === 'poll') renderPoll(msg, snapshot.key);
+                else renderMsg(msg, snapshot.key);
+            });
+
+            // Escutar remoção de mensagens
+            roomRef.child('chat').on('child_removed', snapshot => {
+                const el = document.getElementById('msg-' + snapshot.key);
+                if (el) el.remove();
             });
 
             // Usuários Online
@@ -381,18 +427,15 @@
             });
         }
 
-        // --- LÓGICA DE MENSAGENS E PREMIUM ---
+        // --- LÓGICA DE MENSAGENS ---
         function sendMessage() {
             if (isChatLocked) return;
             const text = chatInput.value.trim();
             if (!text) return;
 
-            // Lógica de Limite para Não Premium
             if (!userData.isPremium) {
-                msgCount++;
-                if (msgCount >= 5) {
-                    lockChat();
-                }
+                localMsgCount++;
+                if (localMsgCount >= 5) lockChat();
             }
 
             const msgData = {
@@ -415,21 +458,24 @@
         function lockChat() {
             isChatLocked = true;
             document.getElementById('chat-lock').classList.add('active');
-            let timeLeft = 120; // 2 minutos
+            let timeLeft = 120;
             const timerEl = document.getElementById('lock-timer');
-            
             const interval = setInterval(() => {
                 timeLeft--;
                 const m = Math.floor(timeLeft / 60), s = timeLeft % 60;
                 timerEl.innerText = `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
-                
                 if (timeLeft <= 0) {
                     clearInterval(interval);
                     isChatLocked = false;
-                    msgCount = 0;
+                    localMsgCount = 0;
                     document.getElementById('chat-lock').classList.remove('active');
                 }
             }, 1000);
+        }
+
+        function deleteMsg(key) {
+            if (!userData.isAdmin) return;
+            roomRef.child('chat').child(key).remove();
         }
 
         // --- SISTEMA DE REPLY ---
@@ -446,13 +492,9 @@
         }
 
         function renderMsg(msg, key) {
-            // Se não for premium, podemos injetar anúncios aqui, mas o pedido é esconder se for premium
-            if (!userData.isPremium && Math.random() > 0.8) {
-                // Injetar anúncio aleatório no chat se desejar
-            }
-
             const div = document.createElement('div');
             div.className = 'msg';
+            div.id = 'msg-' + key;
             div.innerHTML = `
                 <div class="msg-avatar" style="${msg.photo ? `background-image:url(${msg.photo})` : ''}">${msg.photo ? '' : msg.name.charAt(0)}</div>
                 <div class="msg-body">
@@ -460,11 +502,127 @@
                     <div class="msg-user">${msg.name}</div>
                     <div class="msg-text">${msg.text}</div>
                     <span class="reply-btn" onclick="setReply('${msg.name}', '${msg.text.replace(/'/g, "\\'")}')"><i class="fas fa-reply"></i> Responder</span>
+                    <i class="fas fa-trash del-msg" onclick="deleteMsg('${key}')"></i>
                 </div>
             `;
             chatBox.appendChild(div);
             chatBox.scrollTop = chatBox.scrollHeight;
         }
+
+        function renderAd() {
+            const div = document.createElement('div');
+            div.className = 'ad-banner';
+            div.innerHTML = `
+                <div style="font-size:10px; color:#aaa; margin-bottom:5px;">Publicidade</div>
+                <div style="color:white; font-size:12px; margin: 10px 0;">Patrocinado: Conheça nossos planos Premium!</div>
+                <ins class="adsbygoogle" style="display:inline-block;width:320px;height:50px" data-ad-client="ca-pub-xxx"></ins>
+            `;
+            chatBox.appendChild(div);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        // --- ENQUETE ---
+        document.getElementById('open-poll-btn').onclick = () => {
+            if (!userData.isPremium) {
+                alert("Apenas usuários Premium/Admins podem criar enquetes!");
+                return;
+            }
+            document.getElementById('poll-modal').classList.add('active');
+            selectedPollOptions = [];
+            renderSelectedOptions();
+        };
+
+        document.getElementById('poll-search').oninput = (e) => {
+            const query = e.target.value.toLowerCase();
+            const filtered = allMovies.filter(m => m.titulo.toLowerCase().includes(query)).slice(0, 5);
+            const container = document.getElementById('poll-results');
+            container.innerHTML = filtered.map(item => `
+                <div class="search-item" onclick='addPollOption(${JSON.stringify(item).replace(/'/g, "&apos;")})'>
+                    <img src="${item.capa}">
+                    <div class="search-item-info">
+                        <div class="search-item-title">${item.titulo}</div>
+                        <div class="search-item-type">${item.tipo}</div>
+                    </div>
+                </div>
+            `).join('');
+        };
+
+        window.addPollOption = (item) => {
+            if (selectedPollOptions.length >= 3) return;
+            selectedPollOptions.push(item);
+            renderSelectedOptions();
+        };
+
+        function renderSelectedOptions() {
+            const area = document.getElementById('selected-options');
+            area.innerHTML = selectedPollOptions.map(opt => `
+                <div style="background:var(--accent); padding:5px 10px; border-radius:15px; font-size:10px; color:white;">${opt.titulo}</div>
+            `).join('');
+        }
+
+        document.getElementById('confirm-poll').onclick = () => {
+            const msg = document.getElementById('poll-msg').value;
+            if (!msg || selectedPollOptions.length === 0) return;
+            roomRef.child('chat').push({
+                type: 'poll',
+                uid: currentUser.uid,
+                name: currentUser.displayName,
+                photo: currentUser.photoURL,
+                text: msg,
+                options: selectedPollOptions.map(o => ({ 
+                    id: o.id, 
+                    titulo: o.titulo, 
+                    capa: o.capa, 
+                    link: o.link_mp4,
+                    tipo: o.tipo,
+                    episodios: o.episodios || null
+                }))
+            });
+            document.getElementById('poll-modal').classList.remove('active');
+        };
+
+        function renderPoll(poll, key) {
+            const div = document.createElement('div');
+            div.className = 'poll-card';
+            div.id = 'msg-' + key;
+            div.innerHTML = `
+                <div class="poll-creator">
+                    <img src="${poll.photo}"> <span>${poll.name} criou uma enquete</span>
+                    <i class="fas fa-trash del-msg" onclick="deleteMsg('${key}')" style="margin-left:auto; pointer-events:auto;"></i>
+                </div>
+                <div style="font-weight:bold; margin-bottom:10px;">${poll.text}</div>
+                ${poll.options.map(opt => `
+                    <div class="poll-option" onclick="handlePollVote('${opt.id}', '${key}')">
+                        <img src="${opt.capa}">
+                        <span>${opt.titulo}</span>
+                    </div>
+                `).join('')}
+            `;
+            chatBox.appendChild(div);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        window.handlePollVote = (movieId, pollKey) => {
+            if (!userData.isAdmin) {
+                alert("Apenas administradores podem encerrar a votação e mudar o vídeo!");
+                return;
+            }
+            
+            // Buscar o filme nas opções da enquete
+            roomRef.child('chat').child(pollKey).get().then(snap => {
+                const poll = snap.val();
+                const option = poll.options.find(o => o.id == movieId);
+                if (option) {
+                    if (option.tipo === 'serie') {
+                        showEpisodes(option);
+                    } else {
+                        updateVideo(option.link);
+                    }
+                    // Opcional: deletar a enquete após votar
+                    // roomRef.child('chat').child(pollKey).remove();
+                }
+            });
+        };
 
         // --- MUDAR FILME / SÉRIE ---
         function handleSelect(item) {
@@ -475,19 +633,18 @@
                 document.getElementById('admin-modal').classList.remove('active');
             }
         }
-
-        function showEpisodes(serie) {
+	        function showEpisodes(serie) {
             document.getElementById('series-title').innerText = serie.titulo;
             const container = document.getElementById('episodes-container');
             container.innerHTML = '';
             
-            // Supondo que a estrutura da série tenha 'episodios' ou links múltiplos
-            // Como o JSON padrão pode variar, vamos criar botões baseados no que existir
-            if (serie.episodios) {
-                serie.episodios.forEach((ep, index) => {
+            if (serie.episodios && Array.isArray(serie.episodios)) {
+                serie.episodios.forEach((ep) => {
                     const btn = document.createElement('div');
                     btn.className = 'ep-item';
-                    btn.innerText = `EP ${index + 1}`;
+                    // Formato T1 EP1 baseado no JSON
+                    const label = `T${ep.temporada || 1} EP${ep.episodio || '?'}`;
+                    btn.innerText = label;
                     btn.onclick = () => {
                         updateVideo(ep.link_mp4);
                         document.getElementById('episodes-modal').classList.remove('active');
@@ -496,10 +653,9 @@
                     container.appendChild(btn);
                 });
             } else {
-                // Fallback caso não tenha array de eps, mas seja marcado como série
                 const btn = document.createElement('div');
                 btn.className = 'ep-item';
-                btn.innerText = `Episódio Único`;
+                btn.innerText = `Iniciar Série (EP1)`;
                 btn.onclick = () => {
                     updateVideo(serie.link_mp4);
                     document.getElementById('episodes-modal').classList.remove('active');
@@ -511,14 +667,13 @@
         }
 
         function updateVideo(url) {
+            if (!userData.isAdmin) return;
             video.src = url;
             bgVideo.src = url;
-            if (userData.isAdmin) {
-                roomRef.child('sync').set({ url: url, time: 0, playing: true, sender: currentUser.uid });
-            }
+            roomRef.child('sync').set({ url: url, time: 0, playing: true, sender: currentUser.uid });
         }
 
-        // --- BUSCA ---
+        // --- BUSCA ADMIN ---
         document.getElementById('admin-search').oninput = (e) => {
             const query = e.target.value.toLowerCase();
             const results = allMovies.filter(m => m.titulo.toLowerCase().includes(query)).slice(0, 10);
@@ -528,17 +683,16 @@
                     <img src="${item.capa}">
                     <div class="search-item-info">
                         <div class="search-item-title">${item.titulo}</div>
-                        <div class="search-item-type">${item.tipo === 'serie' ? 'Série' : 'Filme'}</div>
+                        <div class="search-item-type">${item.tipo}</div>
                     </div>
                 </div>
             `).join('');
         };
 
-        // --- EVENTOS ---
+        // --- EVENTOS BÁSICOS ---
         document.getElementById('send-msg').onclick = sendMessage;
         chatInput.onkeypress = (e) => e.key === 'Enter' && sendMessage();
         
-        // Controles básicos
         document.getElementById('play-pause').onclick = () => {
             if (!userData.isAdmin) return;
             if (video.paused) video.play(); else video.pause();
@@ -555,6 +709,8 @@
             const m = Math.floor(s/60), sec = Math.floor(s%60);
             return m.toString().padStart(2,'0') + ":" + sec.toString().padStart(2,'0');
         }
+        
+        document.getElementById('fs-btn').onclick = () => document.getElementById('player-wrapper').requestFullscreen();
     </script>
 </body>
 </html>
