@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no, maximum-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="true">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Watch Party Pro - Premium & Admin</title>
@@ -26,18 +26,17 @@
         }
         
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; }
-        html { width: 100%; height: 100%; }
-        body { width: 100%; height: 100vh; height: 100dvh; background-color: #000; overflow: hidden; font-family: 'Avenir Next', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; }
+        body, html { width: 100%; height: 100%; background-color: #000; overflow: hidden; font-family: 'Avenir Next', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
 
         /* LAYOUT PRINCIPAL */
-        .watch-party-container { display: flex; flex-direction: column; width: 100%; height: 100%; background: #000; position: fixed; top: 0; left: 0; right: 0; bottom: 0; }
+        .watch-party-container { display: flex; flex-direction: column; width: 100%; height: 100%; background: #000; }
         @media (min-width: 1024px) { .watch-party-container { flex-direction: row; } }
 
         /* PLAYER SECTION */
-        .player-section { position: relative; width: 100%; flex: 0 0 auto; aspect-ratio: 16 / 9; background: #000; z-index: 10; min-height: 0; }
+        .player-section { position: relative; width: 100%; aspect-ratio: 16 / 9; background: #000; z-index: 10; }
         @media (min-width: 1024px) { .player-section { flex: 1; height: 100%; aspect-ratio: auto; } }
-        .player-wrapper { width: 100%; height: 100%; position: relative; overflow: hidden; display: block; -webkit-user-select: none; user-select: none; }
-        video { width: 100% !important; height: 100% !important; object-fit: contain; display: block; background: #000; position: relative; z-index: 10; }
+        .player-wrapper { width: 100%; height: 100%; position: relative; overflow: hidden; }
+        video { width: 100%; height: 100%; object-fit: contain; }
 
         /* OVERLAYS */
         .player-info-overlay {
@@ -62,11 +61,10 @@
             background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
             z-index: 100; opacity: 0; transition: opacity 0.3s; pointer-events: none;
         }
-        /* Garantir que controles sejam clicáveis para todos no iOS se necessário */
+        /* No iOS, precisamos garantir que o clique passe se o usuário precisar dar play manual */
         .player-wrapper:hover .bottom-controls, .player-wrapper.show-controls .bottom-controls { opacity: 1; pointer-events: auto; }
 
         .seekbar-container { width: 100%; height: 4px; background: rgba(255,255,255,0.2); margin-bottom: 15px; cursor: pointer; position: relative; }
-        .seekbar-container.disabled { cursor: not-allowed; opacity: 0.5; }
         .seekbar-fill { height: 100%; background: var(--accent); width: 0%; }
         .control-row { display: flex; justify-content: space-between; align-items: center; color: white; font-size: 13px; }
 
@@ -78,26 +76,15 @@
         }
         .admin-active .admin-btn { display: flex; }
 
-        /* CONTROLES ADMIN */
-        .admin-controls { display: flex; align-items: center; gap: 15px; }
-        .admin-controls i { cursor: pointer; transition: 0.2s; }
-        .admin-controls i:hover { color: var(--accent-light); }
-        .admin-controls i.disabled { cursor: not-allowed; opacity: 0.3; }
-
-        /* CONTROLES USUÁRIO COMUM */
-        .user-controls { display: flex; align-items: center; gap: 15px; }
-        .user-controls i { cursor: pointer; transition: 0.2s; }
-        .user-controls i:hover { color: var(--accent-light); }
-
         /* CHAT SECTION */
-        .chat-section { flex: 1; display: flex; flex-direction: column; position: relative; overflow: hidden; background: transparent; min-height: 0; }
+        .chat-section { flex: 1; display: flex; flex-direction: column; position: relative; overflow: hidden; background: transparent; }
         .chat-bg-video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; overflow: hidden; }
         .chat-bg-video video { width: 100%; height: 100%; object-fit: cover; filter: blur(40px) brightness(0.4); transform: scale(1.2); }
 
         .chat-header {
             padding: 15px 20px; border-bottom: 1px solid var(--border-color);
             display: flex; justify-content: space-between; align-items: center;
-            background: rgba(0,0,0,0.2); backdrop-filter: blur(10px); flex-shrink: 0;
+            background: rgba(0,0,0,0.2); backdrop-filter: blur(10px);
         }
         .chat-title-area { display: flex; align-items: center; gap: 12px; }
         .chat-title-area h2 { font-size: 15px; color: white; }
@@ -110,17 +97,20 @@
         }
         .avatar-stack:first-child { margin-left: 0; }
 
-        .chat-messages { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 15px; display: flex; flex-direction: column; gap: 12px; min-height: 0; }
-        .msg { display: flex; gap: 10px; animation: fadeIn 0.3s ease; position: relative; cursor: pointer; flex-shrink: 0; }
-        .msg:hover { background: rgba(255,255,255,0.05); border-radius: 8px; padding: 5px; }
+        .chat-messages { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 12px; }
+        .msg { display: flex; gap: 10px; animation: fadeIn 0.3s ease; position: relative; }
         .msg-avatar {
             width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0; background: #333;
             display: flex; align-items: center; justify-content: center; font-size: 12px;
             color: white; font-weight: bold; background-size: cover;
         }
-        .msg-body { background: rgba(255,255,255,0.05); padding: 8px 12px; border-radius: 12px; max-width: 85%; position: relative; word-wrap: break-word; }
+        .msg-body { background: rgba(255,255,255,0.05); padding: 8px 12px; border-radius: 12px; max-width: 85%; position: relative; }
         .msg-user { font-size: 12px; font-weight: bold; color: var(--accent-light); margin-bottom: 2px; }
         .msg-text { font-size: 13px; color: white; line-height: 1.4; }
+        
+        /* DELETE BTN (ADMIN) */
+        .del-msg { position: absolute; right: -25px; top: 5px; color: #ff4444; font-size: 10px; cursor: pointer; display: none; }
+        .admin-active .del-msg { display: block; }
 
         /* REPLY SYSTEM */
         .reply-preview { background: rgba(0,0,0,0.3); border-left: 3px solid var(--accent); padding: 4px 8px; margin-bottom: 5px; border-radius: 4px; font-size: 11px; color: #aaa; cursor: pointer; }
@@ -130,19 +120,14 @@
         .active-reply-bar {
             background: rgba(0,114,210,0.1); border-top: 1px solid var(--accent);
             padding: 8px 15px; display: none; justify-content: space-between; align-items: center;
-            font-size: 12px; color: white; flex-shrink: 0;
+            font-size: 12px; color: white;
         }
 
         /* INPUT AREA & LIMITS */
-        .chat-input-area { padding: 15px; background: rgba(0,0,0,0.3); backdrop-filter: blur(20px); display: flex; flex-direction: column; gap: 10px; position: relative; flex-shrink: 0; }
-        .input-row { display: flex; gap: 10px; align-items: flex-end; width: 100%; }
-        .input-wrapper { flex: 1; background: rgba(255,255,255,0.1); border-radius: 24px; padding: 10px 16px; display: flex; align-items: center; transition: 0.3s; min-height: 40px; }
-        .input-wrapper input { 
-            flex: 1; background: none; border: none; color: white; font-size: 16px; outline: none; 
-            -webkit-appearance: none; -webkit-border-radius: 0; padding: 8px 0;
-            width: 100%; min-height: 40px; font-size: 16px;
-        }
-        .input-wrapper input::placeholder { color: rgba(255,255,255,0.5); }
+        .chat-input-area { padding: 15px; background: rgba(0,0,0,0.3); backdrop-filter: blur(20px); display: flex; flex-direction: column; gap: 10px; position: relative; }
+        .input-row { display: flex; gap: 10px; align-items: center; width: 100%; }
+        .input-wrapper { flex: 1; background: rgba(255,255,255,0.1); border-radius: 24px; padding: 8px 16px; display: flex; align-items: center; transition: 0.3s; }
+        .input-wrapper input { flex: 1; background: none; border: none; color: white; font-size: 14px; outline: none; }
 
         /* BLOQUEIO CHAT TIMER */
         .chat-lock-overlay {
@@ -160,7 +145,7 @@
         .send-btn, .poll-btn {
             width: 40px; height: 40px; background: var(--accent); border: none;
             border-radius: 50%; color: white; display: flex; align-items: center;
-            justify-content: center; cursor: pointer; flex-shrink: 0;
+            justify-content: center; cursor: pointer;
         }
         .poll-btn { background: rgba(255,255,255,0.1); }
 
@@ -178,7 +163,7 @@
         
         /* EPISODES GRID */
         .episodes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 10px; margin-top: 15px; }
-        .ep-item { background: rgba(255,255,255,0.1); padding: 10px; border-radius: 8px; cursor: pointer; text-align: center; color: white; font-size: 12px; transition: 0.2s; }
+        .ep-item { background: rgba(255,255,255,0.1); padding: 10px; border-radius: 8px; color: white; cursor: pointer; font-size: 11px; transition: 0.2s; text-align: center; }
         .ep-item:hover { background: var(--accent); }
 
         /* ENQUETE AVANÇADA */
@@ -188,13 +173,12 @@
         .poll-option {
             background: rgba(255,255,255,0.1); padding: 10px; border-radius: 8px;
             margin-top: 8px; cursor: pointer; font-size: 13px; display: flex; align-items: center; gap: 10px;
-            transition: 0.2s; position: relative;
+            transition: 0.2s;
         }
         .poll-option:hover { background: rgba(255,255,255,0.2); }
         .poll-option img { width: 30px; height: 40px; object-fit: cover; border-radius: 4px; }
-        .poll-vote-count { margin-left: auto; background: rgba(0,0,0,0.3); padding: 4px 8px; border-radius: 6px; font-size: 11px; }
 
-        /* BANNER ANÚNCIO - LIMITE DE 1 */
+        /* BANNER ANÚNCIO */
         .ad-banner { background: rgba(255,255,255,0.05); padding: 10px; border-radius: 10px; margin: 10px 0; text-align: center; border: 1px solid var(--border-color); }
 
         /* BUSCA DE FILMES NO MODAL */
@@ -208,52 +192,7 @@
         .search-item-title { font-size: 13px; font-weight: bold; color: white; }
         .search-item-type { font-size: 10px; color: var(--accent-light); }
 
-        /* POP-UP DE MODERAÇÃO */
-        .moderation-popup {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 3000;
-            display: none; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(10px);
-        }
-        .moderation-popup.active { display: flex; }
-        .moderation-content {
-            background: #1a1d29; width: 100%; max-width: 350px; border-radius: 24px;
-            padding: 30px; text-align: center; border: 1px solid var(--border-color);
-        }
-        .moderation-content h3 { color: white; margin-bottom: 20px; }
-        .moderation-content .user-info { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; margin-bottom: 20px; }
-        .moderation-content .user-info p { color: #aaa; font-size: 13px; margin: 5px 0; }
-        .moderation-buttons { display: flex; gap: 10px; flex-direction: column; }
-        .moderation-buttons button { padding: 12px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; font-size: 13px; }
-        .btn-delete { background: #ff4444; color: white; }
-        .btn-ban { background: #ff8800; color: white; }
-        .btn-cancel { background: rgba(255,255,255,0.1); color: white; }
-
-        /* POP-UP PREMIUM */
-        .premium-popup {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 3000;
-            display: none; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(10px);
-        }
-        .premium-popup.active { display: flex; }
-        .premium-content {
-            background: linear-gradient(135deg, #1a1d29, #2a2d39); width: 100%; max-width: 350px; border-radius: 24px;
-            padding: 30px; text-align: center; border: 2px solid var(--premium-gold);
-        }
-        .premium-content h3 { color: var(--premium-gold); margin-bottom: 15px; font-size: 18px; }
-        .premium-content p { color: #aaa; font-size: 13px; margin-bottom: 20px; line-height: 1.5; }
-        .premium-content .premium-icon { font-size: 48px; color: var(--premium-gold); margin-bottom: 15px; }
-        .premium-buttons { display: flex; gap: 10px; flex-direction: column; }
-        .premium-buttons button { padding: 12px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; font-size: 13px; }
-        .btn-upgrade { background: var(--premium-gold); color: #000; }
-        .btn-close-premium { background: rgba(255,255,255,0.1); color: white; }
-
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-        /* FIX PARA iOS - Prevenir zoom ao focar em input */
-        @supports (padding: max(0px)) {
-            .input-wrapper input {
-                padding-left: max(10px, env(safe-area-inset-left));
-                padding-right: max(10px, env(safe-area-inset-right));
-            }
-        }
     </style>
 </head>
 <body>
@@ -300,36 +239,7 @@
             <button onclick="document.getElementById('poll-modal').classList.remove('active')" style="margin-top:15px; background:none; border:none; color:#aaa; cursor:pointer;">Cancelar</button>
         </div>
     </div>
-
-    <!-- POP-UP DE MODERAÇÃO (ADMIN) -->
-    <div class="moderation-popup" id="moderation-popup">
-        <div class="moderation-content">
-            <h3>Gerenciar Mensagem</h3>
-            <div class="user-info">
-                <p><strong id="mod-user-name">Usuário</strong></p>
-                <p id="mod-user-email" style="font-size: 11px; color: #666;"></p>
-            </div>
-            <div class="moderation-buttons">
-                <button class="btn-delete" onclick="deleteMsgFromPopup()"><i class="fas fa-trash"></i> Deletar Mensagem</button>
-                <button class="btn-ban" onclick="banUserFromPopup()"><i class="fas fa-ban"></i> Banir Usuário</button>
-                <button class="btn-cancel" onclick="closeModeration()">Cancelar</button>
-            </div>
-        </div>
-    </div>
-    <!-- POP-UP PREMIUM -->
-    <div class="premium-popup" id="premium-popup">
-        <div class="premium-content">
-            <div class="premium-icon"><i class="fas fa-crown"></i></div>
-            <h3>Recurso Premium</h3>
-            <p>Apenas usuários Premium podem criar enquetes. Desbloqueia este e muitos outros recursos exclusivos!</p>
-            <div class="premium-buttons">
-                <button class="btn-upgrade" onclick="goToPremium()"><i class="fas fa-star"></i> Se Tornar Premium</button>
-                <button class="btn-close-premium" onclick="closePremiumPopup()">Cancelar</button>
-            </div>
-        </div>
-    </div>
-
-    <div class="watch-party-container">
+	    <div class="watch-party-container">
         <!-- PLAYER -->
         <div class="player-section">
             <div class="player-wrapper" id="player-wrapper">
@@ -343,13 +253,9 @@
                         <div class="seekbar-fill" id="fill"></div>
                     </div>
                     <div class="control-row">
-                        <div id="admin-control-group" style="display:flex; align-items:center; gap:15px;">
+                        <div style="display:flex; align-items:center; gap:15px;">
                             <i class="fas fa-play" id="play-pause" style="cursor:pointer;"></i>
                             <span id="time-display">00:00 / 00:00</span>
-                        </div>
-                        <div id="user-control-group" style="display:none; align-items:center; gap:15px;">
-                            <i class="fas fa-play" id="play-pause-user" style="cursor:pointer;"></i>
-                            <span id="time-display-user">00:00 / 00:00</span>
                         </div>
                         <div style="display:flex; gap:15px;">
                             <button class="admin-btn" onclick="document.getElementById('admin-modal').classList.add('active')">
@@ -380,7 +286,7 @@
                 <div class="chat-lock-overlay" id="chat-lock">
                     <span>Muitas mensagens! Aguarde:</span>
                     <div class="lock-timer" id="lock-timer">02:00</div>
-                    <button class="premium-btn-small" onclick="goToPremium()">Remover Limite com Premium</button>
+                    <button class="premium-btn-small" onclick="window.location.href='premium.html'">Remover Limite com Premium</button>
                 </div>
                 
                 <div class="active-reply-bar" id="reply-bar">
@@ -434,7 +340,6 @@
         let activeReply = null;
         let allMovies = [];
         let selectedPollOptions = [];
-        let currentMsgForModeration = null;
         
         // Detectar iOS
         const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
@@ -449,14 +354,13 @@
             }
         });
 
+        // Capturar resultado do login
         auth.getRedirectResult().then(result => {
             if (result && result.user) {
                 currentUser = result.user;
                 checkUserRole();
             }
-        }).catch(error => {
-            console.error('Erro ao processar login:', error);
-        });
+        }).catch(error => console.error('Erro login:', error));
 
         document.getElementById('google-login').onclick = () => {
             const provider = new firebase.auth.GoogleAuthProvider();
@@ -467,7 +371,7 @@
                         checkUserRole();
                     }
                 }).catch(err => {
-                    console.log("Popup blocked or failed, trying redirect...", err);
+                    console.log("Popup falhou, tentando redirect...", err);
                     auth.signInWithRedirect(provider);
                 });
             } else {
@@ -495,11 +399,6 @@
             
             if (userData.isAdmin) {
                 document.body.classList.add('admin-active');
-                document.getElementById('admin-control-group').style.display = 'flex';
-                document.getElementById('user-control-group').style.display = 'none';
-            } else {
-                document.getElementById('admin-control-group').style.display = 'none';
-                document.getElementById('user-control-group').style.display = 'flex';
             }
             
             if (userData.isPremium) {
@@ -539,12 +438,8 @@
                 }
                 
                 if (data.playing && video.paused) {
-                    video.play().catch(err => {
-                        console.log('Play failed (needs interaction):', err);
-                        // No iOS/Safari, se falhar, o ícone vai mostrar "play" e o usuário clica
-                    });
-                }
-                else if (!data.playing && !video.paused) {
+                    video.play().catch(err => console.log('Autoplay blocked:', err));
+                } else if (!data.playing && !video.paused) {
                     video.pause();
                 }
             });
@@ -569,9 +464,7 @@
             // Usuários Online
             roomRef.child('users').on('value', snapshot => {
                 const users = Object.values(snapshot.val() || {});
-                document.getElementById('viewer-count').innerHTML = 
-                    `<i class="fas fa-eye"></i> ${users.length} ${users.length === 1 ? 'assistindo' : 'assistindo'}`;
-                
+                document.getElementById('viewer-count').innerHTML = `<i class="fas fa-eye"></i> ${users.length} assistindo`;
                 const avatarArea = document.getElementById('user-avatars');
                 avatarArea.innerHTML = users.slice(0, 5).map(u => 
                     `<div class="avatar-stack" style="${u.photo ? `background-image:url(${u.photo})` : ''}" title="${u.name}">${u.photo ? '' : u.initial}</div>`
@@ -626,44 +519,19 @@
             }, 1000);
         }
 
-        function deleteMsg(key) {
+        window.deleteMsg = (key) => {
             if (!userData.isAdmin) return;
             roomRef.child('chat').child(key).remove();
         }
 
-        function deleteMsgFromPopup() {
-            if (currentMsgForModeration) {
-                deleteMsg(currentMsgForModeration.key);
-                closeModeration();
-            }
-        }
-
-        function banUserFromPopup() {
-            if (currentMsgForModeration) {
-                const bannedRef = db.ref('banned_users/' + currentMsgForModeration.uid);
-                bannedRef.set({ 
-                    name: currentMsgForModeration.name, 
-                    bannedAt: Date.now(),
-                    bannedBy: currentUser.uid 
-                });
-                alert(`Usuário ${currentMsgForModeration.name} foi banido!`);
-                closeModeration();
-            }
-        }
-
-        function closeModeration() {
-            document.getElementById('moderation-popup').classList.remove('active');
-            currentMsgForModeration = null;
-        }
-
-        function setReply(name, text) {
+        window.setReply = (name, text) => {
             activeReply = { name, text };
             document.getElementById('reply-user').innerText = name;
             document.getElementById('reply-bar').style.display = 'flex';
             chatInput.focus();
         }
 
-        function cancelReply() {
+        window.cancelReply = () => {
             activeReply = null;
             document.getElementById('reply-bar').style.display = 'none';
         }
@@ -672,12 +540,6 @@
             const div = document.createElement('div');
             div.className = 'msg';
             div.id = 'msg-' + key;
-            if (userData.isAdmin) {
-                div.onclick = (e) => {
-                    if (e.target.closest('.reply-btn')) return;
-                    openModerationPopup(msg, key);
-                };
-            }
             div.innerHTML = `
                 <div class="msg-avatar" style="${msg.photo ? `background-image:url(${msg.photo})` : ''}">${msg.photo ? '' : msg.name.charAt(0)}</div>
                 <div class="msg-body">
@@ -685,17 +547,11 @@
                     <div class="msg-user">${msg.name}</div>
                     <div class="msg-text">${msg.text}</div>
                     <span class="reply-btn" onclick="setReply('${msg.name}', '${msg.text.replace(/'/g, "\\'")}')"><i class="fas fa-reply"></i> Responder</span>
+                    <i class="fas fa-trash del-msg" onclick="deleteMsg('${key}')"></i>
                 </div>
             `;
             chatBox.appendChild(div);
             chatBox.scrollTop = chatBox.scrollHeight;
-        }
-
-        function openModerationPopup(msg, key) {
-            currentMsgForModeration = { ...msg, key };
-            document.getElementById('mod-user-name').innerText = msg.name;
-            document.getElementById('mod-user-email').innerText = msg.text.substring(0, 50) + '...';
-            document.getElementById('moderation-popup').classList.add('active');
         }
 
         function renderAd() {
@@ -704,7 +560,6 @@
             div.innerHTML = `
                 <div style="font-size:10px; color:#aaa; margin-bottom:5px;">Publicidade</div>
                 <div style="color:white; font-size:12px; margin: 10px 0;">Patrocinado: Conheça nossos planos Premium!</div>
-                <p style="color:#666; font-size:11px;">Desfrute de recursos exclusivos e sem anúncios.</p>
             `;
             chatBox.appendChild(div);
             chatBox.scrollTop = chatBox.scrollHeight;
@@ -713,7 +568,7 @@
         // --- ENQUETE ---
         document.getElementById('open-poll-btn').onclick = () => {
             if (!userData.isPremium) {
-                document.getElementById('premium-popup').classList.add('active');
+                alert("Apenas usuários Premium/Admins podem criar enquetes!");
                 return;
             }
             document.getElementById('poll-modal').classList.add('active');
@@ -730,45 +585,44 @@
                     <img src="${item.capa}">
                     <div class="search-item-info">
                         <div class="search-item-title">${item.titulo}</div>
+                        <div class="search-item-type">${item.tipo}</div>
                     </div>
                 </div>
             `).join('');
         };
-        function addPollOption(item) {
-            if (selectedPollOptions.length >= 4) return;
-            if (selectedPollOptions.find(o => o.titulo === item.titulo)) return;
+
+        window.addPollOption = (item) => {
+            if (selectedPollOptions.length >= 3) return;
             selectedPollOptions.push(item);
             renderSelectedOptions();
-        }
+        };
 
         function renderSelectedOptions() {
-            const container = document.getElementById('selected-options');
-            container.innerHTML = selectedPollOptions.map((o, idx) => `
-                <div class="badge" style="background:var(--accent-light); color:white;">
-                    ${o.titulo} <i class="fas fa-times" onclick="selectedPollOptions.splice(${idx}, 1); renderSelectedOptions();" style="cursor:pointer; margin-left:5px;"></i>
-                </div>
+            const area = document.getElementById('selected-options');
+            area.innerHTML = selectedPollOptions.map(opt => `
+                <div style="background:var(--accent); padding:5px 10px; border-radius:15px; font-size:10px; color:white;">${opt.titulo}</div>
             `).join('');
         }
 
         document.getElementById('confirm-poll').onclick = () => {
-            const question = document.getElementById('poll-msg').value.trim();
-            if (!question || selectedPollOptions.length < 2) {
-                alert("Digite a pergunta e escolha pelo menos 2 opções!");
-                return;
-            }
-            const pollData = {
+            const msg = document.getElementById('poll-msg').value;
+            if (!msg || selectedPollOptions.length === 0) return;
+            roomRef.child('chat').push({
                 type: 'poll',
                 uid: currentUser.uid,
                 name: currentUser.displayName,
                 photo: currentUser.photoURL,
-                question: question,
-                options: selectedPollOptions.map(o => ({ titulo: o.titulo, capa: o.capa, votes: 0 })),
-                timestamp: Date.now()
-            };
-            roomRef.child('chat').push(pollData);
+                text: msg,
+                options: selectedPollOptions.map(o => ({ 
+                    id: o.id, 
+                    titulo: o.titulo, 
+                    capa: o.capa, 
+                    link: o.link_mp4,
+                    tipo: o.tipo,
+                    episodios: o.episodios || null
+                }))
+            });
             document.getElementById('poll-modal').classList.remove('active');
-            document.getElementById('poll-msg').value = '';
-            selectedPollOptions = [];
         };
 
         function renderPoll(poll, key) {
@@ -777,61 +631,72 @@
             div.id = 'msg-' + key;
             div.innerHTML = `
                 <div class="poll-creator">
-                    <img src="${poll.photo || ''}">${poll.name} criou uma enquete
+                    <img src="${poll.photo}"> <span>${poll.name} criou uma enquete</span>
+                    <i class="fas fa-trash del-msg" onclick="deleteMsg('${key}')" style="margin-left:auto; pointer-events:auto;"></i>
                 </div>
-                <div style="font-weight:bold; margin-bottom:10px; font-size:14px;">${poll.question}</div>
-                <div id="options-${key}">
-                    ${poll.options.map((opt, idx) => `
-                        <div class="poll-option" onclick="vote('${key}', ${idx})">
-                            <img src="${opt.capa}">
-                            <span>${opt.titulo}</span>
-                            <span class="poll-vote-count">${opt.votes || 0}</span>
-                        </div>
-                    `).join('')}
-                </div>
+                <div style="font-weight:bold; margin-bottom:10px;">${poll.text}</div>
+                ${poll.options.map(opt => `
+                    <div class="poll-option" onclick="handlePollVote('${opt.id}', '${key}')">
+                        <img src="${opt.capa}">
+                        <span>${opt.titulo}</span>
+                    </div>
+                `).join('')}
             `;
             chatBox.appendChild(div);
             chatBox.scrollTop = chatBox.scrollHeight;
-            roomRef.child('chat').child(key).child('options').on('value', snap => {
-                const options = snap.val();
-                if (!options) return;
-                const optContainer = document.getElementById('options-' + key);
-                if (optContainer) {
-                    optContainer.innerHTML = options.map((opt, idx) => `
-                        <div class="poll-option" onclick="vote('${key}', ${idx})">
-                            <img src="${opt.capa}">
-                            <span>${opt.titulo}</span>
-                            <span class="poll-vote-count">${opt.votes || 0}</span>
-                        </div>
-                    `).join('');
+        }
+
+        window.handlePollVote = (movieId, pollKey) => {
+            if (!userData.isAdmin) {
+                alert("Apenas administradores podem encerrar a votação e mudar o vídeo!");
+                return;
+            }
+            roomRef.child('chat').child(pollKey).get().then(snap => {
+                const poll = snap.val();
+                const option = poll.options.find(o => o.id == movieId);
+                if (option) {
+                    if (option.tipo === 'serie') showEpisodes(option);
+                    else updateVideo(option.link);
                 }
             });
-        }
-
-        function vote(pollKey, optIdx) {
-            const voteRef = roomRef.child('chat').child(pollKey).child('options').child(optIdx).child('votes');
-            voteRef.transaction(currentVotes => (currentVotes || 0) + 1);
-        }
-
-        // --- LÓGICA DO PLAYER ---
-        function handleSelect(item) {
-            if (!userData.isAdmin) return;
-            if (item.tipo === 'Série') {
-                openEpisodes(item);
+        };
+	        // --- MUDAR FILME / SÉRIE ---
+        window.handleSelect = (item) => {
+            if (item.tipo === 'serie') {
+                showEpisodes(item);
             } else {
-                updateVideo(item.url);
+                updateVideo(item.link_mp4);
                 document.getElementById('admin-modal').classList.remove('active');
             }
         }
 
-        function openEpisodes(series) {
+        function showEpisodes(serie) {
+            document.getElementById('series-title').innerText = serie.titulo;
             const container = document.getElementById('episodes-container');
-            document.getElementById('series-title').innerText = series.titulo;
-            container.innerHTML = series.episodios.map(ep => `
-                <div class="ep-item" onclick="updateVideo('${ep.url}'); document.getElementById('episodes-modal').classList.remove('active'); document.getElementById('admin-modal').classList.remove('active');">
-                    EP ${ep.numero}
-                </div>
-            `).join('');
+            container.innerHTML = '';
+            if (serie.episodios && Array.isArray(serie.episodios)) {
+                serie.episodios.forEach((ep) => {
+                    const btn = document.createElement('div');
+                    btn.className = 'ep-item';
+                    btn.innerText = `T${ep.temporada || 1} EP${ep.episodio || '?'}`;
+                    btn.onclick = () => {
+                        updateVideo(ep.link_mp4);
+                        document.getElementById('episodes-modal').classList.remove('active');
+                        document.getElementById('admin-modal').classList.remove('active');
+                    };
+                    container.appendChild(btn);
+                });
+            } else {
+                const btn = document.createElement('div');
+                btn.className = 'ep-item';
+                btn.innerText = `Iniciar Série (EP1)`;
+                btn.onclick = () => {
+                    updateVideo(serie.link_mp4);
+                    document.getElementById('episodes-modal').classList.remove('active');
+                    document.getElementById('admin-modal').classList.remove('active');
+                };
+                container.appendChild(btn);
+            }
             document.getElementById('episodes-modal').classList.add('active');
         }
 
@@ -840,9 +705,7 @@
             video.src = url;
             bgVideo.src = url;
             video.load();
-            setTimeout(() => {
-                roomRef.child('sync').set({ url: url, time: 0, playing: true, sender: currentUser.uid });
-            }, 500);
+            roomRef.child('sync').set({ url: url, time: 0, playing: true, sender: currentUser.uid });
         }
 
         // --- BUSCA ADMIN ---
@@ -861,72 +724,32 @@
             `).join('');
         };
 
-        function goToPremium() {
-            window.location.href = 'premium.html';
-        }
-
-        function closePremiumPopup() {
-            document.getElementById('premium-popup').classList.remove('active');
-        }
-
         // --- EVENTOS ---
-        document.getElementById('send-msg').addEventListener('click', sendMessage);
-        chatInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                sendMessage();
-            }
-        });
+        document.getElementById('send-msg').onclick = sendMessage;
+        chatInput.onkeypress = (e) => e.key === 'Enter' && sendMessage();
         
-        // Controle de Play/Pause unificado
         const handlePlayClick = () => {
             if (userData.isAdmin) {
-                togglePlay();
+                if (video.paused) video.play(); else video.pause();
+                roomRef.child('sync').update({ playing: !video.paused, time: video.currentTime });
             } else {
-                // Usuário comum pode dar play localmente se o vídeo estiver pausado mas o admin disser que está "playing"
-                // Isso resolve o bloqueio de autoplay no iOS
+                // Usuário comum clica para destravar o áudio/vídeo no iOS
                 if (video.paused) {
-                    video.play().catch(e => console.log("User play failed", e));
+                    video.play().catch(e => console.log("Manual play failed", e));
                 } else {
                     video.pause();
                 }
             }
         };
-
         document.getElementById('play-pause').onclick = handlePlayClick;
-        document.getElementById('play-pause-user').onclick = handlePlayClick;
-
-        function togglePlay() {
-            if (!userData.isAdmin) return;
-            if (video.paused) {
-                video.play().then(() => {
-                    roomRef.child('sync').update({ playing: true, time: video.currentTime });
-                }).catch(err => console.log('Admin play failed:', err));
-            } else {
-                video.pause();
-                roomRef.child('sync').update({ playing: false, time: video.currentTime });
-            }
-        }
-        
-        // Seekbar - apenas para admins
-        document.getElementById('seekbar').addEventListener('click', (e) => {
-            if (!userData.isAdmin) return;
-            const rect = e.currentTarget.getBoundingClientRect();
-            const percent = (e.clientX - rect.left) / rect.width;
-            video.currentTime = percent * video.duration;
-            roomRef.child('sync').update({ time: video.currentTime });
-        });
         
         video.ontimeupdate = () => {
-            if (video.duration && !isNaN(video.duration)) {
+            if (video.duration) {
                 seekFill.style.width = (video.currentTime / video.duration * 100) + '%';
-                const timeStr = formatTime(video.currentTime) + " / " + formatTime(video.duration);
-                document.getElementById('time-display').innerText = timeStr;
-                document.getElementById('time-display-user').innerText = timeStr;
+                document.getElementById('time-display').innerText = formatTime(video.currentTime) + " / " + formatTime(video.duration);
             }
             const icon = video.paused ? 'fa-play' : 'fa-pause';
-            if (document.getElementById('play-pause')) document.getElementById('play-pause').className = 'fas ' + icon;
-            if (document.getElementById('play-pause-user')) document.getElementById('play-pause-user').className = 'fas ' + icon;
+            document.getElementById('play-pause').className = 'fas ' + icon;
         };
 
         function formatTime(s) {
@@ -936,36 +759,22 @@
         }
         
         document.getElementById('fs-btn').onclick = () => {
-            const elem = document.getElementById('main-video');
-            if (elem.requestFullscreen) elem.requestFullscreen();
-            else if (elem.webkitRequestFullscreen) elem.webkitRequestFullscreen();
-            else if (elem.webkitEnterFullscreen) elem.webkitEnterFullscreen(); // iOS nativo
+            const el = document.getElementById('main-video');
+            if (el.requestFullscreen) el.requestFullscreen();
+            else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+            else if (el.webkitEnterFullscreen) el.webkitEnterFullscreen(); // iOS
         };
 
-        video.addEventListener('seeking', () => {
-            if (userData && userData.isAdmin) {
-                roomRef.child('sync').update({ time: video.currentTime });
-            }
-        });
-
-        // Permitir unmute e play inicial
-        const unlockAudio = () => {
+        // Destravar áudio no iOS
+        const unlock = () => {
             if (video.muted) video.muted = false;
-            // Se o admin estiver em play, tenta dar play no toque
             roomRef.child('sync').once('value', snap => {
-                const data = snap.val();
-                if (data && data.playing && video.paused) {
-                    video.play().catch(e => console.log("Unlock play failed", e));
-                }
+                const d = snap.val();
+                if (d && d.playing && video.paused) video.play().catch(e => {});
             });
         };
-        document.addEventListener('touchend', unlockAudio, false);
-        video.addEventListener('click', unlockAudio);
-
-        // Prevenir zoom
-        document.addEventListener('touchstart', function(e) {
-            if (e.target.tagName === 'INPUT') e.target.style.fontSize = '16px';
-        });
+        document.addEventListener('touchend', unlock);
+        video.addEventListener('click', unlock);
     </script>
 </body>
 </html>
