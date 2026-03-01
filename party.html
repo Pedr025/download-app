@@ -222,7 +222,7 @@
         .time-info { font-size: 13px; color: #fff; font-weight: 500; }
         @media (min-width: 768px) { .time-info { font-size: 16px; } }
 
-	        /* ===== ANÚNCIO ===== */
+        /* ===== ANÚNCIO ===== */
         .ad-overlay {
             position: absolute; inset: 0; z-index: 300;
             background: #000; display: none;
@@ -391,7 +391,7 @@
         }
         .poll-btn { background: rgba(255,255,255,0.1); }
 
-        /* ===== MODAIS ===== */
+	        /* ===== MODAIS ===== */
         .modal {
             position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 2000;
             display: none; align-items: center; justify-content: center;
@@ -520,6 +520,7 @@
             </button>
         </div>
     </div>
+
     <!-- ===== MODAL MUDAR CONTEÚDO (ADMIN) ===== -->
     <div class="modal" id="admin-modal">
         <div class="modal-content">
@@ -593,6 +594,14 @@
         <!-- PLAYER -->
         <div class="player-section">
             <div class="player-container" id="player-container">
+
+                <!-- Botão de Iniciar/Unmute (Crucial para Autoplay) -->
+                <div id="unmute-overlay" style="position:absolute; inset:0; z-index:500; display:none; flex-direction:column; align-items:center; justify-content:center; background:rgba(0,0,0,0.6); backdrop-filter:blur(5px); cursor:pointer;">
+                    <div style="width:80px; height:80px; border-radius:50%; background:var(--accent); display:flex; align-items:center; justify-content:center; font-size:30px; color:white; margin-bottom:15px; box-shadow:0 0 20px rgba(0,114,210,0.5);">
+                        <i class="fas fa-play"></i>
+                    </div>
+                    <span style="color:white; font-weight:bold; font-size:14px; text-transform:uppercase; letter-spacing:1px;">Clique para iniciar o vídeo</span>
+                </div>
 
                 <!-- Vídeo principal -->
                 <video id="main-video" playsinline webkit-playsinline muted preload="auto" crossorigin="anonymous"></video>
@@ -672,8 +681,7 @@
                         </div>
                     </div>
                 </div><!-- fim controls-overlay -->
-
-                <!-- ANÚNCIO -->
+	                <!-- ANÚNCIO -->
                 <div class="ad-overlay" id="ad-overlay">
                     <div class="ad-background"></div>
                     <div class="ad-content">
@@ -717,6 +725,7 @@
                 <div class="user-avatars" id="user-avatars"></div>
             </div>
             <div class="chat-messages" id="chat-box"></div>
+
             <div class="chat-input-area">
                 <!-- Bloqueio timer -->
                 <div class="chat-lock-overlay" id="chat-lock">
@@ -872,15 +881,20 @@
             document.body.classList.add('admin-active');
             document.getElementById('admin-time-group').style.display = 'flex';
             document.getElementById('user-time-group').style.display = 'none';
-            // Mostrar controles do admin
             controls.classList.add('visible');
         } else {
             document.getElementById('admin-time-group').style.display = 'none';
             document.getElementById('user-time-group').style.display = 'flex';
-            // Esconder TODOS os controles para usuários comuns
+            // Esconder apenas controles de reprodução, manter barra inferior para tempo e fullscreen
             document.querySelector('.center-controls').style.display = 'none';
-            document.querySelector('.bottom-bar').style.display = 'none';
+            document.querySelector('.seekbar-wrapper').style.display = 'none';
             document.querySelector('.lock-screen-btn').style.display = 'none';
+            document.getElementById('change-movie-btn').style.display = 'none';
+            document.getElementById('episodes-btn').style.display = 'none';
+            document.getElementById('next-ep-btn').style.display = 'none';
+            // Garantir que a barra inferior apareça para o tempo e fullscreen
+            document.querySelector('.bottom-bar').style.display = 'block';
+            controls.classList.add('visible');
         }
 
         if (userData.isPremium) {
@@ -947,7 +961,8 @@
                     video.pause();
                 }
             }
-	            // Atualizar título
+
+            // Atualizar título
             if (data.title) {
                 document.getElementById('video-title').innerText = data.title;
             }
@@ -1000,100 +1015,55 @@
             }
         });
     }
-
-    // =============================================
+	    // =============================================
     //  CARREGAMENTO DE VÍDEO (com HLS.js + iOS)
     // =============================================
     function loadVideoUrl(url, title, startTime, autoPlay) {
-        if (!url) {
-            console.error('URL vazia para loadVideoUrl');
-            return;
-        }
-
-        console.log('Carregando vídeo:', url, 'Título:', title);
-
+        if (!url) return;
+        
+        // Garantir mudo para autoplay (essencial para navegadores)
+        video.muted = true;
+        document.getElementById('unmute-overlay').style.display = 'flex';
+        
+        document.getElementById('unmute-overlay').onclick = () => {
+            video.muted = false;
+            video.play().catch(() => {});
+            document.getElementById('unmute-overlay').style.display = 'none';
+        };
+        
         // Destruir instância HLS anterior
         if (hlsInstance) { hlsInstance.destroy(); hlsInstance = null; }
 
-        // Limpar src anterior
-        video.src = '';
-        video.load();
-
         const isHLS = url.includes('.m3u8');
-        const isMP4 = url.includes('.mp4') || url.includes('mp4');
 
         if (isHLS) {
-            console.log('Detectado HLS (.m3u8)');
-            if (isIOSDevice) {
-                // iOS Safari suporta HLS nativamente
-                console.log('iOS detectado - usando HLS nativo');
-                video.src = url;
-                video.type = 'application/vnd.apple.mpegurl';
-                video.load();
-                setTimeout(() => {
-                    if (startTime > 0) video.currentTime = startTime;
-                    if (autoPlay) {
-                        video.muted = true;
-                        video.play().catch(err => console.error('Erro ao reproduzir:', err));
-                    }
-                }, 500);
-            } else if (Hls.isSupported()) {
-                // Outros navegadores: usar HLS.js
-                console.log('Usando HLS.js');
+            if (Hls.isSupported()) {
                 hlsInstance = new Hls({
-                    enableWorker: true,
-                    lowLatencyMode: false,
-                    backBufferLength: 90,
-                    maxBufferLength: 30,
-                    maxMaxBufferLength: 60
+                    autoStartLoad: true,
+                    startPosition: startTime || 0,
+                    debug: false
                 });
                 hlsInstance.loadSource(url);
                 hlsInstance.attachMedia(video);
                 hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => {
-                    console.log('HLS manifest carregado');
-                    if (startTime > 0) video.currentTime = startTime;
-                    if (autoPlay) {
-                        video.muted = true;
-                        video.play().catch(err => console.error('Erro ao reproduzir:', err));
-                    }
+                    if (autoPlay) video.play().catch(e => console.log("Autoplay bloqueado:", e));
                 });
-                hlsInstance.on(Hls.Events.ERROR, (event, data) => {
-                    console.error('HLS error:', data.type, data.details);
-                    if (data.fatal) {
-                        if (data.type === Hls.ErrorTypes.NETWORK_ERROR) {
-                            console.log('Erro de rede - tentando recarregar');
-                            hlsInstance.startLoad();
-                        } else if (data.type === Hls.ErrorTypes.MEDIA_ERROR) {
-                            console.log('Erro de mídia - recuperando');
-                            hlsInstance.recoverMediaError();
-                        }
-                    }
-                });
-            } else {
-                // Fallback: tentar direto
-                console.log('HLS.js não suportado - tentando carregamento direto');
+            } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                // Suporte nativo (iOS Safari)
                 video.src = url;
-                video.load();
+                video.addEventListener('loadedmetadata', () => {
+                    if (startTime > 0) video.currentTime = startTime;
+                    if (autoPlay) video.play().catch(e => console.log("Autoplay bloqueado:", e));
+                }, { once: true });
             }
         } else {
-            // MP4 ou outro formato direto
-            console.log('Carregando MP4 ou formato direto');
+            // Formatos diretos (MP4)
             video.src = url;
-            video.type = 'video/mp4';
             video.load();
-            
-            video.onloadedmetadata = () => {
-                console.log('Vídeo metadados carregados');
+            video.addEventListener('loadedmetadata', () => {
                 if (startTime > 0) video.currentTime = startTime;
-                if (autoPlay) {
-                    video.muted = true;
-                    video.play().catch(err => console.error('Erro ao reproduzir:', err));
-                }
-            };
-
-            video.onerror = (e) => {
-                console.error('Erro ao carregar vídeo:', e);
-            };
+                if (autoPlay) video.play().catch(e => console.log("Autoplay bloqueado:", e));
+            }, { once: true });
         }
 
         if (title) document.getElementById('video-title').innerText = title;
@@ -1380,8 +1350,7 @@
             pushNewContent(url, title, item);
         }
     }
-
-    function openEpisodesModal(item) {
+	    function openEpisodesModal(item) {
         document.getElementById('series-title-modal').innerText = item.titulo;
         const container = document.getElementById('episodes-container');
         container.innerHTML = '';
@@ -1426,7 +1395,8 @@
             loadVideoUrl(url, title, 0, true);
             video.setAttribute('data-loaded-url', url);
         }
-	        // Publicar no Firebase para todos
+
+        // Publicar no Firebase para todos
         roomRef.child('sync').set({
             url: url,
             title: title,
