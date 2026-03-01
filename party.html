@@ -547,12 +547,8 @@
                 }
                 if (Math.abs(video.currentTime - data.time) > 2) video.currentTime = data.time;
                 if (data.playing && video.paused) {
-                    // Admins sempre com som, usuários comuns com mute (exceto iOS com interação)
-                    if (userData.isAdmin) {
-                        video.muted = false;
-                    } else {
-                        video.muted = true;
-                    }
+                    // Todos começam com mute para permitir autoplay em todos os navegadores
+                    video.muted = true;
                     video.play().catch(err => {
                         console.log('Play failed:', err);
                     });
@@ -694,7 +690,8 @@
                     openModerationPopup(msg, key);
                 };
             }
-	            div.innerHTML = `
+            
+            div.innerHTML = `
                 <div class="msg-avatar" style="${msg.photo ? `background-image:url(${msg.photo})` : ''}">${msg.photo ? '' : msg.name.charAt(0)}</div>
                 <div class="msg-body">
                     ${msg.replyTo ? `<div class="reply-preview"><strong>@${msg.replyTo.name}:</strong> ${msg.replyTo.text.substring(0,30)}...</div>` : ''}
@@ -768,7 +765,7 @@
             `).join('');
         }
 
-        window.removePollOption = (idx) => {
+	        window.removePollOption = (idx) => {
             selectedPollOptions.splice(idx, 1);
             renderSelectedOptions();
         };
@@ -948,32 +945,20 @@
         };
 
         function togglePlay() {
+            // Apenas admin pode controlar o player
+            if (!userData.isAdmin) return;
+            
             if (video.paused) {
-                // No iOS, permitir som ao clicar manualmente
-                if (isIOSBrowser) {
-                    video.muted = false;
-                }
-                video.play().then(() => {
-                    // Após o play manual, sincronizar com o tempo do Firebase
-                    roomRef.child('sync').once('value', snapshot => {
-                        const data = snapshot.val();
-                        if (data && Math.abs(video.currentTime - data.time) > 2) {
-                            video.currentTime = data.time;
-                        }
-                    });
-                }).catch(err => {
-                    console.log('Play failed, trying muted:', err);
-                    video.muted = true;
-                    video.play().catch(e => console.log('Muted play also failed:', e));
+                video.muted = true;
+                video.play().catch(err => {
+                    console.log('Play failed:', err);
                 });
             } else {
                 video.pause();
             }
             
-            // Apenas admin atualiza o estado global no Firebase
-            if (userData.isAdmin) {
-                roomRef.child('sync').update({ playing: !video.paused, time: video.currentTime });
-            }
+            // Sincronizar com Firebase
+            roomRef.child('sync').update({ playing: !video.paused, time: video.currentTime });
         }
         
         // Seekbar - apenas para admins
@@ -1029,6 +1014,19 @@
                 video.style.height = '100%';
             }
         });
+        
+        // Sincronizar play/pause com Firebase (apenas admin)
+        video.addEventListener('play', () => {
+            if (userData && userData.isAdmin) {
+                roomRef.child('sync').update({ playing: true, time: video.currentTime });
+            }
+        });
+        
+        video.addEventListener('pause', () => {
+            if (userData && userData.isAdmin) {
+                roomRef.child('sync').update({ playing: false, time: video.currentTime });
+            }
+        });
 
         // Tratar erros de reprodução
         video.addEventListener('error', (e) => {
@@ -1052,29 +1050,21 @@
             }
         });
 
-        // Suporte para iOS - Permitir reprodução com gesto de toque
+        // Permitir unmute ao tocar (admin)
         document.addEventListener('touchend', () => {
-            if (video.paused && currentUser && userData.isAdmin) {
+            if (currentUser && userData && userData.isAdmin && video.muted) {
                 video.muted = false;
-                video.play().catch(err => {
-                    console.log('Play failed on touch:', err);
-                });
             }
         }, false);
         
-        // Monitorar eventos do player para sincronização (apenas admins)
-        video.addEventListener('play', () => {
-            if (userData && userData.isAdmin) {
-                roomRef.child('sync').update({ playing: true, time: video.currentTime });
+        // Permitir que usuários comuns desmutam o vídeo ao clicar
+        video.addEventListener('click', () => {
+            if (currentUser && userData && !userData.isAdmin && video.muted) {
+                video.muted = false;
             }
         });
         
-        video.addEventListener('pause', () => {
-            if (userData && userData.isAdmin) {
-                roomRef.child('sync').update({ playing: false, time: video.currentTime });
-            }
-        });
-        
+        // Sincronização de seek (apenas admin)
         video.addEventListener('seeking', () => {
             if (userData && userData.isAdmin) {
                 roomRef.child('sync').update({ time: video.currentTime });
