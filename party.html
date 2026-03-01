@@ -316,7 +316,8 @@
             </div>
         </div>
     </div>
-    <!-- POP-UP PREMIUM -->
+
+      <!-- POP-UP PREMIUM -->
     <div class="premium-popup" id="premium-popup">
         <div class="premium-content">
             <div class="premium-icon"><i class="fas fa-crown"></i></div>
@@ -540,36 +541,26 @@
                 const data = snapshot.val();
                 if (!data) return;
                 
-                // Forçar carregamento se a URL mudar ou se o vídeo estiver parado no início
                 if (video.src !== data.url) { 
                     video.src = data.url; 
                     bgVideo.src = data.url;
-                    video.load();
                 }
-
-                // Sincronizar tempo
+                
                 if (Math.abs(video.currentTime - data.time) > 2) {
                     video.currentTime = data.time;
                 }
-
-                // Lógica de Play/Pause sincronizada
-                if (data.playing) {
-                    if (video.paused) {
-                        // SEMPRE mutado no início para garantir que o navegador deixe rodar (Autoplay Policy)
-                        video.muted = true; 
-                        video.play().catch(err => {
-                            console.log('Autoplay bloqueado, tentando novamente...');
-                            // Tentar carregar e tocar de novo se falhar
-                            video.load();
-                            video.play().catch(e => console.log('Falha crítica no play:', e));
-                        });
-                    }
-                } else {
-                    if (!video.paused) {
-                        video.pause();
-                    }
+                
+                if (data.playing && video.paused) {
+                    video.muted = true;
+                    video.play().catch(err => {
+                        console.log('Play failed:', err);
+                    });
+                }
+                else if (!data.playing && !video.paused) {
+                    video.pause();
                 }
             });
+
             // Chat & Contador Global
             roomRef.child('chat').limitToLast(50).on('child_added', snapshot => {
                 const msg = snapshot.val();
@@ -762,7 +753,8 @@
                 </div>
             `).join('');
         };
-	        window.addPollOption = (item) => {
+
+        window.addPollOption = (item) => {
             if (selectedPollOptions.length >= 3) return;
             selectedPollOptions.push(item);
             renderSelectedOptions();
@@ -777,7 +769,6 @@
                 </div>
             `).join('');
         }
-
         window.removePollOption = (idx) => {
             selectedPollOptions.splice(idx, 1);
             renderSelectedOptions();
@@ -951,36 +942,29 @@
         document.getElementById('play-pause').onclick = () => {
             if (userData.isAdmin) {
                 togglePlay();
-            } else {
-                // Usuário comum apenas desmuta se clicar no play
-                video.muted = false;
             }
         };
 
         document.getElementById('play-pause-user').onclick = () => {
             if (userData.isAdmin) {
                 togglePlay();
-            } else {
-                // Usuário comum apenas desmuta se clicar no play
-                video.muted = false;
             }
         };
 
         function togglePlay() {
-            // Apenas admin pode controlar o player
             if (!userData.isAdmin) return;
             
             if (video.paused) {
                 video.muted = true;
-                video.play().catch(err => {
+                video.play().then(() => {
+                    roomRef.child('sync').update({ playing: true, time: video.currentTime });
+                }).catch(err => {
                     console.log('Play failed:', err);
                 });
             } else {
                 video.pause();
+                roomRef.child('sync').update({ playing: false, time: video.currentTime });
             }
-            
-            // Sincronizar com Firebase
-            roomRef.child('sync').update({ playing: !video.paused, time: video.currentTime });
         }
         
         // Seekbar - apenas para admins
@@ -1037,41 +1021,6 @@
             }
         });
         
-        // Sincronizar play/pause com Firebase (apenas admin)
-        video.addEventListener('play', () => {
-            if (userData && userData.isAdmin) {
-                roomRef.child('sync').update({ playing: true, time: video.currentTime });
-            }
-        });
-        
-        video.addEventListener('pause', () => {
-            if (userData && userData.isAdmin) {
-                roomRef.child('sync').update({ playing: false, time: video.currentTime });
-            }
-        });
-
-        // Tratar erros de reprodução
-        video.addEventListener('error', (e) => {
-            console.error('Erro de vídeo:', e);
-            const error = video.error;
-            if (error) {
-                switch(error.code) {
-                    case error.MEDIA_ERR_ABORTED:
-                        console.log('Reprodução abortada');
-                        break;
-                    case error.MEDIA_ERR_NETWORK:
-                        console.log('Erro de rede');
-                        break;
-                    case error.MEDIA_ERR_DECODE:
-                        console.log('Erro ao decodificar');
-                        break;
-                    case error.MEDIA_ERR_SRC_NOT_SUPPORTED:
-                        console.log('Formato de vídeo não suportado');
-                        break;
-                }
-            }
-        });
-
         // Sincronização de seek (apenas admin)
         video.addEventListener('seeking', () => {
             if (userData && userData.isAdmin) {
