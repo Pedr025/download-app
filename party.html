@@ -316,7 +316,6 @@
             </div>
         </div>
     </div>
-
     <!-- POP-UP PREMIUM -->
     <div class="premium-popup" id="premium-popup">
         <div class="premium-content">
@@ -540,22 +539,37 @@
             roomRef.child('sync').on('value', snapshot => {
                 const data = snapshot.val();
                 if (!data) return;
+                
+                // Forçar carregamento se a URL mudar ou se o vídeo estiver parado no início
                 if (video.src !== data.url) { 
                     video.src = data.url; 
                     bgVideo.src = data.url;
                     video.load();
                 }
-                if (Math.abs(video.currentTime - data.time) > 2) video.currentTime = data.time;
-                if (data.playing && video.paused) {
-                    // Todos começam com mute para permitir autoplay em todos os navegadores
-                    video.muted = true;
-                    video.play().catch(err => {
-                        console.log('Play failed:', err);
-                    });
-                }
-                else if (!data.playing && !video.paused) video.pause();
-            });
 
+                // Sincronizar tempo
+                if (Math.abs(video.currentTime - data.time) > 2) {
+                    video.currentTime = data.time;
+                }
+
+                // Lógica de Play/Pause sincronizada
+                if (data.playing) {
+                    if (video.paused) {
+                        // SEMPRE mutado no início para garantir que o navegador deixe rodar (Autoplay Policy)
+                        video.muted = true; 
+                        video.play().catch(err => {
+                            console.log('Autoplay bloqueado, tentando novamente...');
+                            // Tentar carregar e tocar de novo se falhar
+                            video.load();
+                            video.play().catch(e => console.log('Falha crítica no play:', e));
+                        });
+                    }
+                } else {
+                    if (!video.paused) {
+                        video.pause();
+                    }
+                }
+            });
             // Chat & Contador Global
             roomRef.child('chat').limitToLast(50).on('child_added', snapshot => {
                 const msg = snapshot.val();
@@ -748,8 +762,7 @@
                 </div>
             `).join('');
         };
-
-        window.addPollOption = (item) => {
+	        window.addPollOption = (item) => {
             if (selectedPollOptions.length >= 3) return;
             selectedPollOptions.push(item);
             renderSelectedOptions();
@@ -765,7 +778,7 @@
             `).join('');
         }
 
-	        window.removePollOption = (idx) => {
+        window.removePollOption = (idx) => {
             selectedPollOptions.splice(idx, 1);
             renderSelectedOptions();
         };
@@ -936,12 +949,21 @@
         });
         
         document.getElementById('play-pause').onclick = () => {
-            togglePlay();
+            if (userData.isAdmin) {
+                togglePlay();
+            } else {
+                // Usuário comum apenas desmuta se clicar no play
+                video.muted = false;
+            }
         };
 
-        // Novo botão de play para usuários comuns (iOS fix)
         document.getElementById('play-pause-user').onclick = () => {
-            togglePlay();
+            if (userData.isAdmin) {
+                togglePlay();
+            } else {
+                // Usuário comum apenas desmuta se clicar no play
+                video.muted = false;
+            }
         };
 
         function togglePlay() {
@@ -1050,24 +1072,24 @@
             }
         });
 
-        // Permitir unmute ao tocar (admin)
-        document.addEventListener('touchend', () => {
-            if (currentUser && userData && userData.isAdmin && video.muted) {
-                video.muted = false;
-            }
-        }, false);
-        
-        // Permitir que usuários comuns desmutam o vídeo ao clicar
-        video.addEventListener('click', () => {
-            if (currentUser && userData && !userData.isAdmin && video.muted) {
-                video.muted = false;
-            }
-        });
-        
         // Sincronização de seek (apenas admin)
         video.addEventListener('seeking', () => {
             if (userData && userData.isAdmin) {
                 roomRef.child('sync').update({ time: video.currentTime });
+            }
+        });
+
+        // Permitir unmute ao tocar na tela para qualquer usuário
+        document.addEventListener('touchend', () => {
+            if (video.muted) {
+                video.muted = false;
+            }
+        }, false);
+        
+        // Permitir unmute ao clicar no vídeo para qualquer usuário
+        video.addEventListener('click', () => {
+            if (video.muted) {
+                video.muted = false;
             }
         });
 
