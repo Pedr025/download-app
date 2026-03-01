@@ -222,7 +222,7 @@
         .time-info { font-size: 13px; color: #fff; font-weight: 500; }
         @media (min-width: 768px) { .time-info { font-size: 16px; } }
 
-        /* ===== ANÚNCIO ===== */
+	        /* ===== ANÚNCIO ===== */
         .ad-overlay {
             position: absolute; inset: 0; z-index: 300;
             background: #000; display: none;
@@ -374,7 +374,7 @@
         }
         .input-wrapper input::placeholder { color: rgba(255,255,255,0.45); }
 
-	        /* BLOQUEIO CHAT */
+        /* BLOQUEIO CHAT */
         .chat-lock-overlay {
             position: absolute; inset: 0; background: rgba(0,0,0,0.45);
             backdrop-filter: blur(15px); display: none; align-items: center;
@@ -520,7 +520,6 @@
             </button>
         </div>
     </div>
-
     <!-- ===== MODAL MUDAR CONTEÚDO (ADMIN) ===== -->
     <div class="modal" id="admin-modal">
         <div class="modal-content">
@@ -718,7 +717,6 @@
                 <div class="user-avatars" id="user-avatars"></div>
             </div>
             <div class="chat-messages" id="chat-box"></div>
-
             <div class="chat-input-area">
                 <!-- Bloqueio timer -->
                 <div class="chat-lock-overlay" id="chat-lock">
@@ -729,7 +727,7 @@
                     </button>
                 </div>
 
-		                <!-- Barra de reply -->
+                <!-- Barra de reply -->
                 <div class="active-reply-bar" id="reply-bar">
                     <span>Respondendo a <strong id="reply-user"></strong></span>
                     <i class="fas fa-times" style="cursor:pointer;" onclick="cancelReply()"></i>
@@ -874,9 +872,15 @@
             document.body.classList.add('admin-active');
             document.getElementById('admin-time-group').style.display = 'flex';
             document.getElementById('user-time-group').style.display = 'none';
+            // Mostrar controles do admin
+            controls.classList.add('visible');
         } else {
             document.getElementById('admin-time-group').style.display = 'none';
             document.getElementById('user-time-group').style.display = 'flex';
+            // Esconder TODOS os controles para usuários comuns
+            document.querySelector('.center-controls').style.display = 'none';
+            document.querySelector('.bottom-bar').style.display = 'none';
+            document.querySelector('.lock-screen-btn').style.display = 'none';
         }
 
         if (userData.isPremium) {
@@ -912,31 +916,38 @@
         // Sincronização do player via Firebase
         roomRef.child('sync').on('value', snapshot => {
             const data = snapshot.val();
-            if (!data) return;
+            if (!data) {
+                console.log('Nenhum dado de sincronização no Firebase');
+                return;
+            }
 
+            console.log('Dados de sync recebidos:', data);
             isSyncingFromFirebase = true;
 
             // Carregar vídeo se mudou
             if (data.url && video.getAttribute('data-loaded-url') !== data.url) {
+                console.log('URL mudou - recarregando vídeo');
                 loadVideoUrl(data.url, data.title || 'Watch Party', data.time || 0, data.playing);
                 video.setAttribute('data-loaded-url', data.url);
                 // Atualizar bg-video
                 loadBgVideo(data.url);
-            } else {
+            } else if (data.url) {
                 // Sincronizar tempo (tolerância de 2s)
                 if (data.time !== undefined && Math.abs(video.currentTime - data.time) > 2) {
+                    console.log('Sincronizando tempo:', data.time);
                     video.currentTime = data.time;
                 }
                 // Sincronizar play/pause
                 if (data.playing && video.paused) {
+                    console.log('Admin iniciou reprodução');
                     video.muted = true;
-                    video.play().catch(() => {});
+                    video.play().catch(err => console.error('Erro ao reproduzir:', err));
                 } else if (!data.playing && !video.paused) {
+                    console.log('Admin pausou reprodução');
                     video.pause();
                 }
             }
-
-            // Atualizar título
+	            // Atualizar título
             if (data.title) {
                 document.getElementById('video-title').innerText = data.title;
             }
@@ -972,68 +983,116 @@
             ).join('');
         });
 
-             // Setup dos controles do player
+        // Setup dos controles do player
         setupPlayerControls();
+
+        // Carregar conteúdo padrão se não houver nada no Firebase
+        roomRef.child('sync').once('value', snapshot => {
+            if (!snapshot.val()) {
+                console.log('Nenhum conteúdo no Firebase - carregando padrão');
+                if (userData.isAdmin && allMovies.length > 0) {
+                    // Admin carrega o primeiro filme por padrão
+                    const defaultMovie = allMovies[0];
+                    if (defaultMovie && defaultMovie.link_mp4) {
+                        pushNewContent(defaultMovie.link_mp4, defaultMovie.titulo, defaultMovie);
+                    }
+                }
+            }
+        });
     }
 
     // =============================================
     //  CARREGAMENTO DE VÍDEO (com HLS.js + iOS)
     // =============================================
     function loadVideoUrl(url, title, startTime, autoPlay) {
-        if (!url) return;
+        if (!url) {
+            console.error('URL vazia para loadVideoUrl');
+            return;
+        }
+
+        console.log('Carregando vídeo:', url, 'Título:', title);
 
         // Destruir instância HLS anterior
         if (hlsInstance) { hlsInstance.destroy(); hlsInstance = null; }
 
+        // Limpar src anterior
+        video.src = '';
+        video.load();
+
         const isHLS = url.includes('.m3u8');
+        const isMP4 = url.includes('.mp4') || url.includes('mp4');
 
         if (isHLS) {
+            console.log('Detectado HLS (.m3u8)');
             if (isIOSDevice) {
                 // iOS Safari suporta HLS nativamente
+                console.log('iOS detectado - usando HLS nativo');
                 video.src = url;
+                video.type = 'application/vnd.apple.mpegurl';
                 video.load();
-                video.onloadedmetadata = () => {
+                setTimeout(() => {
                     if (startTime > 0) video.currentTime = startTime;
-                    if (autoPlay) video.play().catch(() => {});
-                };
+                    if (autoPlay) {
+                        video.muted = true;
+                        video.play().catch(err => console.error('Erro ao reproduzir:', err));
+                    }
+                }, 500);
             } else if (Hls.isSupported()) {
                 // Outros navegadores: usar HLS.js
+                console.log('Usando HLS.js');
                 hlsInstance = new Hls({
                     enableWorker: true,
                     lowLatencyMode: false,
-                    backBufferLength: 90
+                    backBufferLength: 90,
+                    maxBufferLength: 30,
+                    maxMaxBufferLength: 60
                 });
                 hlsInstance.loadSource(url);
                 hlsInstance.attachMedia(video);
                 hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => {
+                    console.log('HLS manifest carregado');
                     if (startTime > 0) video.currentTime = startTime;
                     if (autoPlay) {
                         video.muted = true;
-                        video.play().catch(() => {});
+                        video.play().catch(err => console.error('Erro ao reproduzir:', err));
                     }
                 });
                 hlsInstance.on(Hls.Events.ERROR, (event, data) => {
+                    console.error('HLS error:', data.type, data.details);
                     if (data.fatal) {
-                        console.error('HLS fatal error:', data.type, data.details);
-                        if (data.type === Hls.ErrorTypes.NETWORK_ERROR) hlsInstance.startLoad();
-                        else if (data.type === Hls.ErrorTypes.MEDIA_ERROR) hlsInstance.recoverMediaError();
+                        if (data.type === Hls.ErrorTypes.NETWORK_ERROR) {
+                            console.log('Erro de rede - tentando recarregar');
+                            hlsInstance.startLoad();
+                        } else if (data.type === Hls.ErrorTypes.MEDIA_ERROR) {
+                            console.log('Erro de mídia - recuperando');
+                            hlsInstance.recoverMediaError();
+                        }
                     }
                 });
             } else {
                 // Fallback: tentar direto
+                console.log('HLS.js não suportado - tentando carregamento direto');
                 video.src = url;
                 video.load();
             }
         } else {
             // MP4 ou outro formato direto
+            console.log('Carregando MP4 ou formato direto');
             video.src = url;
+            video.type = 'video/mp4';
             video.load();
+            
             video.onloadedmetadata = () => {
+                console.log('Vídeo metadados carregados');
                 if (startTime > 0) video.currentTime = startTime;
                 if (autoPlay) {
                     video.muted = true;
-                    video.play().catch(() => {});
+                    video.play().catch(err => console.error('Erro ao reproduzir:', err));
                 }
+            };
+
+            video.onerror = (e) => {
+                console.error('Erro ao carregar vídeo:', e);
             };
         }
 
@@ -1360,13 +1419,23 @@
         if (season) currentSeason = season;
         if (ep) currentEp = ep;
 
-        // Publicar no Firebase para todos
+        console.log('pushNewContent - URL:', url, 'Título:', title);
+
+        // Carregar vídeo imediatamente no admin
+        if (userData.isAdmin) {
+            loadVideoUrl(url, title, 0, true);
+            video.setAttribute('data-loaded-url', url);
+        }
+	        // Publicar no Firebase para todos
         roomRef.child('sync').set({
             url: url,
             title: title,
             time: 0,
             playing: true,
             updatedAt: Date.now()
+        }, (err) => {
+            if (err) console.error('Erro ao salvar no Firebase:', err);
+            else console.log('Conteúdo publicado com sucesso');
         });
 
         // Atualizar episódios overlay
@@ -1418,6 +1487,7 @@
             list.appendChild(card);
         });
     }
+
     // =============================================
     //  CHAT
     // =============================================
