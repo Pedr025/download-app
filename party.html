@@ -373,8 +373,7 @@
             -webkit-border-radius: 0; padding: 6px 0; width: 100%; min-height: 28px;
         }
         .input-wrapper input::placeholder { color: rgba(255,255,255,0.45); }
-
-        /* BLOQUEIO CHAT */
+	        /* BLOQUEIO CHAT */
         .chat-lock-overlay {
             position: absolute; inset: 0; background: rgba(0,0,0,0.45);
             backdrop-filter: blur(15px); display: none; align-items: center;
@@ -391,7 +390,7 @@
         }
         .poll-btn { background: rgba(255,255,255,0.1); }
 
-	            /* ===== MODAIS ===== */
+	        /* ===== MODAIS ===== */
         .modal {
             position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 2000;
             display: none; align-items: center; justify-content: center;
@@ -681,7 +680,7 @@
                         </div>
                     </div>
                 </div><!-- fim controls-overlay -->
-                    <!-- ANÚNCIO -->
+	                <!-- ANÚNCIO -->
                 <div class="ad-overlay" id="ad-overlay">
                     <div class="ad-background"></div>
                     <div class="ad-content">
@@ -698,8 +697,7 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- EPISÓDIOS OVERLAY (dentro do player) -->
+	                <!-- EPISÓDIOS OVERLAY (dentro do player) -->
                 <div class="episodes-overlay" id="episodes-overlay">
                     <div class="episodes-header">
                         <h2 id="episodes-overlay-title">Episódios</h2>
@@ -827,20 +825,8 @@
     let isSyncingFromFirebase = false;
 
     // =============================================
-    //  AUTENTICAÇÃO (CORRIGIDA)
+    //  AUTENTICAÇÃO
     // =============================================
-    
-    // 1. Capturar resultado do redirect ANTES de onAuthStateChanged
-    auth.getRedirectResult()
-        .then(result => {
-            if (result && result.user) {
-                currentUser = result.user;
-                checkUserRole();
-            }
-        })
-        .catch(err => console.error('Redirect result error:', err));
-
-    // 2. Monitorar mudanças no estado de autenticação
     auth.onAuthStateChanged(user => {
         if (user) {
             currentUser = user;
@@ -850,23 +836,25 @@
         }
     });
 
-    // 3. Lógica do botão de login (Híbrida iOS/Android)
+    // Capturar resultado do redirect (especialmente iOS)
+    auth.getRedirectResult().then(result => {
+        if (result && result.user) {
+            currentUser = result.user;
+            checkUserRole();
+        }
+    }).catch(err => console.error('Redirect result error:', err));
+
     document.getElementById('google-login').onclick = () => {
         const provider = new firebase.auth.GoogleAuthProvider();
-        provider.addScope('profile');
-        provider.addScope('email');
-        provider.setCustomParameters({ 'prompt': 'select_account' });
-        
         if (isIOSDevice) {
-            // No iOS, popup é o padrão recomendado pela Apple para evitar perda de contexto
+            // No iOS, popup é mais confiável que redirect
             auth.signInWithPopup(provider)
-                .then(result => { if (result && result.user) { currentUser = result.user; checkUserRole(); } })
+                .then(result => { if (result.user) { currentUser = result.user; checkUserRole(); } })
                 .catch(err => {
-                    console.log('Popup falhou ou bloqueado, tentando redirect...', err);
+                    console.log('Popup falhou, tentando redirect...', err);
                     auth.signInWithRedirect(provider);
                 });
         } else {
-            // No Android/Web, redirect é o padrão
             auth.signInWithRedirect(provider);
         }
     };
@@ -1025,7 +1013,7 @@
             }
         });
     }
-        // =============================================
+	    // =============================================
     //  CARREGAMENTO DE VÍDEO (com HLS.js + iOS)
     // =============================================
     function loadVideoUrl(url, title, startTime, autoPlay) {
@@ -1088,8 +1076,7 @@
             bgVideo.play().catch(() => {});
         }
     }
-
-    // =============================================
+	    // =============================================
     //  CONTROLES DO PLAYER
     // =============================================
     function setupPlayerControls() {
@@ -1183,7 +1170,7 @@
         // Seekbar (admin only)
         setupSeekbar();
 
-	        // Mostrar controles ao interagir
+        // Mostrar controles ao interagir
         const showEvents = ['mousemove', 'touchstart', 'mousedown', 'keydown'];
         showEvents.forEach(e => document.addEventListener(e, showControls, { passive: true }));
         video.onclick = (e) => { e.stopPropagation(); showControls(); };
@@ -1360,7 +1347,7 @@
             pushNewContent(url, title, item);
         }
     }
-        function openEpisodesModal(item) {
+	    function openEpisodesModal(item) {
         document.getElementById('series-title-modal').innerText = item.titulo;
         const container = document.getElementById('episodes-container');
         container.innerHTML = '';
@@ -1546,6 +1533,18 @@
             <div style="color:white; font-size:12px; margin:8px 0;">Conheça nossos planos Premium!</div>
             <p style="color:#666; font-size:11px;">Recursos exclusivos e sem anúncios.</p>
         `;
+              chatBox.appendChild(div);
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function renderAdBanner() {
+        const div = document.createElement('div');
+        div.className = 'ad-banner';
+        div.innerHTML = `
+            <div style="font-size:10px; color:#aaa; margin-bottom:4px;">Publicidade</div>
+            <div style="color:white; font-size:12px; margin:8px 0;">Conheça nossos planos Premium!</div>
+            <p style="color:#666; font-size:11px;">Recursos exclusivos e sem anúncios.</p>
+        `;
         chatBox.appendChild(div);
         chatBox.scrollTop = chatBox.scrollHeight;
     }
@@ -1635,7 +1634,7 @@
         `).join('');
     }
 
-	    function removePollOption(index) {
+    function removePollOption(index) {
         selectedPollOptions.splice(index, 1);
         renderSelectedOptions();
     }
@@ -1730,3 +1729,4 @@
     </script>
 </body>
 </html>
+
