@@ -317,7 +317,7 @@
         </div>
     </div>
 
-    <!-- POP-UP PREMIUM -->
+	    <!-- POP-UP PREMIUM -->
     <div class="premium-popup" id="premium-popup">
         <div class="premium-content">
             <div class="premium-icon"><i class="fas fa-crown"></i></div>
@@ -334,7 +334,7 @@
         <!-- PLAYER -->
         <div class="player-section">
             <div class="player-wrapper" id="player-wrapper">
-                <video id="main-video" playsinline webkit-playsinline></video>
+                <video id="main-video" playsinline webkit-playsinline muted="muted" crossorigin="anonymous"></video>
                 <div class="player-info-overlay">
                     <div id="premium-badge-area"></div>
                     <div class="badge viewers" id="viewer-count"><i class="fas fa-eye"></i> 1 assistindo</div>
@@ -365,7 +365,7 @@
         <!-- CHAT -->
         <div class="chat-section">
             <div class="chat-bg-video">
-                <video id="bg-video" muted loop playsinline webkit-playsinline></video>
+                <video id="bg-video" muted loop playsinline webkit-playsinline crossorigin="anonymous"></video>
             </div>
             <div class="chat-header">
                 <div class="chat-title-area">
@@ -404,7 +404,7 @@
         // CONFIGURAÇÃO FIREBASE
         const firebaseConfig = {
             apiKey: "AIzaSyB0IJNOMSnpHEazCNA7Nu02gsbAUNvmIYE",
-            authDomain: "nupmatch---filmes-com-amigos.firebaseapp.com",
+            authDomain: "filmesrave.com", // Domínio customizado configurado
             databaseURL: "https://nupmatch---filmes-com-amigos-default-rtdb.firebaseio.com",
             projectId: "nupmatch---filmes-com-amigos",
             storageBucket: "nupmatch---filmes-com-amigos.firebasestorage.app",
@@ -446,6 +446,17 @@
             } else {
                 document.getElementById('login-modal').classList.add('active');
             }
+        });
+
+        // Capturar resultado do redirect no iOS e domínios customizados
+        auth.getRedirectResult().then(result => {
+            if (result && result.user) {
+                currentUser = result.user;
+                checkUserRole();
+            }
+        }).catch(error => {
+            console.error('Erro ao processar login:', error);
+            // Se houver erro de domínio, o Firebase costuma avisar aqui
         });
 
         document.getElementById('google-login').onclick = () => {
@@ -510,7 +521,10 @@
                     bgVideo.src = data.url; 
                 }
                 if (Math.abs(video.currentTime - data.time) > 2) video.currentTime = data.time;
-                if (data.playing && video.paused) video.play().catch(()=>{});
+                if (data.playing && video.paused) {
+                    video.muted = true;
+                    video.play().catch(err => console.log('Play failed:', err));
+                }
                 else if (!data.playing && !video.paused) video.pause();
             });
 
@@ -546,7 +560,8 @@
                 ).join('');
             });
         }
-	        // --- LÓGICA DE MENSAGENS ---
+
+        // --- LÓGICA DE MENSAGENS ---
         function sendMessage() {
             if (isChatLocked) return;
             const text = chatInput.value.trim();
@@ -722,151 +737,7 @@
             `).join('');
         }
 
-        window.removePollOption = (idx) => {
-            selectedPollOptions.splice(idx, 1);
-            renderSelectedOptions();
-        };
-
-        document.getElementById('confirm-poll').onclick = () => {
-            const msg = document.getElementById('poll-msg').value;
-            if (!msg || selectedPollOptions.length === 0) return;
-            roomRef.child('chat').push({
-                type: 'poll',
-                uid: currentUser.uid,
-                name: currentUser.displayName,
-                photo: currentUser.photoURL,
-                text: msg,
-                options: selectedPollOptions.map(o => ({ 
-                    id: o.id, 
-                    titulo: o.titulo, 
-                    capa: o.capa, 
-                    link: o.link_mp4,
-                    tipo: o.tipo,
-                    episodios: o.episodios || null
-                })),
-                votes: {}
-            });
-            document.getElementById('poll-modal').classList.remove('active');
-            document.getElementById('poll-msg').value = '';
-            selectedPollOptions = [];
-        };
-
-        function renderPoll(poll, key) {
-            const div = document.createElement('div');
-            div.className = 'poll-card';
-            div.id = 'msg-' + key;
-            
-            const totalVotes = Object.keys(poll.votes || {}).length;
-            
-            div.innerHTML = `
-                <div class="poll-creator">
-                    <img src="${poll.photo}"> <span>${poll.name} criou uma enquete</span>
-                </div>
-                <div style="font-weight:bold; margin-bottom:10px;">${poll.text}</div>
-                ${poll.options.map(opt => {
-                    const optionVotes = Object.values(poll.votes || {}).filter(v => v === opt.id).length;
-                    const votePercentage = totalVotes > 0 ? Math.round((optionVotes / totalVotes) * 100) : 0;
-                    return `
-                        <div class="poll-option" onclick="handlePollVote('${opt.id}', '${key}')">
-                            <img src="${opt.capa}">
-                            <span>${opt.titulo}</span>
-                            <div class="poll-vote-count">${optionVotes} ${optionVotes === 1 ? 'voto' : 'votos'} (${votePercentage}%)</div>
-                        </div>
-                    `;
-                }).join('')}
-                <div style="font-size:10px; color:#aaa; margin-top:10px; text-align:center;">Total: ${totalVotes} ${totalVotes === 1 ? 'voto' : 'votos'}</div>
-            `;
-            chatBox.appendChild(div);
-            chatBox.scrollTop = chatBox.scrollHeight;
-        }
-
-        window.handlePollVote = (movieId, pollKey) => {
-            roomRef.child('chat').child(pollKey).get().then(snap => {
-                const poll = snap.val();
-                const option = poll.options.find(o => o.id == movieId);
-                
-                if (option) {
-                    const votes = poll.votes || {};
-                    votes[currentUser.uid] = movieId;
-                    roomRef.child('chat').child(pollKey).update({ votes });
-                    
-                    if (userData.isAdmin) {
-                        if (option.tipo === 'serie') {
-                            showEpisodes(option);
-                        } else {
-                            updateVideo(option.link);
-                        }
-                    }
-                }
-            });
-        };
-
-        // --- MUDAR FILME / SÉRIE ---
-        function handleSelect(item) {
-            if (item.tipo === 'serie') {
-                showEpisodes(item);
-            } else {
-                updateVideo(item.link_mp4);
-                document.getElementById('admin-modal').classList.remove('active');
-            }
-        }
-
-        function showEpisodes(serie) {
-            document.getElementById('series-title').innerText = serie.titulo;
-            const container = document.getElementById('episodes-container');
-            container.innerHTML = '';
-            
-            if (serie.episodios && Array.isArray(serie.episodios)) {
-                serie.episodios.forEach((ep) => {
-                    const btn = document.createElement('div');
-                    btn.className = 'ep-item';
-                    const label = `T${ep.temporada || 1} EP${ep.episodio || '?'}`;
-                    btn.innerText = label;
-                    btn.onclick = () => {
-                        updateVideo(ep.link_mp4);
-                        document.getElementById('episodes-modal').classList.remove('active');
-                        document.getElementById('admin-modal').classList.remove('active');
-                    };
-                    container.appendChild(btn);
-                });
-            } else {
-                const btn = document.createElement('div');
-                btn.className = 'ep-item';
-                btn.innerText = `Iniciar Série (EP1)`;
-                btn.onclick = () => {
-                    updateVideo(serie.link_mp4);
-                    document.getElementById('episodes-modal').classList.remove('active');
-                    document.getElementById('admin-modal').classList.remove('active');
-                };
-                container.appendChild(btn);
-            }
-            document.getElementById('episodes-modal').classList.add('active');
-        }
-
-        function updateVideo(url) {
-            if (!userData.isAdmin) return;
-            video.src = url;
-            bgVideo.src = url;
-            roomRef.child('sync').set({ url: url, time: 0, playing: true, sender: currentUser.uid });
-        }
-
-        // --- BUSCA ADMIN ---
-        document.getElementById('admin-search').oninput = (e) => {
-            const query = e.target.value.toLowerCase();
-            const results = allMovies.filter(m => m.titulo.toLowerCase().includes(query)).slice(0, 10);
-            const container = document.getElementById('admin-results');
-            container.innerHTML = results.map(item => `
-                <div class="search-item" onclick='handleSelect(${JSON.stringify(item).replace(/'/g, "&apos;")})'>
-                    <img src="${item.capa}">
-                    <div class="search-item-info">
-                        <div class="search-item-title">${item.titulo}</div>
-                        <div class="search-item-type">${item.tipo}</div>
-                    </div>
-                </div>
-            `).join('');
-        };
-
-        // --- FUNÇÕES PREMIUM ---
+         // --- FUNÇÕES PREMIUM ---
         function goToPremium() {
             window.location.href = 'premium.html';
         }
@@ -886,7 +757,12 @@
         
         document.getElementById('play-pause').onclick = () => {
             if (!userData.isAdmin) return;
-            if (video.paused) video.play(); else video.pause();
+            if (video.paused) {
+                video.muted = true;
+                video.play().catch(err => console.log('Play failed:', err));
+            } else {
+                video.pause();
+            }
             roomRef.child('sync').update({ playing: !video.paused, time: video.currentTime });
         };
         
@@ -900,10 +776,12 @@
         });
         
         video.ontimeupdate = () => {
-            seekFill.style.width = (video.currentTime / video.duration * 100) + '%';
-            const timeStr = formatTime(video.currentTime) + " / " + formatTime(video.duration);
-            document.getElementById('time-display').innerText = timeStr;
-            document.getElementById('time-display-user').innerText = timeStr;
+            if (video.duration && !isNaN(video.duration)) {
+                seekFill.style.width = (video.currentTime / video.duration * 100) + '%';
+                const timeStr = formatTime(video.currentTime) + " / " + formatTime(video.duration);
+                document.getElementById('time-display').innerText = timeStr;
+                document.getElementById('time-display-user').innerText = timeStr;
+            }
         };
 
         function formatTime(s) {
@@ -932,6 +810,36 @@
                 video.style.height = '100%';
             }
         });
+
+        // Suporte para iOS - Tratar erros de reprodução
+        video.addEventListener('error', (e) => {
+            console.error('Erro de vídeo:', e);
+            const error = video.error;
+            if (error) {
+                switch(error.code) {
+                    case error.MEDIA_ERR_ABORTED:
+                        console.log('Reprodução abortada');
+                        break;
+                    case error.MEDIA_ERR_NETWORK:
+                        console.log('Erro de rede');
+                        break;
+                    case error.MEDIA_ERR_DECODE:
+                        console.log('Erro ao decodificar');
+                        break;
+                    case error.MEDIA_ERR_SRC_NOT_SUPPORTED:
+                        console.log('Formato de vídeo não suportado');
+                        break;
+                }
+            }
+        });
+
+        // Suporte para iOS - Permitir reprodução com gesto de toque
+        document.addEventListener('touchend', () => {
+            if (video.paused && currentUser && userData.isAdmin) {
+                video.muted = true;
+                video.play().catch(err => console.log('Play failed:', err));
+            }
+        }, false);
 
         // Prevenir zoom ao focar em input no iOS
         document.addEventListener('touchstart', function(e) {
