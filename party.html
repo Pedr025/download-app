@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no, maximum-scale=1.0">
     <meta name="apple-mobile-web-app-capable" content="true">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Watch Party Pro - Premium & Admin</title>
@@ -26,16 +26,20 @@
         }
         
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; }
-        body, html { width: 100%; height: 100%; background-color: #000; overflow: hidden; font-family: 'Avenir Next', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+        html { width: 100%; height: 100%; }
+        body { width: 100%; height: 100vh; height: 100dvh; background-color: #000; overflow: hidden; font-family: 'Avenir Next', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; }
 
-        .watch-party-container { display: flex; flex-direction: column; width: 100%; height: 100%; background: #000; }
+        /* LAYOUT PRINCIPAL */
+        .watch-party-container { display: flex; flex-direction: column; width: 100%; height: 100%; background: #000; position: fixed; top: 0; left: 0; right: 0; bottom: 0; }
         @media (min-width: 1024px) { .watch-party-container { flex-direction: row; } }
 
-        .player-section { position: relative; width: 100%; aspect-ratio: 16 / 9; background: #000; z-index: 10; }
+        /* PLAYER SECTION */
+        .player-section { position: relative; width: 100%; flex: 0 0 auto; aspect-ratio: 16 / 9; background: #000; z-index: 10; min-height: 0; }
         @media (min-width: 1024px) { .player-section { flex: 1; height: 100%; aspect-ratio: auto; } }
-        .player-wrapper { width: 100%; height: 100%; position: relative; overflow: hidden; background: #000; }
-        video { width: 100%; height: 100%; object-fit: contain; background: #000; display: block; }
+        .player-wrapper { width: 100%; height: 100%; position: relative; overflow: hidden; display: block; -webkit-user-select: none; user-select: none; }
+        video { width: 100% !important; height: 100% !important; object-fit: contain; display: block; background: #000; position: relative; z-index: 10; }
 
+        /* OVERLAYS */
         .player-info-overlay {
             position: absolute; top: 0; left: 0; right: 0; padding: 15px;
             background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
@@ -52,17 +56,21 @@
         .badge.viewers { background: rgba(255, 255, 255, 0.15); margin-top: 8px; }
         .badge.premium { background: linear-gradient(45deg, #ffcc00, #ff9900); color: #000; }
 
+        /* CONTROLES (ADMIN ONLY) */
         .bottom-controls {
             position: absolute; bottom: 0; left: 0; right: 0; padding: 10px 20px 20px;
             background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
             z-index: 100; opacity: 0; transition: opacity 0.3s; pointer-events: none;
         }
-        .player-wrapper:hover .bottom-controls, .player-wrapper.show-controls .bottom-controls { opacity: 1; pointer-events: auto; }
+        .admin-active .bottom-controls { pointer-events: auto; }
+        .player-wrapper:hover .bottom-controls, .player-wrapper.show-controls .bottom-controls { opacity: 1; }
 
         .seekbar-container { width: 100%; height: 4px; background: rgba(255,255,255,0.2); margin-bottom: 15px; cursor: pointer; position: relative; }
+        .seekbar-container.disabled { cursor: not-allowed; opacity: 0.5; }
         .seekbar-fill { height: 100%; background: var(--accent); width: 0%; }
         .control-row { display: flex; justify-content: space-between; align-items: center; color: white; font-size: 13px; }
 
+        /* BOTÃO MUDAR FILME (ADMIN) */
         .admin-btn {
             background: var(--accent); color: white; border: none; padding: 8px 15px;
             border-radius: 20px; font-size: 12px; font-weight: bold; cursor: pointer;
@@ -70,14 +78,26 @@
         }
         .admin-active .admin-btn { display: flex; }
 
-        .chat-section { flex: 1; display: flex; flex-direction: column; position: relative; overflow: hidden; background: transparent; }
+        /* CONTROLES ADMIN */
+        .admin-controls { display: flex; align-items: center; gap: 15px; }
+        .admin-controls i { cursor: pointer; transition: 0.2s; }
+        .admin-controls i:hover { color: var(--accent-light); }
+        .admin-controls i.disabled { cursor: not-allowed; opacity: 0.3; }
+
+        /* CONTROLES USUÁRIO COMUM (APENAS FULLSCREEN) */
+        .user-controls { display: flex; align-items: center; gap: 15px; }
+        .user-controls i { cursor: pointer; transition: 0.2s; }
+        .user-controls i:hover { color: var(--accent-light); }
+
+        /* CHAT SECTION */
+        .chat-section { flex: 1; display: flex; flex-direction: column; position: relative; overflow: hidden; background: transparent; min-height: 0; }
         .chat-bg-video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; overflow: hidden; }
         .chat-bg-video video { width: 100%; height: 100%; object-fit: cover; filter: blur(40px) brightness(0.4); transform: scale(1.2); }
 
         .chat-header {
             padding: 15px 20px; border-bottom: 1px solid var(--border-color);
             display: flex; justify-content: space-between; align-items: center;
-            background: rgba(0,0,0,0.2); backdrop-filter: blur(10px);
+            background: rgba(0,0,0,0.2); backdrop-filter: blur(10px); flex-shrink: 0;
         }
         .chat-title-area { display: flex; align-items: center; gap: 12px; }
         .chat-title-area h2 { font-size: 15px; color: white; }
@@ -90,20 +110,19 @@
         }
         .avatar-stack:first-child { margin-left: 0; }
 
-        .chat-messages { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 12px; }
-        .msg { display: flex; gap: 10px; animation: fadeIn 0.3s ease; position: relative; }
+        .chat-messages { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 15px; display: flex; flex-direction: column; gap: 12px; min-height: 0; }
+        .msg { display: flex; gap: 10px; animation: fadeIn 0.3s ease; position: relative; cursor: pointer; flex-shrink: 0; }
+        .msg:hover { background: rgba(255,255,255,0.05); border-radius: 8px; padding: 5px; }
         .msg-avatar {
             width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0; background: #333;
             display: flex; align-items: center; justify-content: center; font-size: 12px;
             color: white; font-weight: bold; background-size: cover;
         }
-        .msg-body { background: rgba(255,255,255,0.05); padding: 8px 12px; border-radius: 12px; max-width: 85%; position: relative; }
+        .msg-body { background: rgba(255,255,255,0.05); padding: 8px 12px; border-radius: 12px; max-width: 85%; position: relative; word-wrap: break-word; }
         .msg-user { font-size: 12px; font-weight: bold; color: var(--accent-light); margin-bottom: 2px; }
         .msg-text { font-size: 13px; color: white; line-height: 1.4; }
-        
-        .del-msg { position: absolute; right: -25px; top: 5px; color: #ff4444; font-size: 10px; cursor: pointer; display: none; }
-        .admin-active .del-msg { display: block; }
 
+        /* REPLY SYSTEM */
         .reply-preview { background: rgba(0,0,0,0.3); border-left: 3px solid var(--accent); padding: 4px 8px; margin-bottom: 5px; border-radius: 4px; font-size: 11px; color: #aaa; cursor: pointer; }
         .reply-btn { font-size: 10px; color: #666; cursor: pointer; margin-top: 4px; display: inline-block; }
         .reply-btn:hover { color: var(--accent-light); }
@@ -111,14 +130,21 @@
         .active-reply-bar {
             background: rgba(0,114,210,0.1); border-top: 1px solid var(--accent);
             padding: 8px 15px; display: none; justify-content: space-between; align-items: center;
-            font-size: 12px; color: white;
+            font-size: 12px; color: white; flex-shrink: 0;
         }
 
-        .chat-input-area { padding: 15px; background: rgba(0,0,0,0.3); backdrop-filter: blur(20px); display: flex; flex-direction: column; gap: 10px; position: relative; }
-        .input-row { display: flex; gap: 10px; align-items: center; width: 100%; }
-        .input-wrapper { flex: 1; background: rgba(255,255,255,0.1); border-radius: 24px; padding: 8px 16px; display: flex; align-items: center; transition: 0.3s; }
-        .input-wrapper input { flex: 1; background: none; border: none; color: white; font-size: 14px; outline: none; }
+        /* INPUT AREA & LIMITS */
+        .chat-input-area { padding: 15px; background: rgba(0,0,0,0.3); backdrop-filter: blur(20px); display: flex; flex-direction: column; gap: 10px; position: relative; flex-shrink: 0; }
+        .input-row { display: flex; gap: 10px; align-items: flex-end; width: 100%; }
+        .input-wrapper { flex: 1; background: rgba(255,255,255,0.1); border-radius: 24px; padding: 10px 16px; display: flex; align-items: center; transition: 0.3s; min-height: 40px; }
+        .input-wrapper input { 
+            flex: 1; background: none; border: none; color: white; font-size: 16px; outline: none; 
+            -webkit-appearance: none; -webkit-border-radius: 0; padding: 8px 0;
+            width: 100%; min-height: 40px; font-size: 16px;
+        }
+        .input-wrapper input::placeholder { color: rgba(255,255,255,0.5); }
 
+        /* BLOQUEIO CHAT TIMER */
         .chat-lock-overlay {
             position: absolute; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(15px);
             display: none; align-items: center; justify-content: center; flex-direction: column;
@@ -134,10 +160,11 @@
         .send-btn, .poll-btn {
             width: 40px; height: 40px; background: var(--accent); border: none;
             border-radius: 50%; color: white; display: flex; align-items: center;
-            justify-content: center; cursor: pointer;
+            justify-content: center; cursor: pointer; flex-shrink: 0;
         }
         .poll-btn { background: rgba(255,255,255,0.1); }
 
+        /* MODALS */
         .modal {
             position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 2000;
             display: none; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(10px);
@@ -149,21 +176,28 @@
             max-height: 80vh; overflow-y: auto;
         }
         
+        /* EPISODES GRID */
         .episodes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 10px; margin-top: 15px; }
         .ep-item { background: rgba(255,255,255,0.1); padding: 10px; border-radius: 8px; color: white; cursor: pointer; font-size: 11px; transition: 0.2s; text-align: center; }
         .ep-item:hover { background: var(--accent); }
 
+        /* ENQUETE AVANÇADA */
         .poll-card { background: linear-gradient(135deg, #0072d2, #003d7a); border-radius: 15px; padding: 15px; margin: 10px 0; color: white; position: relative; }
         .poll-creator { display: flex; align-items: center; gap: 8px; font-size: 10px; margin-bottom: 8px; opacity: 0.8; }
         .poll-creator img { width: 16px; height: 16px; border-radius: 50%; }
         .poll-option {
             background: rgba(255,255,255,0.1); padding: 10px; border-radius: 8px;
             margin-top: 8px; cursor: pointer; font-size: 13px; display: flex; align-items: center; gap: 10px;
-            transition: 0.2s;
+            transition: 0.2s; position: relative;
         }
         .poll-option:hover { background: rgba(255,255,255,0.2); }
         .poll-option img { width: 30px; height: 40px; object-fit: cover; border-radius: 4px; }
+        .poll-vote-count { margin-left: auto; background: rgba(0,0,0,0.3); padding: 4px 8px; border-radius: 6px; font-size: 11px; }
 
+        /* BANNER ANÚNCIO - LIMITE DE 1 */
+        .ad-banner { background: rgba(255,255,255,0.05); padding: 10px; border-radius: 10px; margin: 10px 0; text-align: center; border: 1px solid var(--border-color); }
+
+        /* BUSCA DE FILMES NO MODAL */
         .search-results { margin-top: 15px; display: flex; flex-direction: column; gap: 10px; text-align: left; }
         .search-item {
             display: flex; gap: 10px; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; cursor: pointer; transition: 0.2s;
@@ -174,11 +208,57 @@
         .search-item-title { font-size: 13px; font-weight: bold; color: white; }
         .search-item-type { font-size: 10px; color: var(--accent-light); }
 
+        /* POP-UP DE MODERAÇÃO */
+        .moderation-popup {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 3000;
+            display: none; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(10px);
+        }
+        .moderation-popup.active { display: flex; }
+        .moderation-content {
+            background: #1a1d29; width: 100%; max-width: 350px; border-radius: 24px;
+            padding: 30px; text-align: center; border: 1px solid var(--border-color);
+        }
+        .moderation-content h3 { color: white; margin-bottom: 20px; }
+        .moderation-content .user-info { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; margin-bottom: 20px; }
+        .moderation-content .user-info p { color: #aaa; font-size: 13px; margin: 5px 0; }
+        .moderation-buttons { display: flex; gap: 10px; flex-direction: column; }
+        .moderation-buttons button { padding: 12px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; font-size: 13px; }
+        .btn-delete { background: #ff4444; color: white; }
+        .btn-ban { background: #ff8800; color: white; }
+        .btn-cancel { background: rgba(255,255,255,0.1); color: white; }
+
+        /* POP-UP PREMIUM */
+        .premium-popup {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 3000;
+            display: none; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(10px);
+        }
+        .premium-popup.active { display: flex; }
+        .premium-content {
+            background: linear-gradient(135deg, #1a1d29, #2a2d39); width: 100%; max-width: 350px; border-radius: 24px;
+            padding: 30px; text-align: center; border: 2px solid var(--premium-gold);
+        }
+        .premium-content h3 { color: var(--premium-gold); margin-bottom: 15px; font-size: 18px; }
+        .premium-content p { color: #aaa; font-size: 13px; margin-bottom: 20px; line-height: 1.5; }
+        .premium-content .premium-icon { font-size: 48px; color: var(--premium-gold); margin-bottom: 15px; }
+        .premium-buttons { display: flex; gap: 10px; flex-direction: column; }
+        .premium-buttons button { padding: 12px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; font-size: 13px; }
+        .btn-upgrade { background: var(--premium-gold); color: #000; }
+        .btn-close-premium { background: rgba(255,255,255,0.1); color: white; }
+
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* FIX PARA iOS - Prevenir zoom ao focar em input */
+        @supports (padding: max(0px)) {
+            .input-wrapper input {
+                padding-left: max(10px, env(safe-area-inset-left));
+                padding-right: max(10px, env(safe-area-inset-right));
+            }
+        }
     </style>
 </head>
 <body>
 
+    <!-- LOGIN MODAL -->
     <div class="modal" id="login-modal">
         <div class="modal-content">
             <h2 style="color: white; margin-bottom: 10px;">Watch Party</h2>
@@ -189,6 +269,7 @@
         </div>
     </div>
 
+    <!-- MODAL MUDAR CONTEÚDO (ADMIN) -->
     <div class="modal" id="admin-modal">
         <div class="modal-content">
             <h3 style="color: white; margin-bottom: 15px;">Mudar Filme/Série</h3>
@@ -198,6 +279,7 @@
         </div>
     </div>
     
+    <!-- MODAL SELEÇÃO DE EPISÓDIOS -->
     <div class="modal" id="episodes-modal">
         <div class="modal-content">
             <h3 id="series-title" style="color: white; margin-bottom: 15px;">Escolha o Episódio</h3>
@@ -206,6 +288,7 @@
         </div>
     </div>
 
+    <!-- MODAL ENQUETE -->
     <div class="modal" id="poll-modal">
         <div class="modal-content">
             <h3 style="color: white; margin-bottom: 15px;">Criar Enquete</h3>
@@ -218,14 +301,40 @@
         </div>
     </div>
 
+    <!-- POP-UP DE MODERAÇÃO (ADMIN) -->
+    <div class="moderation-popup" id="moderation-popup">
+        <div class="moderation-content">
+            <h3>Gerenciar Mensagem</h3>
+            <div class="user-info">
+                <p><strong id="mod-user-name">Usuário</strong></p>
+                <p id="mod-user-email" style="font-size: 11px; color: #666;"></p>
+            </div>
+            <div class="moderation-buttons">
+                <button class="btn-delete" onclick="deleteMsgFromPopup()"><i class="fas fa-trash"></i> Deletar Mensagem</button>
+                <button class="btn-ban" onclick="banUserFromPopup()"><i class="fas fa-ban"></i> Banir Usuário</button>
+                <button class="btn-cancel" onclick="closeModeration()">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+	    <!-- POP-UP PREMIUM -->
+    <div class="premium-popup" id="premium-popup">
+        <div class="premium-content">
+            <div class="premium-icon"><i class="fas fa-crown"></i></div>
+            <h3>Recurso Premium</h3>
+            <p>Apenas usuários Premium podem criar enquetes. Desbloqueia este e muitos outros recursos exclusivos!</p>
+            <div class="premium-buttons">
+                <button class="btn-upgrade" onclick="goToPremium()"><i class="fas fa-star"></i> Se Tornar Premium</button>
+                <button class="btn-close-premium" onclick="closePremiumPopup()">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
     <div class="watch-party-container">
+        <!-- PLAYER -->
         <div class="player-section">
             <div class="player-wrapper" id="player-wrapper">
-                <!-- VIDEO TAG FORÇADA -->
-                <video id="main-video" playsinline webkit-playsinline crossorigin="anonymous" preload="auto">
-                    <source id="video-source" src="" type="video/mp4">
-                    Seu navegador não suporta vídeos.
-                </video>
+                <video id="main-video" playsinline webkit-playsinline muted="muted" crossorigin="anonymous"></video>
                 <div class="player-info-overlay">
                     <div id="premium-badge-area"></div>
                     <div class="badge viewers" id="viewer-count"><i class="fas fa-eye"></i> 1 assistindo</div>
@@ -235,9 +344,13 @@
                         <div class="seekbar-fill" id="fill"></div>
                     </div>
                     <div class="control-row">
-                        <div style="display:flex; align-items:center; gap:15px;">
+                        <div id="admin-control-group" style="display:flex; align-items:center; gap:15px;">
                             <i class="fas fa-play" id="play-pause" style="cursor:pointer;"></i>
                             <span id="time-display">00:00 / 00:00</span>
+                        </div>
+                        <div id="user-control-group" style="display:none; align-items:center; gap:15px;">
+                            <i class="fas fa-play" id="play-pause-user" style="cursor:pointer;"></i>
+                            <span id="time-display-user">00:00 / 00:00</span>
                         </div>
                         <div style="display:flex; gap:15px;">
                             <button class="admin-btn" onclick="document.getElementById('admin-modal').classList.add('active')">
@@ -250,6 +363,7 @@
             </div>
         </div>
 
+        <!-- CHAT -->
         <div class="chat-section">
             <div class="chat-bg-video">
                 <video id="bg-video" muted loop playsinline webkit-playsinline crossorigin="anonymous"></video>
@@ -263,30 +377,35 @@
             <div class="chat-messages" id="chat-box"></div>
             
             <div class="chat-input-area">
+                <!-- BLOQUEIO TIMER -->
                 <div class="chat-lock-overlay" id="chat-lock">
                     <span>Muitas mensagens! Aguarde:</span>
                     <div class="lock-timer" id="lock-timer">02:00</div>
-                    <button class="premium-btn-small" onclick="window.location.href='premium.html'">Remover Limite com Premium</button>
+                    <button class="premium-btn-small" onclick="goToPremium()">Remover Limite com Premium</button>
                 </div>
                 
+                <!-- BARRA DE REPLY -->
                 <div class="active-reply-bar" id="reply-bar">
                     <span>Respondendo a <strong id="reply-user"></strong></span>
-                    <i class="fas fa-times" onclick="cancelReply()" style="cursor:pointer;"></i>
+                    <i class="fas fa-times" style="cursor:pointer;" onclick="cancelReply()"></i>
                 </div>
+
                 <div class="input-row">
-                    <button class="poll-btn" id="open-poll-btn"><i class="fas fa-poll-h"></i></button>
+                    <button class="poll-btn" id="open-poll-btn" type="button"><i class="fas fa-poll"></i></button>
                     <div class="input-wrapper">
-                        <input type="text" id="chat-input" placeholder="Diga algo...">
+                        <input type="text" id="chat-input" placeholder="Diga algo..." autocomplete="off">
                     </div>
-                    <button class="send-btn" id="send-msg"><i class="fas fa-paper-plane"></i></button>
+                    <button class="send-btn" id="send-msg" type="button"><i class="fas fa-paper-plane"></i></button>
                 </div>
             </div>
         </div>
     </div>
-	    <script>
+
+    <script>
+        // CONFIGURAÇÃO FIREBASE
         const firebaseConfig = {
             apiKey: "AIzaSyB0IJNOMSnpHEazCNA7Nu02gsbAUNvmIYE",
-            authDomain: "nupmatch---filmes-com-amigos.firebaseapp.com",
+            authDomain: "nupmatch---filmes-com-amigos.firebaseapp.com", // Voltando para o padrão do Firebase para garantir o redirecionamento
             databaseURL: "https://nupmatch---filmes-com-amigos-default-rtdb.firebaseio.com",
             projectId: "nupmatch---filmes-com-amigos",
             storageBucket: "nupmatch---filmes-com-amigos.firebasestorage.app",
@@ -300,10 +419,10 @@
         const roomRef = db.ref('rooms/default_room');
         const API_URL = "https://pkfilmes.pages.dev/movies_data.json";
 
+        // LISTA DE ADMINS
         const ADMIN_EMAILS = ["grudentt@gmail.com", "nz.pett@gmail.com"];
         
         const video = document.getElementById('main-video');
-        const source = document.getElementById('video-source');
         const bgVideo = document.getElementById('bg-video');
         const seekFill = document.getElementById('fill');
         const chatBox = document.getElementById('chat-box');
@@ -313,13 +432,19 @@
         let userData = { isPremium: false, isAdmin: false };
         let localMsgCount = 0;
         let globalMsgCounter = 0;
+        let adShownCount = 0;
         let isChatLocked = false;
         let activeReply = null;
         let allMovies = [];
         let selectedPollOptions = [];
+        let currentMsgForModeration = null;
         
+        // Detectar iOS
         const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+        const isIOSBrowser = isIOS || (isSafari && /iPhone|iPad|iPod/.test(navigator.userAgent));
 
+        // --- AUTENTICAÇÃO ---
         auth.onAuthStateChanged(user => {
             if (user) {
                 currentUser = user;
@@ -329,15 +454,24 @@
             }
         });
 
+        // Capturar resultado do redirect no iOS e domínios customizados
         auth.getRedirectResult().then(result => {
             if (result && result.user) {
                 currentUser = result.user;
                 checkUserRole();
             }
-        }).catch(error => console.error('Erro login:', error));
+        }).catch(error => {
+            console.error('Erro ao processar login:', error);
+            // Se houver erro de domínio, o Firebase costuma avisar aqui
+        });
+        
+        // Log para debug
+        console.log('Dispositivo detectado - iOS:', isIOS, 'Safari:', isSafari);
 
         document.getElementById('google-login').onclick = () => {
             const provider = new firebase.auth.GoogleAuthProvider();
+            // Forçar o uso de popup no iOS se o redirect estiver falhando
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
             if (isIOS) {
                 auth.signInWithPopup(provider).then(result => {
                     if (result.user) {
@@ -345,6 +479,7 @@
                         checkUserRole();
                     }
                 }).catch(err => {
+                    console.log("Popup blocked or failed, trying redirect...", err);
                     auth.signInWithRedirect(provider);
                 });
             } else {
@@ -356,6 +491,7 @@
             const userRef = db.ref('users/' + currentUser.uid);
             const snapshot = await userRef.get();
             let data = snapshot.val();
+            
             const isAdmin = ADMIN_EMAILS.includes(currentUser.email);
 
             if (!data) {
@@ -368,8 +504,19 @@
 
             userData = data;
             userData.isAdmin = isAdmin;
-            if (userData.isAdmin) document.body.classList.add('admin-active');
-            if (userData.isPremium) document.getElementById('premium-badge-area').innerHTML = '<div class="badge premium"><i class="fas fa-crown"></i> PREMIUM</div>';
+            
+            if (userData.isAdmin) {
+                document.body.classList.add('admin-active');
+                document.getElementById('admin-control-group').style.display = 'flex';
+                document.getElementById('user-control-group').style.display = 'none';
+            } else {
+                document.getElementById('admin-control-group').style.display = 'none';
+                document.getElementById('user-control-group').style.display = 'flex';
+            }
+            
+            if (userData.isPremium) {
+                document.getElementById('premium-badge-area').innerHTML = '<div class="badge premium"><i class="fas fa-crown"></i> PREMIUM</div>';
+            }
             
             document.getElementById('login-modal').classList.remove('active');
             initParty();
@@ -384,57 +531,62 @@
                 allMovies = [];
             }
 
+            // Presença
             const presenceRef = roomRef.child('users').child(currentUser.uid);
             presenceRef.set({ name: currentUser.displayName, photo: currentUser.photoURL, initial: currentUser.displayName.charAt(0) });
             presenceRef.onDisconnect().remove();
 
+            // Sincronização
             roomRef.child('sync').on('value', snapshot => {
                 const data = snapshot.val();
-                if (!data || !data.url) return;
+                if (!data) return;
                 
-                // TÉCNICA DE CARREGAMENTO FORÇADO
-                if (video.src !== data.url && !video.src.includes(data.url)) { 
-                    console.log("Forçando carregamento da URL:", data.url);
-                    
-                    // Reset total do player para evitar travamentos
-                    video.pause();
-                    source.src = data.url;
-                    video.src = data.url; // Algumas versões de iOS preferem no video, outras no source
+                if (video.src !== data.url) { 
+                    video.src = data.url; 
                     bgVideo.src = data.url;
-                    
-                    video.load();
-                    
-                    // Tentar tocar após carregar (o iOS exige interação, por isso o unlock() é vital)
-                    if (data.playing) {
-                        video.play().catch(e => console.log("Aguardando interação para tocar..."));
-                    }
                 }
                 
-                if (Math.abs(video.currentTime - data.time) > 3) {
+                if (Math.abs(video.currentTime - data.time) > 2) {
                     video.currentTime = data.time;
                 }
                 
                 if (data.playing && video.paused) {
-                    video.play().catch(e => {});
-                } else if (!data.playing && !video.paused) {
+                    video.muted = true;
+                    video.play().catch(err => {
+                        console.log('Play failed:', err);
+                    });
+                }
+                else if (!data.playing && !video.paused) {
                     video.pause();
                 }
             });
 
+            // Chat & Contador Global
             roomRef.child('chat').limitToLast(50).on('child_added', snapshot => {
                 const msg = snapshot.val();
+                globalMsgCounter++;
+                
+                if (!userData.isPremium && globalMsgCounter % 15 === 0 && adShownCount < 1) {
+                    renderAd();
+                    adShownCount++;
+                }
+
                 if (msg.type === 'poll') renderPoll(msg, snapshot.key);
                 else renderMsg(msg, snapshot.key);
             });
 
+            // Escutar remoção de mensagens
             roomRef.child('chat').on('child_removed', snapshot => {
                 const el = document.getElementById('msg-' + snapshot.key);
                 if (el) el.remove();
             });
 
+            // Usuários Online
             roomRef.child('users').on('value', snapshot => {
                 const users = Object.values(snapshot.val() || {});
-                document.getElementById('viewer-count').innerHTML = `<i class="fas fa-eye"></i> ${users.length} assistindo`;
+                document.getElementById('viewer-count').innerHTML = 
+                    `<i class="fas fa-eye"></i> ${users.length} ${users.length === 1 ? 'assistindo' : 'assistindo'}`;
+                
                 const avatarArea = document.getElementById('user-avatars');
                 avatarArea.innerHTML = users.slice(0, 5).map(u => 
                     `<div class="avatar-stack" style="${u.photo ? `background-image:url(${u.photo})` : ''}" title="${u.name}">${u.photo ? '' : u.initial}</div>`
@@ -442,16 +594,30 @@
             });
         }
 
+        // --- LÓGICA DE MENSAGENS ---
         function sendMessage() {
             if (isChatLocked) return;
             const text = chatInput.value.trim();
             if (!text) return;
+
             if (!userData.isPremium) {
                 localMsgCount++;
                 if (localMsgCount >= 5) lockChat();
             }
-            const msgData = { uid: currentUser.uid, name: currentUser.displayName, photo: currentUser.photoURL, text: text, timestamp: Date.now() };
-            if (activeReply) { msgData.replyTo = activeReply; cancelReply(); }
+
+            const msgData = {
+                uid: currentUser.uid,
+                name: currentUser.displayName,
+                photo: currentUser.photoURL,
+                text: text,
+                timestamp: Date.now()
+            };
+
+            if (activeReply) {
+                msgData.replyTo = activeReply;
+                cancelReply();
+            }
+
             roomRef.child('chat').push(msgData);
             chatInput.value = '';
             chatInput.blur();
@@ -466,18 +632,70 @@
                 timeLeft--;
                 const m = Math.floor(timeLeft / 60), s = timeLeft % 60;
                 timerEl.innerText = `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
-                if (timeLeft <= 0) { clearInterval(interval); isChatLocked = false; localMsgCount = 0; document.getElementById('chat-lock').classList.remove('active'); }
+                if (timeLeft <= 0) {
+                    clearInterval(interval);
+                    isChatLocked = false;
+                    localMsgCount = 0;
+                    document.getElementById('chat-lock').classList.remove('active');
+                }
             }, 1000);
         }
 
-        window.deleteMsg = (key) => { if (userData.isAdmin) roomRef.child('chat').child(key).remove(); }
-        window.setReply = (name, text) => { activeReply = { name, text }; document.getElementById('reply-user').innerText = name; document.getElementById('reply-bar').style.display = 'flex'; chatInput.focus(); }
-        window.cancelReply = () => { activeReply = null; document.getElementById('reply-bar').style.display = 'none'; }
+        function deleteMsg(key) {
+            if (!userData.isAdmin) return;
+            roomRef.child('chat').child(key).remove();
+        }
+
+        function deleteMsgFromPopup() {
+            if (currentMsgForModeration) {
+                deleteMsg(currentMsgForModeration.key);
+                closeModeration();
+            }
+        }
+
+        function banUserFromPopup() {
+            if (currentMsgForModeration) {
+                const bannedRef = db.ref('banned_users/' + currentMsgForModeration.uid);
+                bannedRef.set({ 
+                    name: currentMsgForModeration.name, 
+                    bannedAt: Date.now(),
+                    bannedBy: currentUser.uid 
+                });
+                alert(`Usuário ${currentMsgForModeration.name} foi banido!`);
+                closeModeration();
+            }
+        }
+
+        function closeModeration() {
+            document.getElementById('moderation-popup').classList.remove('active');
+            currentMsgForModeration = null;
+        }
+
+        // --- SISTEMA DE REPLY ---
+        function setReply(name, text) {
+            activeReply = { name, text };
+            document.getElementById('reply-user').innerText = name;
+            document.getElementById('reply-bar').style.display = 'flex';
+            chatInput.focus();
+        }
+
+        function cancelReply() {
+            activeReply = null;
+            document.getElementById('reply-bar').style.display = 'none';
+        }
 
         function renderMsg(msg, key) {
             const div = document.createElement('div');
             div.className = 'msg';
             div.id = 'msg-' + key;
+            
+            if (userData.isAdmin) {
+                div.onclick = (e) => {
+                    if (e.target.closest('.reply-btn')) return;
+                    openModerationPopup(msg, key);
+                };
+            }
+            
             div.innerHTML = `
                 <div class="msg-avatar" style="${msg.photo ? `background-image:url(${msg.photo})` : ''}">${msg.photo ? '' : msg.name.charAt(0)}</div>
                 <div class="msg-body">
@@ -485,18 +703,40 @@
                     <div class="msg-user">${msg.name}</div>
                     <div class="msg-text">${msg.text}</div>
                     <span class="reply-btn" onclick="setReply('${msg.name}', '${msg.text.replace(/'/g, "\\'")}')"><i class="fas fa-reply"></i> Responder</span>
-                    <i class="fas fa-trash del-msg" onclick="deleteMsg('${key}')"></i>
                 </div>
             `;
             chatBox.appendChild(div);
             chatBox.scrollTop = chatBox.scrollHeight;
         }
 
+        function openModerationPopup(msg, key) {
+            currentMsgForModeration = { ...msg, key };
+            document.getElementById('mod-user-name').innerText = msg.name;
+            document.getElementById('mod-user-email').innerText = msg.text.substring(0, 50) + '...';
+            document.getElementById('moderation-popup').classList.add('active');
+        }
+
+        function renderAd() {
+            const div = document.createElement('div');
+            div.className = 'ad-banner';
+            div.innerHTML = `
+                <div style="font-size:10px; color:#aaa; margin-bottom:5px;">Publicidade</div>
+                <div style="color:white; font-size:12px; margin: 10px 0;">Patrocinado: Conheça nossos planos Premium!</div>
+                <p style="color:#666; font-size:11px;">Desfrute de recursos exclusivos e sem anúncios.</p>
+            `;
+            chatBox.appendChild(div);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        // --- ENQUETE ---
         document.getElementById('open-poll-btn').onclick = () => {
-            if (!userData.isPremium) { alert("Apenas usuários Premium/Admins podem criar enquetes!"); return; }
+            if (!userData.isPremium) {
+                document.getElementById('premium-popup').classList.add('active');
+                return;
+            }
             document.getElementById('poll-modal').classList.add('active');
             selectedPollOptions = [];
-            document.getElementById('selected-options').innerHTML = '';
+            renderSelectedOptions();
         };
 
         document.getElementById('poll-search').oninput = (e) => {
@@ -517,129 +757,147 @@
         window.addPollOption = (item) => {
             if (selectedPollOptions.length >= 3) return;
             selectedPollOptions.push(item);
-            document.getElementById('selected-options').innerHTML = selectedPollOptions.map(opt => `
-                <div style="background:var(--accent); padding:5px 10px; border-radius:15px; font-size:10px; color:white;">${opt.titulo}</div>
+            renderSelectedOptions();
+        };
+
+        function renderSelectedOptions() {
+            const area = document.getElementById('selected-options');
+            area.innerHTML = selectedPollOptions.map((opt, idx) => `
+                <div style="background:var(--accent); padding:5px 10px; border-radius:15px; font-size:10px; color:white; display:flex; align-items:center; gap:5px;">
+                    ${opt.titulo}
+                    <i class="fas fa-times" style="cursor:pointer;" onclick="removePollOption(${idx})"></i>
+                </div>
             `).join('');
-        };
-
-        document.getElementById('confirm-poll').onclick = () => {
-            const msg = document.getElementById('poll-msg').value;
-            if (!msg || selectedPollOptions.length === 0) return;
-            roomRef.child('chat').push({
-                type: 'poll', uid: currentUser.uid, name: currentUser.displayName, photo: currentUser.photoURL, text: msg,
-                options: selectedPollOptions.map(o => ({ id: o.id, titulo: o.titulo, capa: o.capa, link: o.link_mp4, tipo: o.tipo, episodios: o.episodios || null }))
-            });
-            document.getElementById('poll-modal').classList.remove('active');
-        };
-
-        function renderPoll(poll, key) {
-            const div = document.createElement('div');
-            div.className = 'poll-card';
-            div.id = 'msg-' + key;
-            div.innerHTML = `
-                <div class="poll-creator"><img src="${poll.photo}"> <span>${poll.name} criou uma enquete</span><i class="fas fa-trash del-msg" onclick="deleteMsg('${key}')" style="margin-left:auto; pointer-events:auto;"></i></div>
-                <div style="font-weight:bold; margin-bottom:10px;">${poll.text}</div>
-                ${poll.options.map(opt => `<div class="poll-option" onclick="handlePollVote('${opt.id}', '${key}')"><img src="${opt.capa}"><span>${opt.titulo}</span></div>`).join('')}
-            `;
-            chatBox.appendChild(div);
-            chatBox.scrollTop = chatBox.scrollHeight;
         }
 
-        window.handlePollVote = (movieId, pollKey) => {
-            if (!userData.isAdmin) { alert("Apenas administradores podem encerrar a votação e mudar o vídeo!"); return; }
-            roomRef.child('chat').child(pollKey).get().then(snap => {
-                const poll = snap.val();
-                const option = poll.options.find(o => o.id == movieId);
-                if (option) { if (option.tipo === 'serie') showEpisodes(option); else updateVideo(option.link); }
-            });
+	        // --- FUNÇÕES PREMIUM ---
+        function goToPremium() {
+            window.location.href = 'premium.html';
+        }
+
+        function closePremiumPopup() {
+            document.getElementById('premium-popup').classList.remove('active');
+        }
+
+        // --- EVENTOS BÁSICOS ---
+        document.getElementById('send-msg').addEventListener('click', sendMessage);
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+        
+        document.getElementById('play-pause').onclick = () => {
+            if (userData.isAdmin) {
+                togglePlay();
+            }
         };
 
-        window.handleSelect = (item) => { if (item.tipo === 'serie') showEpisodes(item); else updateVideo(item.link_mp4); document.getElementById('admin-modal').classList.remove('active'); }
+        document.getElementById('play-pause-user').onclick = () => {
+            if (userData.isAdmin) {
+                togglePlay();
+            }
+        };
 
-        function showEpisodes(serie) {
-            document.getElementById('series-title').innerText = serie.titulo;
-            const container = document.getElementById('episodes-container');
-            container.innerHTML = '';
-            const episodes = serie.episodios || [];
-            if (episodes.length > 0) {
-                episodes.forEach(ep => {
-                    const btn = document.createElement('div');
-                    btn.className = 'ep-item'; btn.innerText = `T${ep.temporada || 1} EP${ep.episodio || '?'}`;
-                    btn.onclick = () => { updateVideo(ep.link_mp4); document.getElementById('episodes-modal').classList.remove('active'); document.getElementById('admin-modal').classList.remove('active'); };
-                    container.appendChild(btn);
+        function togglePlay() {
+            if (!userData.isAdmin) return;
+            
+            if (video.paused) {
+                video.muted = true;
+                video.play().then(() => {
+                    roomRef.child('sync').update({ playing: true, time: video.currentTime });
+                }).catch(err => {
+                    console.log('Play failed:', err);
                 });
             } else {
-                const btn = document.createElement('div'); btn.className = 'ep-item'; btn.innerText = `Iniciar Série (EP1)`;
-                btn.onclick = () => { updateVideo(serie.link_mp4); document.getElementById('episodes-modal').classList.remove('active'); document.getElementById('admin-modal').classList.remove('active'); };
-                container.appendChild(btn);
+                video.pause();
+                roomRef.child('sync').update({ playing: false, time: video.currentTime });
             }
-            document.getElementById('episodes-modal').classList.add('active');
         }
-
-        function updateVideo(url) {
-            if (!userData.isAdmin) return;
-            // Atualizar Firebase
-            roomRef.child('sync').set({ url: url, time: 0, playing: true, sender: currentUser.uid });
-        }
-
-        document.getElementById('admin-search').oninput = (e) => {
-            const query = e.target.value.toLowerCase();
-            const results = allMovies.filter(m => m.titulo.toLowerCase().includes(query)).slice(0, 10);
-            const container = document.getElementById('admin-results');
-            container.innerHTML = results.map(item => `<div class="search-item" onclick='handleSelect(${JSON.stringify(item).replace(/'/g, "&apos;")})'><img src="${item.capa}"><div class="search-item-info"><div class="search-item-title">${item.titulo}</div><div class="search-item-type">${item.tipo}</div></div></div>`).join('');
-        };
-
-        document.getElementById('send-msg').onclick = sendMessage;
-        chatInput.onkeypress = (e) => e.key === 'Enter' && sendMessage();
         
-        const handlePlayClick = () => {
-            if (userData.isAdmin) {
-                if (video.paused) video.play(); else video.pause();
-                roomRef.child('sync').update({ playing: !video.paused, time: video.currentTime });
-            } else {
-                if (video.paused) video.play().catch(e => {}); else video.pause();
-            }
-        };
-        document.getElementById('play-pause').onclick = handlePlayClick;
+        // Seekbar - apenas para admins
+        document.getElementById('seekbar').addEventListener('click', (e) => {
+            if (!userData.isAdmin) return;
+            const rect = e.currentTarget.getBoundingClientRect();
+            const percent = (e.clientX - rect.left) / rect.width;
+            video.currentTime = percent * video.duration;
+            roomRef.child('sync').update({ time: video.currentTime });
+        });
         
         video.ontimeupdate = () => {
-            if (video.duration) {
+            if (video.duration && !isNaN(video.duration)) {
                 seekFill.style.width = (video.currentTime / video.duration * 100) + '%';
-                document.getElementById('time-display').innerText = formatTime(video.currentTime) + " / " + formatTime(video.duration);
+                const timeStr = formatTime(video.currentTime) + " / " + formatTime(video.duration);
+                document.getElementById('time-display').innerText = timeStr;
+                document.getElementById('time-display-user').innerText = timeStr;
             }
-            document.getElementById('play-pause').className = 'fas ' + (video.paused ? 'fa-play' : 'fa-pause');
+            
+            // Atualizar ícone de play/pause para todos
+            const icon = video.paused ? 'fa-play' : 'fa-pause';
+            if (document.getElementById('play-pause')) {
+                document.getElementById('play-pause').className = 'fas ' + icon;
+            }
+            if (document.getElementById('play-pause-user')) {
+                document.getElementById('play-pause-user').className = 'fas ' + icon;
+            }
         };
 
-        function formatTime(s) { if (isNaN(s)) return "00:00"; const m = Math.floor(s/60), sec = Math.floor(s%60); return m.toString().padStart(2,'0') + ":" + sec.toString().padStart(2,'0'); }
+        function formatTime(s) {
+            if (isNaN(s)) return "00:00";
+            const m = Math.floor(s/60), sec = Math.floor(s%60);
+            return m.toString().padStart(2,'0') + ":" + sec.toString().padStart(2,'0');
+        }
         
         document.getElementById('fs-btn').onclick = () => {
-            const el = document.getElementById('main-video');
-            if (el.requestFullscreen) el.requestFullscreen();
-            else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
-            else if (el.webkitEnterFullscreen) el.webkitEnterFullscreen();
+            const elem = document.getElementById('player-wrapper');
+            if (elem.requestFullscreen) {
+                elem.requestFullscreen();
+            } else if (elem.webkitRequestFullscreen) {
+                elem.webkitRequestFullscreen();
+            } else if (elem.mozRequestFullScreen) {
+                elem.mozRequestFullScreen();
+            } else if (elem.msRequestFullscreen) {
+                elem.msRequestFullscreen();
+            }
         };
 
-        // UNLOCK É A CHAVE PARA O MOBILE
-        const unlock = () => {
-            console.log("Destravando player...");
-            if (video.muted) video.muted = false;
-            
-            // Forçar o carregamento caso esteja travado
-            if (video.readyState === 0 && video.src) {
-                video.load();
+        // Suporte para fullscreen
+        video.addEventListener('fullscreenchange', () => {
+            if (document.fullscreenElement) {
+                video.style.width = '100%';
+                video.style.height = '100%';
             }
-            
-            roomRef.child('sync').once('value', snap => {
-                const d = snap.val();
-                if (d && d.playing && video.paused) {
-                    video.play().catch(e => console.log("Erro ao forçar play:", e));
-                }
-            });
-        };
+        });
         
-        document.addEventListener('touchend', unlock);
-        document.addEventListener('click', unlock);
-        video.addEventListener('click', unlock);
+        // Sincronização de seek (apenas admin)
+        video.addEventListener('seeking', () => {
+            if (userData && userData.isAdmin) {
+                roomRef.child('sync').update({ time: video.currentTime });
+            }
+        });
+
+        // Permitir unmute ao tocar na tela para qualquer usuário
+        document.addEventListener('touchend', () => {
+            if (video.muted) {
+                video.muted = false;
+            }
+        }, false);
+        
+        // Permitir unmute ao clicar no vídeo para qualquer usuário
+        video.addEventListener('click', () => {
+            if (video.muted) {
+                video.muted = false;
+            }
+        });
+
+        // Prevenir zoom ao focar em input
+        document.addEventListener('touchstart', function(e) {
+            if (e.target.tagName === 'INPUT') {
+                e.target.style.fontSize = '16px';
+            }
+        });
     </script>
 </body>
 </html>
+
