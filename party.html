@@ -56,14 +56,14 @@
         .badge.viewers { background: rgba(255, 255, 255, 0.15); margin-top: 8px; }
         .badge.premium { background: linear-gradient(45deg, #ffcc00, #ff9900); color: #000; }
 
-        /* CONTROLES (ADMIN ONLY) */
+        /* CONTROLES */
         .bottom-controls {
             position: absolute; bottom: 0; left: 0; right: 0; padding: 10px 20px 20px;
             background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
             z-index: 100; opacity: 0; transition: opacity 0.3s; pointer-events: none;
         }
-        .admin-active .bottom-controls { pointer-events: auto; }
-        .player-wrapper:hover .bottom-controls, .player-wrapper.show-controls .bottom-controls { opacity: 1; }
+        /* Garantir que controles sejam clicáveis para todos no iOS se necessário */
+        .player-wrapper:hover .bottom-controls, .player-wrapper.show-controls .bottom-controls { opacity: 1; pointer-events: auto; }
 
         .seekbar-container { width: 100%; height: 4px; background: rgba(255,255,255,0.2); margin-bottom: 15px; cursor: pointer; position: relative; }
         .seekbar-container.disabled { cursor: not-allowed; opacity: 0.5; }
@@ -84,7 +84,7 @@
         .admin-controls i:hover { color: var(--accent-light); }
         .admin-controls i.disabled { cursor: not-allowed; opacity: 0.3; }
 
-        /* CONTROLES USUÁRIO COMUM (APENAS FULLSCREEN) */
+        /* CONTROLES USUÁRIO COMUM */
         .user-controls { display: flex; align-items: center; gap: 15px; }
         .user-controls i { cursor: pointer; transition: 0.2s; }
         .user-controls i:hover { color: var(--accent-light); }
@@ -178,7 +178,7 @@
         
         /* EPISODES GRID */
         .episodes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 10px; margin-top: 15px; }
-        .ep-item { background: rgba(255,255,255,0.1); padding: 10px; border-radius: 8px; color: white; cursor: pointer; font-size: 11px; transition: 0.2s; text-align: center; }
+        .ep-item { background: rgba(255,255,255,0.1); padding: 10px; border-radius: 8px; cursor: pointer; text-align: center; color: white; font-size: 12px; transition: 0.2s; }
         .ep-item:hover { background: var(--accent); }
 
         /* ENQUETE AVANÇADA */
@@ -316,8 +316,7 @@
             </div>
         </div>
     </div>
-
-      <!-- POP-UP PREMIUM -->
+    <!-- POP-UP PREMIUM -->
     <div class="premium-popup" id="premium-popup">
         <div class="premium-content">
             <div class="premium-icon"><i class="fas fa-crown"></i></div>
@@ -334,7 +333,7 @@
         <!-- PLAYER -->
         <div class="player-section">
             <div class="player-wrapper" id="player-wrapper">
-                <video id="main-video" playsinline webkit-playsinline muted="muted" crossorigin="anonymous"></video>
+                <video id="main-video" playsinline webkit-playsinline crossorigin="anonymous"></video>
                 <div class="player-info-overlay">
                     <div id="premium-badge-area"></div>
                     <div class="badge viewers" id="viewer-count"><i class="fas fa-eye"></i> 1 assistindo</div>
@@ -384,18 +383,16 @@
                     <button class="premium-btn-small" onclick="goToPremium()">Remover Limite com Premium</button>
                 </div>
                 
-                <!-- BARRA DE REPLY -->
                 <div class="active-reply-bar" id="reply-bar">
                     <span>Respondendo a <strong id="reply-user"></strong></span>
-                    <i class="fas fa-times" style="cursor:pointer;" onclick="cancelReply()"></i>
+                    <i class="fas fa-times" onclick="cancelReply()" style="cursor:pointer;"></i>
                 </div>
-
                 <div class="input-row">
-                    <button class="poll-btn" id="open-poll-btn" type="button"><i class="fas fa-poll"></i></button>
+                    <button class="poll-btn" id="open-poll-btn"><i class="fas fa-poll-h"></i></button>
                     <div class="input-wrapper">
-                        <input type="text" id="chat-input" placeholder="Diga algo..." autocomplete="off">
+                        <input type="text" id="chat-input" placeholder="Diga algo...">
                     </div>
-                    <button class="send-btn" id="send-msg" type="button"><i class="fas fa-paper-plane"></i></button>
+                    <button class="send-btn" id="send-msg"><i class="fas fa-paper-plane"></i></button>
                 </div>
             </div>
         </div>
@@ -405,7 +402,7 @@
         // CONFIGURAÇÃO FIREBASE
         const firebaseConfig = {
             apiKey: "AIzaSyB0IJNOMSnpHEazCNA7Nu02gsbAUNvmIYE",
-            authDomain: "nupmatch---filmes-com-amigos.firebaseapp.com", // Voltando para o padrão do Firebase para garantir o redirecionamento
+            authDomain: "nupmatch---filmes-com-amigos.firebaseapp.com",
             databaseURL: "https://nupmatch---filmes-com-amigos-default-rtdb.firebaseio.com",
             projectId: "nupmatch---filmes-com-amigos",
             storageBucket: "nupmatch---filmes-com-amigos.firebasestorage.app",
@@ -441,8 +438,6 @@
         
         // Detectar iOS
         const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-        const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-        const isIOSBrowser = isIOS || (isSafari && /iPhone|iPad|iPod/.test(navigator.userAgent));
 
         // --- AUTENTICAÇÃO ---
         auth.onAuthStateChanged(user => {
@@ -454,7 +449,6 @@
             }
         });
 
-        // Capturar resultado do redirect no iOS e domínios customizados
         auth.getRedirectResult().then(result => {
             if (result && result.user) {
                 currentUser = result.user;
@@ -462,16 +456,10 @@
             }
         }).catch(error => {
             console.error('Erro ao processar login:', error);
-            // Se houver erro de domínio, o Firebase costuma avisar aqui
         });
-        
-        // Log para debug
-        console.log('Dispositivo detectado - iOS:', isIOS, 'Safari:', isSafari);
 
         document.getElementById('google-login').onclick = () => {
             const provider = new firebase.auth.GoogleAuthProvider();
-            // Forçar o uso de popup no iOS se o redirect estiver falhando
-            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
             if (isIOS) {
                 auth.signInWithPopup(provider).then(result => {
                     if (result.user) {
@@ -531,7 +519,6 @@
                 allMovies = [];
             }
 
-            // Presença
             const presenceRef = roomRef.child('users').child(currentUser.uid);
             presenceRef.set({ name: currentUser.displayName, photo: currentUser.photoURL, initial: currentUser.displayName.charAt(0) });
             presenceRef.onDisconnect().remove();
@@ -544,16 +531,17 @@
                 if (video.src !== data.url) { 
                     video.src = data.url; 
                     bgVideo.src = data.url;
+                    video.load();
                 }
                 
-                if (Math.abs(video.currentTime - data.time) > 2) {
+                if (Math.abs(video.currentTime - data.time) > 3) {
                     video.currentTime = data.time;
                 }
                 
                 if (data.playing && video.paused) {
-                    video.muted = true;
                     video.play().catch(err => {
-                        console.log('Play failed:', err);
+                        console.log('Play failed (needs interaction):', err);
+                        // No iOS/Safari, se falhar, o ícone vai mostrar "play" e o usuário clica
                     });
                 }
                 else if (!data.playing && !video.paused) {
@@ -561,21 +549,18 @@
                 }
             });
 
-            // Chat & Contador Global
+            // Chat
             roomRef.child('chat').limitToLast(50).on('child_added', snapshot => {
                 const msg = snapshot.val();
                 globalMsgCounter++;
-                
                 if (!userData.isPremium && globalMsgCounter % 15 === 0 && adShownCount < 1) {
                     renderAd();
                     adShownCount++;
                 }
-
                 if (msg.type === 'poll') renderPoll(msg, snapshot.key);
                 else renderMsg(msg, snapshot.key);
             });
 
-            // Escutar remoção de mensagens
             roomRef.child('chat').on('child_removed', snapshot => {
                 const el = document.getElementById('msg-' + snapshot.key);
                 if (el) el.remove();
@@ -671,7 +656,6 @@
             currentMsgForModeration = null;
         }
 
-        // --- SISTEMA DE REPLY ---
         function setReply(name, text) {
             activeReply = { name, text };
             document.getElementById('reply-user').innerText = name;
@@ -688,14 +672,12 @@
             const div = document.createElement('div');
             div.className = 'msg';
             div.id = 'msg-' + key;
-            
             if (userData.isAdmin) {
                 div.onclick = (e) => {
                     if (e.target.closest('.reply-btn')) return;
                     openModerationPopup(msg, key);
                 };
             }
-            
             div.innerHTML = `
                 <div class="msg-avatar" style="${msg.photo ? `background-image:url(${msg.photo})` : ''}">${msg.photo ? '' : msg.name.charAt(0)}</div>
                 <div class="msg-body">
@@ -748,51 +730,42 @@
                     <img src="${item.capa}">
                     <div class="search-item-info">
                         <div class="search-item-title">${item.titulo}</div>
-                        <div class="search-item-type">${item.tipo}</div>
                     </div>
                 </div>
             `).join('');
         };
-
-        window.addPollOption = (item) => {
-            if (selectedPollOptions.length >= 3) return;
+        function addPollOption(item) {
+            if (selectedPollOptions.length >= 4) return;
+            if (selectedPollOptions.find(o => o.titulo === item.titulo)) return;
             selectedPollOptions.push(item);
             renderSelectedOptions();
-        };
+        }
 
         function renderSelectedOptions() {
-            const area = document.getElementById('selected-options');
-            area.innerHTML = selectedPollOptions.map((opt, idx) => `
-                <div style="background:var(--accent); padding:5px 10px; border-radius:15px; font-size:10px; color:white; display:flex; align-items:center; gap:5px;">
-                    ${opt.titulo}
-                    <i class="fas fa-times" style="cursor:pointer;" onclick="removePollOption(${idx})"></i>
+            const container = document.getElementById('selected-options');
+            container.innerHTML = selectedPollOptions.map((o, idx) => `
+                <div class="badge" style="background:var(--accent-light); color:white;">
+                    ${o.titulo} <i class="fas fa-times" onclick="selectedPollOptions.splice(${idx}, 1); renderSelectedOptions();" style="cursor:pointer; margin-left:5px;"></i>
                 </div>
             `).join('');
         }
-        window.removePollOption = (idx) => {
-            selectedPollOptions.splice(idx, 1);
-            renderSelectedOptions();
-        };
 
         document.getElementById('confirm-poll').onclick = () => {
-            const msg = document.getElementById('poll-msg').value;
-            if (!msg || selectedPollOptions.length === 0) return;
-            roomRef.child('chat').push({
+            const question = document.getElementById('poll-msg').value.trim();
+            if (!question || selectedPollOptions.length < 2) {
+                alert("Digite a pergunta e escolha pelo menos 2 opções!");
+                return;
+            }
+            const pollData = {
                 type: 'poll',
                 uid: currentUser.uid,
                 name: currentUser.displayName,
                 photo: currentUser.photoURL,
-                text: msg,
-                options: selectedPollOptions.map(o => ({ 
-                    id: o.id, 
-                    titulo: o.titulo, 
-                    capa: o.capa, 
-                    link: o.link_mp4,
-                    tipo: o.tipo,
-                    episodios: o.episodios || null
-                })),
-                votes: {}
-            });
+                question: question,
+                options: selectedPollOptions.map(o => ({ titulo: o.titulo, capa: o.capa, votes: 0 })),
+                timestamp: Date.now()
+            };
+            roomRef.child('chat').push(pollData);
             document.getElementById('poll-modal').classList.remove('active');
             document.getElementById('poll-msg').value = '';
             selectedPollOptions = [];
@@ -802,104 +775,71 @@
             const div = document.createElement('div');
             div.className = 'poll-card';
             div.id = 'msg-' + key;
-            
-            const totalVotes = Object.keys(poll.votes || {}).length;
-            
             div.innerHTML = `
                 <div class="poll-creator">
-                    <img src="${poll.photo}"> <span>${poll.name} criou uma enquete</span>
+                    <img src="${poll.photo || ''}">${poll.name} criou uma enquete
                 </div>
-                <div style="font-weight:bold; margin-bottom:10px;">${poll.text}</div>
-                ${poll.options.map(opt => {
-                    const optionVotes = Object.values(poll.votes || {}).filter(v => v === opt.id).length;
-                    const votePercentage = totalVotes > 0 ? Math.round((optionVotes / totalVotes) * 100) : 0;
-                    return `
-                        <div class="poll-option" onclick="handlePollVote('${opt.id}', '${key}')">
+                <div style="font-weight:bold; margin-bottom:10px; font-size:14px;">${poll.question}</div>
+                <div id="options-${key}">
+                    ${poll.options.map((opt, idx) => `
+                        <div class="poll-option" onclick="vote('${key}', ${idx})">
                             <img src="${opt.capa}">
                             <span>${opt.titulo}</span>
-                            <div class="poll-vote-count">${optionVotes} ${optionVotes === 1 ? 'voto' : 'votos'} (${votePercentage}%)</div>
+                            <span class="poll-vote-count">${opt.votes || 0}</span>
                         </div>
-                    `;
-                }).join('')}
-                <div style="font-size:10px; color:#aaa; margin-top:10px; text-align:center;">Total: ${totalVotes} ${totalVotes === 1 ? 'voto' : 'votos'}</div>
+                    `).join('')}
+                </div>
             `;
             chatBox.appendChild(div);
             chatBox.scrollTop = chatBox.scrollHeight;
-        }
-
-        window.handlePollVote = (movieId, pollKey) => {
-            roomRef.child('chat').child(pollKey).get().then(snap => {
-                const poll = snap.val();
-                const option = poll.options.find(o => o.id == movieId);
-                
-                if (option) {
-                    const votes = poll.votes || {};
-                    votes[currentUser.uid] = movieId;
-                    roomRef.child('chat').child(pollKey).update({ votes });
-                    
-                    if (userData.isAdmin) {
-                        if (option.tipo === 'serie') {
-                            showEpisodes(option);
-                        } else {
-                            updateVideo(option.link);
-                        }
-                    }
+            roomRef.child('chat').child(key).child('options').on('value', snap => {
+                const options = snap.val();
+                if (!options) return;
+                const optContainer = document.getElementById('options-' + key);
+                if (optContainer) {
+                    optContainer.innerHTML = options.map((opt, idx) => `
+                        <div class="poll-option" onclick="vote('${key}', ${idx})">
+                            <img src="${opt.capa}">
+                            <span>${opt.titulo}</span>
+                            <span class="poll-vote-count">${opt.votes || 0}</span>
+                        </div>
+                    `).join('');
                 }
             });
-        };
+        }
 
-        // --- MUDAR FILME / SÉRIE ---
+        function vote(pollKey, optIdx) {
+            const voteRef = roomRef.child('chat').child(pollKey).child('options').child(optIdx).child('votes');
+            voteRef.transaction(currentVotes => (currentVotes || 0) + 1);
+        }
+
+        // --- LÓGICA DO PLAYER ---
         function handleSelect(item) {
-            if (item.tipo === 'serie') {
-                showEpisodes(item);
+            if (!userData.isAdmin) return;
+            if (item.tipo === 'Série') {
+                openEpisodes(item);
             } else {
-                updateVideo(item.link_mp4);
+                updateVideo(item.url);
                 document.getElementById('admin-modal').classList.remove('active');
             }
         }
 
-        function showEpisodes(serie) {
-            document.getElementById('series-title').innerText = serie.titulo;
+        function openEpisodes(series) {
             const container = document.getElementById('episodes-container');
-            container.innerHTML = '';
-            
-            if (serie.episodios && Array.isArray(serie.episodios)) {
-                serie.episodios.forEach((ep) => {
-                    const btn = document.createElement('div');
-                    btn.className = 'ep-item';
-                    const label = `T${ep.temporada || 1} EP${ep.episodio || '?'}`;
-                    btn.innerText = label;
-                    btn.onclick = () => {
-                        updateVideo(ep.link_mp4);
-                        document.getElementById('episodes-modal').classList.remove('active');
-                        document.getElementById('admin-modal').classList.remove('active');
-                    };
-                    container.appendChild(btn);
-                });
-            } else {
-                const btn = document.createElement('div');
-                btn.className = 'ep-item';
-                btn.innerText = `Iniciar Série (EP1)`;
-                btn.onclick = () => {
-                    updateVideo(serie.link_mp4);
-                    document.getElementById('episodes-modal').classList.remove('active');
-                    document.getElementById('admin-modal').classList.remove('active');
-                };
-                container.appendChild(btn);
-            }
+            document.getElementById('series-title').innerText = series.titulo;
+            container.innerHTML = series.episodios.map(ep => `
+                <div class="ep-item" onclick="updateVideo('${ep.url}'); document.getElementById('episodes-modal').classList.remove('active'); document.getElementById('admin-modal').classList.remove('active');">
+                    EP ${ep.numero}
+                </div>
+            `).join('');
             document.getElementById('episodes-modal').classList.add('active');
         }
 
         function updateVideo(url) {
             if (!userData.isAdmin) return;
-            // No iOS, não forcar mute ao mudar vídeo
-            if (!isIOSBrowser) {
-                video.muted = true;
-            }
             video.src = url;
             bgVideo.src = url;
             video.load();
-            // Dar tempo para o iOS carregar o vídeo
             setTimeout(() => {
                 roomRef.child('sync').set({ url: url, time: 0, playing: true, sender: currentUser.uid });
             }, 500);
@@ -921,7 +861,6 @@
             `).join('');
         };
 
-        // --- FUNÇÕES PREMIUM ---
         function goToPremium() {
             window.location.href = 'premium.html';
         }
@@ -930,7 +869,7 @@
             document.getElementById('premium-popup').classList.remove('active');
         }
 
-        // --- EVENTOS BÁSICOS ---
+        // --- EVENTOS ---
         document.getElementById('send-msg').addEventListener('click', sendMessage);
         chatInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
@@ -939,28 +878,30 @@
             }
         });
         
-        document.getElementById('play-pause').onclick = () => {
+        // Controle de Play/Pause unificado
+        const handlePlayClick = () => {
             if (userData.isAdmin) {
                 togglePlay();
+            } else {
+                // Usuário comum pode dar play localmente se o vídeo estiver pausado mas o admin disser que está "playing"
+                // Isso resolve o bloqueio de autoplay no iOS
+                if (video.paused) {
+                    video.play().catch(e => console.log("User play failed", e));
+                } else {
+                    video.pause();
+                }
             }
         };
 
-        document.getElementById('play-pause-user').onclick = () => {
-            if (userData.isAdmin) {
-                togglePlay();
-            }
-        };
+        document.getElementById('play-pause').onclick = handlePlayClick;
+        document.getElementById('play-pause-user').onclick = handlePlayClick;
 
         function togglePlay() {
             if (!userData.isAdmin) return;
-            
             if (video.paused) {
-                video.muted = true;
                 video.play().then(() => {
                     roomRef.child('sync').update({ playing: true, time: video.currentTime });
-                }).catch(err => {
-                    console.log('Play failed:', err);
-                });
+                }).catch(err => console.log('Admin play failed:', err));
             } else {
                 video.pause();
                 roomRef.child('sync').update({ playing: false, time: video.currentTime });
@@ -983,15 +924,9 @@
                 document.getElementById('time-display').innerText = timeStr;
                 document.getElementById('time-display-user').innerText = timeStr;
             }
-            
-            // Atualizar ícone de play/pause para todos
             const icon = video.paused ? 'fa-play' : 'fa-pause';
-            if (document.getElementById('play-pause')) {
-                document.getElementById('play-pause').className = 'fas ' + icon;
-            }
-            if (document.getElementById('play-pause-user')) {
-                document.getElementById('play-pause-user').className = 'fas ' + icon;
-            }
+            if (document.getElementById('play-pause')) document.getElementById('play-pause').className = 'fas ' + icon;
+            if (document.getElementById('play-pause-user')) document.getElementById('play-pause-user').className = 'fas ' + icon;
         };
 
         function formatTime(s) {
@@ -1001,52 +936,35 @@
         }
         
         document.getElementById('fs-btn').onclick = () => {
-            const elem = document.getElementById('player-wrapper');
-            if (elem.requestFullscreen) {
-                elem.requestFullscreen();
-            } else if (elem.webkitRequestFullscreen) {
-                elem.webkitRequestFullscreen();
-            } else if (elem.mozRequestFullScreen) {
-                elem.mozRequestFullScreen();
-            } else if (elem.msRequestFullscreen) {
-                elem.msRequestFullscreen();
-            }
+            const elem = document.getElementById('main-video');
+            if (elem.requestFullscreen) elem.requestFullscreen();
+            else if (elem.webkitRequestFullscreen) elem.webkitRequestFullscreen();
+            else if (elem.webkitEnterFullscreen) elem.webkitEnterFullscreen(); // iOS nativo
         };
 
-        // Suporte para fullscreen
-        video.addEventListener('fullscreenchange', () => {
-            if (document.fullscreenElement) {
-                video.style.width = '100%';
-                video.style.height = '100%';
-            }
-        });
-        
-        // Sincronização de seek (apenas admin)
         video.addEventListener('seeking', () => {
             if (userData && userData.isAdmin) {
                 roomRef.child('sync').update({ time: video.currentTime });
             }
         });
 
-        // Permitir unmute ao tocar na tela para qualquer usuário
-        document.addEventListener('touchend', () => {
-            if (video.muted) {
-                video.muted = false;
-            }
-        }, false);
-        
-        // Permitir unmute ao clicar no vídeo para qualquer usuário
-        video.addEventListener('click', () => {
-            if (video.muted) {
-                video.muted = false;
-            }
-        });
+        // Permitir unmute e play inicial
+        const unlockAudio = () => {
+            if (video.muted) video.muted = false;
+            // Se o admin estiver em play, tenta dar play no toque
+            roomRef.child('sync').once('value', snap => {
+                const data = snap.val();
+                if (data && data.playing && video.paused) {
+                    video.play().catch(e => console.log("Unlock play failed", e));
+                }
+            });
+        };
+        document.addEventListener('touchend', unlockAudio, false);
+        video.addEventListener('click', unlockAudio);
 
-        // Prevenir zoom ao focar em input
+        // Prevenir zoom
         document.addEventListener('touchstart', function(e) {
-            if (e.target.tagName === 'INPUT') {
-                e.target.style.fontSize = '16px';
-            }
+            if (e.target.tagName === 'INPUT') e.target.style.fontSize = '16px';
         });
     </script>
 </body>
