@@ -391,7 +391,7 @@
         }
         .poll-btn { background: rgba(255,255,255,0.1); }
 
-	        /* ===== MODAIS ===== */
+                  /* ===== MODAIS ===== */
         .modal {
             position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 2000;
             display: none; align-items: center; justify-content: center;
@@ -681,7 +681,7 @@
                         </div>
                     </div>
                 </div><!-- fim controls-overlay -->
-	                <!-- ANÚNCIO -->
+                    <!-- ANÚNCIO -->
                 <div class="ad-overlay" id="ad-overlay">
                     <div class="ad-background"></div>
                     <div class="ad-content">
@@ -698,8 +698,7 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- EPISÓDIOS OVERLAY (dentro do player) -->
+	                <!-- EPISÓDIOS OVERLAY (dentro do player) -->
                 <div class="episodes-overlay" id="episodes-overlay">
                     <div class="episodes-header">
                         <h2 id="episodes-overlay-title">Episódios</h2>
@@ -829,35 +828,87 @@
     // =============================================
     //  AUTENTICAÇÃO
     // =============================================
+    let authStateChecked = false;
+
+    // Configurar o provedor do Google com escopos
+    function getGoogleProvider() {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        provider.addScope('profile');
+        provider.addScope('email');
+        provider.setCustomParameters({
+            'prompt': 'select_account'
+        });
+        return provider;
+    }
+
+    // Capturar resultado do redirect ANTES de onAuthStateChanged
+    auth.getRedirectResult()
+        .then(result => {
+            if (result && result.user) {
+                currentUser = result.user;
+                console.log('✓ Login com redirect bem-sucedido:', result.user.email);
+                checkUserRole();
+            }
+        })
+        .catch(err => {
+            console.error('Erro no redirect result:', err.code, err.message);
+            // Se houver erro, deixar o onAuthStateChanged lidar
+        });
+
+    // Monitorar mudanças no estado de autenticação
     auth.onAuthStateChanged(user => {
+        authStateChecked = true;
         if (user) {
             currentUser = user;
+            console.log('✓ Usuário autenticado:', user.email);
             checkUserRole();
         } else {
+            console.log('✗ Nenhum usuário autenticado, mostrando modal de login');
             document.getElementById('login-modal').classList.add('active');
         }
     });
 
-    // Capturar resultado do redirect (especialmente iOS)
-    auth.getRedirectResult().then(result => {
-        if (result && result.user) {
-            currentUser = result.user;
-            checkUserRole();
-        }
-    }).catch(err => console.error('Redirect result error:', err));
-
+    // Botão de login com Google
     document.getElementById('google-login').onclick = () => {
-        const provider = new firebase.auth.GoogleAuthProvider();
+        console.log('Iniciando login com Google...');
+        const provider = getGoogleProvider();
+        
+        // Estratégia diferenciada por plataforma
         if (isIOSDevice) {
-            // No iOS, popup é mais confiável que redirect
+            console.log('Plataforma: iOS - Usando popup');
             auth.signInWithPopup(provider)
-                .then(result => { if (result.user) { currentUser = result.user; checkUserRole(); } })
+                .then(result => {
+                    if (result && result.user) {
+                        currentUser = result.user;
+                        console.log('✓ Login popup iOS bem-sucedido:', result.user.email);
+                        checkUserRole();
+                    }
+                })
                 .catch(err => {
-                    console.log('Popup falhou, tentando redirect...', err);
+                    console.error('✗ Erro no popup iOS:', err.code, err.message);
+                    // Fallback para redirect se popup falhar
+                    console.log('Tentando fallback com redirect...');
                     auth.signInWithRedirect(provider);
                 });
         } else {
-            auth.signInWithRedirect(provider);
+            console.log('Plataforma: Android/Web - Usando redirect');
+            auth.signInWithRedirect(provider)
+                .catch(err => {
+                    console.error('✗ Erro no redirect:', err.code, err.message);
+                    // Fallback para popup se redirect falhar
+                    console.log('Tentando fallback com popup...');
+                    auth.signInWithPopup(provider)
+                        .then(result => {
+                            if (result && result.user) {
+                                currentUser = result.user;
+                                console.log('✓ Login popup fallback bem-sucedido:', result.user.email);
+                                checkUserRole();
+                            }
+                        })
+                        .catch(popupErr => {
+                            console.error('✗ Erro no popup fallback:', popupErr.code, popupErr.message);
+                        });
+                });
         }
     };
 
@@ -905,8 +956,7 @@
         document.getElementById('login-modal').classList.remove('active');
         initParty();
     }
-
-    // =============================================
+	    // =============================================
     //  INICIALIZAÇÃO DA PARTY
     // =============================================
     async function initParty() {
@@ -1015,7 +1065,7 @@
             }
         });
     }
-	    // =============================================
+        // =============================================
     //  CARREGAMENTO DE VÍDEO (com HLS.js + iOS)
     // =============================================
     function loadVideoUrl(url, title, startTime, autoPlay) {
@@ -1350,7 +1400,7 @@
             pushNewContent(url, title, item);
         }
     }
-	    function openEpisodesModal(item) {
+        function openEpisodesModal(item) {
         document.getElementById('series-title-modal').innerText = item.titulo;
         const container = document.getElementById('episodes-container');
         container.innerHTML = '';
@@ -1379,7 +1429,7 @@
                 });
             });
         }
-        document.getElementById('episodes-modal').classList.add('active');
+	document.getElementById('episodes-modal').classList.add('active');
     }
 
     function pushNewContent(url, title, item, season, ep) {
