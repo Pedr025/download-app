@@ -36,7 +36,7 @@
         .player-section { position: relative; width: 100%; aspect-ratio: 16 / 9; background: #000; z-index: 10; }
         @media (min-width: 1024px) { .player-section { flex: 1; height: 100%; aspect-ratio: auto; } }
         .player-wrapper { width: 100%; height: 100%; position: relative; overflow: hidden; }
-        video { width: 100%; height: 100%; object-fit: contain; }
+        video { width: 100%; height: 100%; object-fit: contain; background: #000; }
 
         /* OVERLAYS */
         .player-info-overlay {
@@ -61,7 +61,6 @@
             background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
             z-index: 100; opacity: 0; transition: opacity 0.3s; pointer-events: none;
         }
-        /* No iOS, precisamos garantir que o clique passe se o usuário precisar dar play manual */
         .player-wrapper:hover .bottom-controls, .player-wrapper.show-controls .bottom-controls { opacity: 1; pointer-events: auto; }
 
         .seekbar-container { width: 100%; height: 4px; background: rgba(255,255,255,0.2); margin-bottom: 15px; cursor: pointer; position: relative; }
@@ -108,7 +107,6 @@
         .msg-user { font-size: 12px; font-weight: bold; color: var(--accent-light); margin-bottom: 2px; }
         .msg-text { font-size: 13px; color: white; line-height: 1.4; }
         
-        /* DELETE BTN (ADMIN) */
         .del-msg { position: absolute; right: -25px; top: 5px; color: #ff4444; font-size: 10px; cursor: pointer; display: none; }
         .admin-active .del-msg { display: block; }
 
@@ -123,7 +121,7 @@
             font-size: 12px; color: white;
         }
 
-        /* INPUT AREA & LIMITS */
+        /* INPUT AREA */
         .chat-input-area { padding: 15px; background: rgba(0,0,0,0.3); backdrop-filter: blur(20px); display: flex; flex-direction: column; gap: 10px; position: relative; }
         .input-row { display: flex; gap: 10px; align-items: center; width: 100%; }
         .input-wrapper { flex: 1; background: rgba(255,255,255,0.1); border-radius: 24px; padding: 8px 16px; display: flex; align-items: center; transition: 0.3s; }
@@ -161,12 +159,11 @@
             max-height: 80vh; overflow-y: auto;
         }
         
-        /* EPISODES GRID */
         .episodes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 10px; margin-top: 15px; }
         .ep-item { background: rgba(255,255,255,0.1); padding: 10px; border-radius: 8px; color: white; cursor: pointer; font-size: 11px; transition: 0.2s; text-align: center; }
         .ep-item:hover { background: var(--accent); }
 
-        /* ENQUETE AVANÇADA */
+        /* ENQUETE */
         .poll-card { background: linear-gradient(135deg, #0072d2, #003d7a); border-radius: 15px; padding: 15px; margin: 10px 0; color: white; position: relative; }
         .poll-creator { display: flex; align-items: center; gap: 8px; font-size: 10px; margin-bottom: 8px; opacity: 0.8; }
         .poll-creator img { width: 16px; height: 16px; border-radius: 50%; }
@@ -178,10 +175,7 @@
         .poll-option:hover { background: rgba(255,255,255,0.2); }
         .poll-option img { width: 30px; height: 40px; object-fit: cover; border-radius: 4px; }
 
-        /* BANNER ANÚNCIO */
-        .ad-banner { background: rgba(255,255,255,0.05); padding: 10px; border-radius: 10px; margin: 10px 0; text-align: center; border: 1px solid var(--border-color); }
-
-        /* BUSCA DE FILMES NO MODAL */
+        /* BUSCA */
         .search-results { margin-top: 15px; display: flex; flex-direction: column; gap: 10px; text-align: left; }
         .search-item {
             display: flex; gap: 10px; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; cursor: pointer; transition: 0.2s;
@@ -239,7 +233,8 @@
             <button onclick="document.getElementById('poll-modal').classList.remove('active')" style="margin-top:15px; background:none; border:none; color:#aaa; cursor:pointer;">Cancelar</button>
         </div>
     </div>
-	    <div class="watch-party-container">
+
+    <div class="watch-party-container">
         <!-- PLAYER -->
         <div class="player-section">
             <div class="player-wrapper" id="player-wrapper">
@@ -282,7 +277,6 @@
             <div class="chat-messages" id="chat-box"></div>
             
             <div class="chat-input-area">
-                <!-- BLOQUEIO TIMER -->
                 <div class="chat-lock-overlay" id="chat-lock">
                     <span>Muitas mensagens! Aguarde:</span>
                     <div class="lock-timer" id="lock-timer">02:00</div>
@@ -303,7 +297,6 @@
             </div>
         </div>
     </div>
-
     <script>
         // CONFIGURAÇÃO FIREBASE
         const firebaseConfig = {
@@ -322,7 +315,6 @@
         const roomRef = db.ref('rooms/default_room');
         const API_URL = "https://pkfilmes.pages.dev/movies_data.json";
 
-        // LISTA DE ADMINS
         const ADMIN_EMAILS = ["grudentt@gmail.com", "nz.pett@gmail.com"];
         
         const video = document.getElementById('main-video');
@@ -341,7 +333,6 @@
         let allMovies = [];
         let selectedPollOptions = [];
         
-        // Detectar iOS
         const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 
         // --- AUTENTICAÇÃO ---
@@ -354,7 +345,6 @@
             }
         });
 
-        // Capturar resultado do login
         auth.getRedirectResult().then(result => {
             if (result && result.user) {
                 currentUser = result.user;
@@ -383,7 +373,6 @@
             const userRef = db.ref('users/' + currentUser.uid);
             const snapshot = await userRef.get();
             let data = snapshot.val();
-            
             const isAdmin = ADMIN_EMAILS.includes(currentUser.email);
 
             if (!data) {
@@ -396,14 +385,8 @@
 
             userData = data;
             userData.isAdmin = isAdmin;
-            
-            if (userData.isAdmin) {
-                document.body.classList.add('admin-active');
-            }
-            
-            if (userData.isPremium) {
-                document.getElementById('premium-badge-area').innerHTML = '<div class="badge premium"><i class="fas fa-crown"></i> PREMIUM</div>';
-            }
+            if (userData.isAdmin) document.body.classList.add('admin-active');
+            if (userData.isPremium) document.getElementById('premium-badge-area').innerHTML = '<div class="badge premium"><i class="fas fa-crown"></i> PREMIUM</div>';
             
             document.getElementById('login-modal').classList.remove('active');
             initParty();
@@ -427,18 +410,23 @@
                 const data = snapshot.val();
                 if (!data) return;
                 
+                // Forçar carregamento se a URL mudou
                 if (video.src !== data.url) { 
                     video.src = data.url; 
                     bgVideo.src = data.url;
                     video.load();
                 }
                 
+                // Sincronizar tempo
                 if (Math.abs(video.currentTime - data.time) > 3) {
                     video.currentTime = data.time;
                 }
                 
+                // Tocar ou pausar baseado no admin
                 if (data.playing && video.paused) {
-                    video.play().catch(err => console.log('Autoplay blocked:', err));
+                    video.play().catch(err => {
+                        console.log('Autoplay bloqueado pelo navegador. Clique no player para sincronizar.');
+                    });
                 } else if (!data.playing && !video.paused) {
                     video.pause();
                 }
@@ -448,10 +436,6 @@
             roomRef.child('chat').limitToLast(50).on('child_added', snapshot => {
                 const msg = snapshot.val();
                 globalMsgCounter++;
-                if (!userData.isPremium && globalMsgCounter % 15 === 0 && adShownCount < 1) {
-                    renderAd();
-                    adShownCount++;
-                }
                 if (msg.type === 'poll') renderPoll(msg, snapshot.key);
                 else renderMsg(msg, snapshot.key);
             });
@@ -472,30 +456,17 @@
             });
         }
 
-        // --- LÓGICA DE MENSAGENS ---
+        // --- MENSAGENS ---
         function sendMessage() {
             if (isChatLocked) return;
             const text = chatInput.value.trim();
             if (!text) return;
-
             if (!userData.isPremium) {
                 localMsgCount++;
                 if (localMsgCount >= 5) lockChat();
             }
-
-            const msgData = {
-                uid: currentUser.uid,
-                name: currentUser.displayName,
-                photo: currentUser.photoURL,
-                text: text,
-                timestamp: Date.now()
-            };
-
-            if (activeReply) {
-                msgData.replyTo = activeReply;
-                cancelReply();
-            }
-
+            const msgData = { uid: currentUser.uid, name: currentUser.displayName, photo: currentUser.photoURL, text: text, timestamp: Date.now() };
+            if (activeReply) { msgData.replyTo = activeReply; cancelReply(); }
             roomRef.child('chat').push(msgData);
             chatInput.value = '';
             chatInput.blur();
@@ -510,31 +481,13 @@
                 timeLeft--;
                 const m = Math.floor(timeLeft / 60), s = timeLeft % 60;
                 timerEl.innerText = `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
-                if (timeLeft <= 0) {
-                    clearInterval(interval);
-                    isChatLocked = false;
-                    localMsgCount = 0;
-                    document.getElementById('chat-lock').classList.remove('active');
-                }
+                if (timeLeft <= 0) { clearInterval(interval); isChatLocked = false; localMsgCount = 0; document.getElementById('chat-lock').classList.remove('active'); }
             }, 1000);
         }
 
-        window.deleteMsg = (key) => {
-            if (!userData.isAdmin) return;
-            roomRef.child('chat').child(key).remove();
-        }
-
-        window.setReply = (name, text) => {
-            activeReply = { name, text };
-            document.getElementById('reply-user').innerText = name;
-            document.getElementById('reply-bar').style.display = 'flex';
-            chatInput.focus();
-        }
-
-        window.cancelReply = () => {
-            activeReply = null;
-            document.getElementById('reply-bar').style.display = 'none';
-        }
+        window.deleteMsg = (key) => { if (userData.isAdmin) roomRef.child('chat').child(key).remove(); }
+        window.setReply = (name, text) => { activeReply = { name, text }; document.getElementById('reply-user').innerText = name; document.getElementById('reply-bar').style.display = 'flex'; chatInput.focus(); }
+        window.cancelReply = () => { activeReply = null; document.getElementById('reply-bar').style.display = 'none'; }
 
         function renderMsg(msg, key) {
             const div = document.createElement('div');
@@ -554,26 +507,12 @@
             chatBox.scrollTop = chatBox.scrollHeight;
         }
 
-        function renderAd() {
-            const div = document.createElement('div');
-            div.className = 'ad-banner';
-            div.innerHTML = `
-                <div style="font-size:10px; color:#aaa; margin-bottom:5px;">Publicidade</div>
-                <div style="color:white; font-size:12px; margin: 10px 0;">Patrocinado: Conheça nossos planos Premium!</div>
-            `;
-            chatBox.appendChild(div);
-            chatBox.scrollTop = chatBox.scrollHeight;
-        }
-
         // --- ENQUETE ---
         document.getElementById('open-poll-btn').onclick = () => {
-            if (!userData.isPremium) {
-                alert("Apenas usuários Premium/Admins podem criar enquetes!");
-                return;
-            }
+            if (!userData.isPremium) { alert("Apenas usuários Premium/Admins podem criar enquetes!"); return; }
             document.getElementById('poll-modal').classList.add('active');
             selectedPollOptions = [];
-            renderSelectedOptions();
+            document.getElementById('selected-options').innerHTML = '';
         };
 
         document.getElementById('poll-search').oninput = (e) => {
@@ -594,33 +533,17 @@
         window.addPollOption = (item) => {
             if (selectedPollOptions.length >= 3) return;
             selectedPollOptions.push(item);
-            renderSelectedOptions();
-        };
-
-        function renderSelectedOptions() {
-            const area = document.getElementById('selected-options');
-            area.innerHTML = selectedPollOptions.map(opt => `
+            document.getElementById('selected-options').innerHTML = selectedPollOptions.map(opt => `
                 <div style="background:var(--accent); padding:5px 10px; border-radius:15px; font-size:10px; color:white;">${opt.titulo}</div>
             `).join('');
-        }
+        };
 
         document.getElementById('confirm-poll').onclick = () => {
             const msg = document.getElementById('poll-msg').value;
             if (!msg || selectedPollOptions.length === 0) return;
             roomRef.child('chat').push({
-                type: 'poll',
-                uid: currentUser.uid,
-                name: currentUser.displayName,
-                photo: currentUser.photoURL,
-                text: msg,
-                options: selectedPollOptions.map(o => ({ 
-                    id: o.id, 
-                    titulo: o.titulo, 
-                    capa: o.capa, 
-                    link: o.link_mp4,
-                    tipo: o.tipo,
-                    episodios: o.episodios || null
-                }))
+                type: 'poll', uid: currentUser.uid, name: currentUser.displayName, photo: currentUser.photoURL, text: msg,
+                options: selectedPollOptions.map(o => ({ id: o.id, titulo: o.titulo, capa: o.capa, link: o.link_mp4, tipo: o.tipo, episodios: o.episodios || null }))
             });
             document.getElementById('poll-modal').classList.remove('active');
         };
@@ -630,71 +553,41 @@
             div.className = 'poll-card';
             div.id = 'msg-' + key;
             div.innerHTML = `
-                <div class="poll-creator">
-                    <img src="${poll.photo}"> <span>${poll.name} criou uma enquete</span>
-                    <i class="fas fa-trash del-msg" onclick="deleteMsg('${key}')" style="margin-left:auto; pointer-events:auto;"></i>
-                </div>
+                <div class="poll-creator"><img src="${poll.photo}"> <span>${poll.name} criou uma enquete</span><i class="fas fa-trash del-msg" onclick="deleteMsg('${key}')" style="margin-left:auto; pointer-events:auto;"></i></div>
                 <div style="font-weight:bold; margin-bottom:10px;">${poll.text}</div>
-                ${poll.options.map(opt => `
-                    <div class="poll-option" onclick="handlePollVote('${opt.id}', '${key}')">
-                        <img src="${opt.capa}">
-                        <span>${opt.titulo}</span>
-                    </div>
-                `).join('')}
+                ${poll.options.map(opt => `<div class="poll-option" onclick="handlePollVote('${opt.id}', '${key}')"><img src="${opt.capa}"><span>${opt.titulo}</span></div>`).join('')}
             `;
             chatBox.appendChild(div);
             chatBox.scrollTop = chatBox.scrollHeight;
         }
 
         window.handlePollVote = (movieId, pollKey) => {
-            if (!userData.isAdmin) {
-                alert("Apenas administradores podem encerrar a votação e mudar o vídeo!");
-                return;
-            }
+            if (!userData.isAdmin) { alert("Apenas administradores podem encerrar a votação e mudar o vídeo!"); return; }
             roomRef.child('chat').child(pollKey).get().then(snap => {
                 const poll = snap.val();
                 const option = poll.options.find(o => o.id == movieId);
-                if (option) {
-                    if (option.tipo === 'serie') showEpisodes(option);
-                    else updateVideo(option.link);
-                }
+                if (option) { if (option.tipo === 'serie') showEpisodes(option); else updateVideo(option.link); }
             });
         };
-	        // --- MUDAR FILME / SÉRIE ---
-        window.handleSelect = (item) => {
-            if (item.tipo === 'serie') {
-                showEpisodes(item);
-            } else {
-                updateVideo(item.link_mp4);
-                document.getElementById('admin-modal').classList.remove('active');
-            }
-        }
+
+        // --- PLAYER ---
+        window.handleSelect = (item) => { if (item.tipo === 'serie') showEpisodes(item); else updateVideo(item.link_mp4); document.getElementById('admin-modal').classList.remove('active'); }
 
         function showEpisodes(serie) {
             document.getElementById('series-title').innerText = serie.titulo;
             const container = document.getElementById('episodes-container');
             container.innerHTML = '';
-            if (serie.episodios && Array.isArray(serie.episodios)) {
-                serie.episodios.forEach((ep) => {
+            const episodes = serie.episodios || [];
+            if (episodes.length > 0) {
+                episodes.forEach(ep => {
                     const btn = document.createElement('div');
-                    btn.className = 'ep-item';
-                    btn.innerText = `T${ep.temporada || 1} EP${ep.episodio || '?'}`;
-                    btn.onclick = () => {
-                        updateVideo(ep.link_mp4);
-                        document.getElementById('episodes-modal').classList.remove('active');
-                        document.getElementById('admin-modal').classList.remove('active');
-                    };
+                    btn.className = 'ep-item'; btn.innerText = `T${ep.temporada || 1} EP${ep.episodio || '?'}`;
+                    btn.onclick = () => { updateVideo(ep.link_mp4); document.getElementById('episodes-modal').classList.remove('active'); document.getElementById('admin-modal').classList.remove('active'); };
                     container.appendChild(btn);
                 });
             } else {
-                const btn = document.createElement('div');
-                btn.className = 'ep-item';
-                btn.innerText = `Iniciar Série (EP1)`;
-                btn.onclick = () => {
-                    updateVideo(serie.link_mp4);
-                    document.getElementById('episodes-modal').classList.remove('active');
-                    document.getElementById('admin-modal').classList.remove('active');
-                };
+                const btn = document.createElement('div'); btn.className = 'ep-item'; btn.innerText = `Iniciar Série (EP1)`;
+                btn.onclick = () => { updateVideo(serie.link_mp4); document.getElementById('episodes-modal').classList.remove('active'); document.getElementById('admin-modal').classList.remove('active'); };
                 container.appendChild(btn);
             }
             document.getElementById('episodes-modal').classList.add('active');
@@ -702,29 +595,21 @@
 
         function updateVideo(url) {
             if (!userData.isAdmin) return;
+            // Atualizar localmente
             video.src = url;
             bgVideo.src = url;
             video.load();
+            // Atualizar Firebase para todos
             roomRef.child('sync').set({ url: url, time: 0, playing: true, sender: currentUser.uid });
         }
 
-        // --- BUSCA ADMIN ---
         document.getElementById('admin-search').oninput = (e) => {
             const query = e.target.value.toLowerCase();
             const results = allMovies.filter(m => m.titulo.toLowerCase().includes(query)).slice(0, 10);
             const container = document.getElementById('admin-results');
-            container.innerHTML = results.map(item => `
-                <div class="search-item" onclick='handleSelect(${JSON.stringify(item).replace(/'/g, "&apos;")})'>
-                    <img src="${item.capa}">
-                    <div class="search-item-info">
-                        <div class="search-item-title">${item.titulo}</div>
-                        <div class="search-item-type">${item.tipo}</div>
-                    </div>
-                </div>
-            `).join('');
+            container.innerHTML = results.map(item => `<div class="search-item" onclick='handleSelect(${JSON.stringify(item).replace(/'/g, "&apos;")})'><img src="${item.capa}"><div class="search-item-info"><div class="search-item-title">${item.titulo}</div><div class="search-item-type">${item.tipo}</div></div></div>`).join('');
         };
 
-        // --- EVENTOS ---
         document.getElementById('send-msg').onclick = sendMessage;
         chatInput.onkeypress = (e) => e.key === 'Enter' && sendMessage();
         
@@ -733,12 +618,7 @@
                 if (video.paused) video.play(); else video.pause();
                 roomRef.child('sync').update({ playing: !video.paused, time: video.currentTime });
             } else {
-                // Usuário comum clica para destravar o áudio/vídeo no iOS
-                if (video.paused) {
-                    video.play().catch(e => console.log("Manual play failed", e));
-                } else {
-                    video.pause();
-                }
+                if (video.paused) video.play().catch(e => {}); else video.pause();
             }
         };
         document.getElementById('play-pause').onclick = handlePlayClick;
@@ -748,24 +628,19 @@
                 seekFill.style.width = (video.currentTime / video.duration * 100) + '%';
                 document.getElementById('time-display').innerText = formatTime(video.currentTime) + " / " + formatTime(video.duration);
             }
-            const icon = video.paused ? 'fa-play' : 'fa-pause';
-            document.getElementById('play-pause').className = 'fas ' + icon;
+            document.getElementById('play-pause').className = 'fas ' + (video.paused ? 'fa-play' : 'fa-pause');
         };
 
-        function formatTime(s) {
-            if (isNaN(s)) return "00:00";
-            const m = Math.floor(s/60), sec = Math.floor(s%60);
-            return m.toString().padStart(2,'0') + ":" + sec.toString().padStart(2,'0');
-        }
+        function formatTime(s) { if (isNaN(s)) return "00:00"; const m = Math.floor(s/60), sec = Math.floor(s%60); return m.toString().padStart(2,'0') + ":" + sec.toString().padStart(2,'0'); }
         
         document.getElementById('fs-btn').onclick = () => {
             const el = document.getElementById('main-video');
             if (el.requestFullscreen) el.requestFullscreen();
             else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
-            else if (el.webkitEnterFullscreen) el.webkitEnterFullscreen(); // iOS
+            else if (el.webkitEnterFullscreen) el.webkitEnterFullscreen();
         };
 
-        // Destravar áudio no iOS
+        // Destravar áudio/vídeo em dispositivos móveis
         const unlock = () => {
             if (video.muted) video.muted = false;
             roomRef.child('sync').once('value', snap => {
