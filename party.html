@@ -3,18 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no, maximum-scale=1.0">
-    <meta name="apple-mobile-web-app-capable" content="true">
+    <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Watch Party Pro - Premium & Admin</title>
+    <title>Watch Party Pro</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    
+
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+    <!-- HLS.js para suporte a streams .m3u8 em todos os navegadores -->
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest/dist/hls.min.js"></script>
 
     <style>
-        :root { 
+        :root {
             --accent: #0072d2;
             --accent-light: #00a8ff;
             --bg-dark: rgba(4, 7, 20, 0.7);
@@ -23,139 +25,364 @@
             --text-secondary: #b3b3b3;
             --border-color: rgba(255, 255, 255, 0.1);
             --premium-gold: #ffcc00;
+            --disney-gradient: linear-gradient(to bottom, rgba(4,7,20,0.85) 0%, transparent 25%, transparent 75%, rgba(4,7,20,0.85) 100%);
         }
-        
+
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; }
         html { width: 100%; height: 100%; }
-        body { width: 100%; height: 100vh; height: 100dvh; background-color: #000; overflow: hidden; font-family: 'Avenir Next', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; }
-
-        /* LAYOUT PRINCIPAL */
-        .watch-party-container { display: flex; flex-direction: column; width: 100%; height: 100%; background: #000; position: fixed; top: 0; left: 0; right: 0; bottom: 0; }
-        @media (min-width: 1024px) { .watch-party-container { flex-direction: row; } }
-
-        /* PLAYER SECTION */
-        .player-section { position: relative; width: 100%; flex: 0 0 auto; aspect-ratio: 16 / 9; background: #000; z-index: 10; min-height: 0; }
-        @media (min-width: 1024px) { .player-section { flex: 1; height: 100%; aspect-ratio: auto; } }
-        .player-wrapper { width: 100%; height: 100%; position: relative; overflow: hidden; display: block; -webkit-user-select: none; user-select: none; }
-        video { width: 100% !important; height: 100% !important; object-fit: contain; display: block; background: #000; position: relative; z-index: 10; }
-
-        /* OVERLAYS */
-        .player-info-overlay {
-            position: absolute; top: 0; left: 0; right: 0; padding: 15px;
-            background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
-            z-index: 100; display: flex; justify-content: space-between; align-items: flex-start;
-            pointer-events: none; opacity: 0; transition: opacity 0.3s;
+        body {
+            width: 100%; height: 100vh; height: 100dvh;
+            background-color: #000; overflow: hidden;
+            font-family: 'Avenir Next', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            -webkit-font-smoothing: antialiased;
         }
-        .player-wrapper:hover .player-info-overlay, .player-wrapper.show-controls .player-info-overlay { opacity: 1; }
 
-        .badge {
-            background: rgba(0, 114, 210, 0.8); backdrop-filter: blur(10px); color: white;
-            padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 700;
-            display: flex; align-items: center; gap: 6px; width: fit-content; pointer-events: auto;
+        /* ===== LAYOUT PRINCIPAL ===== */
+        .watch-party-container {
+            display: flex; flex-direction: column;
+            width: 100%; height: 100%;
+            background: #000; position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
         }
-        .badge.viewers { background: rgba(255, 255, 255, 0.15); margin-top: 8px; }
-        .badge.premium { background: linear-gradient(45deg, #ffcc00, #ff9900); color: #000; }
-
-        /* CONTROLES (ADMIN ONLY) */
-        .bottom-controls {
-            position: absolute; bottom: 0; left: 0; right: 0; padding: 10px 20px 20px;
-            background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
-            z-index: 100; opacity: 0; transition: opacity 0.3s; pointer-events: none;
+        @media (min-width: 1024px) {
+            .watch-party-container { flex-direction: row; }
         }
-        .admin-active .bottom-controls { pointer-events: auto; }
-        .player-wrapper:hover .bottom-controls, .player-wrapper.show-controls .bottom-controls { opacity: 1; }
 
-        .seekbar-container { width: 100%; height: 4px; background: rgba(255,255,255,0.2); margin-bottom: 15px; cursor: pointer; position: relative; }
-        .seekbar-container.disabled { cursor: not-allowed; opacity: 0.5; }
-        .seekbar-fill { height: 100%; background: var(--accent); width: 0%; }
-        .control-row { display: flex; justify-content: space-between; align-items: center; color: white; font-size: 13px; }
-
-        /* BOTÃO MUDAR FILME (ADMIN) */
-        .admin-btn {
-            background: var(--accent); color: white; border: none; padding: 8px 15px;
-            border-radius: 20px; font-size: 12px; font-weight: bold; cursor: pointer;
-            display: none; align-items: center; gap: 8px; pointer-events: auto;
+        /* ===== SEÇÃO DO PLAYER ===== */
+        .player-section {
+            position: relative; width: 100%; flex: 0 0 auto;
+            aspect-ratio: 16 / 9; background: #000; z-index: 10; min-height: 0;
         }
-        .admin-active .admin-btn { display: flex; }
+        @media (min-width: 1024px) {
+            .player-section { flex: 1; height: 100%; aspect-ratio: auto; }
+        }
 
-        /* CONTROLES ADMIN */
-        .admin-controls { display: flex; align-items: center; gap: 15px; }
-        .admin-controls i { cursor: pointer; transition: 0.2s; }
-        .admin-controls i:hover { color: var(--accent-light); }
-        .admin-controls i.disabled { cursor: not-allowed; opacity: 0.3; }
+        /* ===== PLAYER CONTAINER (estilo Disney+) ===== */
+        .player-container {
+            position: relative; width: 100%; height: 100%;
+            background: #000; display: flex; align-items: center; justify-content: center;
+            overflow: hidden;
+        }
 
-        /* CONTROLES USUÁRIO COMUM (APENAS FULLSCREEN) */
-        .user-controls { display: flex; align-items: center; gap: 15px; }
-        .user-controls i { cursor: pointer; transition: 0.2s; }
-        .user-controls i:hover { color: var(--accent-light); }
+        video#main-video {
+            width: 100% !important; height: 100% !important;
+            object-fit: contain; display: block; background: #000;
+            position: relative; z-index: 5;
+            /* Essencial para iOS */
+            -webkit-playsinline: true;
+        }
+        video#main-video.fill-mode { object-fit: cover; }
 
-        /* CHAT SECTION */
-        .chat-section { flex: 1; display: flex; flex-direction: column; position: relative; overflow: hidden; background: transparent; min-height: 0; }
+        /* ===== OVERLAY DE CONTROLES (estilo Disney+) ===== */
+        .controls-overlay {
+            position: absolute; inset: 0; z-index: 100;
+            display: flex; flex-direction: column; justify-content: space-between;
+            background: var(--disney-gradient);
+            opacity: 0; visibility: hidden;
+            transition: opacity 0.4s ease, visibility 0.4s ease;
+            pointer-events: none;
+        }
+        .controls-overlay.visible {
+            opacity: 1; visibility: visible; pointer-events: auto;
+        }
+        .controls-overlay.locked .top-bar,
+        .controls-overlay.locked .center-controls,
+        .controls-overlay.locked .bottom-bar { display: none !important; }
+
+        /* Botão de tela travada */
+        .lock-screen-btn {
+            position: absolute; left: 20px; top: 50%; transform: translateY(-50%);
+            z-index: 110; background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2); color: #fff;
+            width: 46px; height: 46px; border-radius: 50%; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; font-size: 18px;
+            opacity: 0; visibility: hidden; transition: all 0.3s; backdrop-filter: blur(10px);
+        }
+        .controls-overlay.visible .lock-screen-btn { opacity: 1; visibility: visible; }
+        .lock-screen-btn.active { background: var(--accent); border-color: var(--accent); }
+
+        /* BARRA SUPERIOR */
+        .top-bar {
+            padding: 20px 20px 10px;
+            display: flex; align-items: center; justify-content: space-between;
+            flex-shrink: 0;
+        }
+        @media (min-width: 768px) { .top-bar { padding: 30px 40px 10px; } }
+
+        .top-left { display: flex; align-items: center; gap: 15px; }
+        .top-bar h3 { font-size: 16px; font-weight: 600; color: #fff; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        @media (min-width: 768px) { .top-bar h3 { font-size: 20px; max-width: 400px; } }
+
+        .top-right { display: flex; align-items: center; gap: 12px; }
+        .top-icon-btn {
+            background: none; border: none; color: #fff;
+            font-size: 18px; cursor: pointer; transition: 0.3s;
+            display: flex; align-items: center; justify-content: center;
+            width: 36px; height: 36px;
+        }
+        @media (min-width: 768px) { .top-icon-btn { font-size: 20px; width: 40px; height: 40px; } }
+
+        /* Badge de espectadores no topo */
+        .viewers-badge {
+            background: rgba(255,255,255,0.15); backdrop-filter: blur(10px);
+            color: white; padding: 5px 10px; border-radius: 8px;
+            font-size: 11px; font-weight: 700;
+            display: flex; align-items: center; gap: 5px;
+        }
+        .badge-premium {
+            background: linear-gradient(45deg, #ffcc00, #ff9900); color: #000;
+            padding: 5px 10px; border-radius: 8px; font-size: 11px; font-weight: 700;
+            display: flex; align-items: center; gap: 5px;
+        }
+
+        /* CONTROLES CENTRAIS */
+        .center-controls {
+            position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            display: flex; align-items: center; gap: 40px; z-index: 105;
+        }
+        @media (min-width: 768px) { .center-controls { gap: 70px; } }
+
+        .center-btn {
+            background: none; border: none; color: #fff;
+            font-size: 28px; cursor: pointer;
+            transition: transform 0.2s;
+            display: flex; flex-direction: column; align-items: center; gap: 4px;
+        }
+        @media (min-width: 768px) { .center-btn { font-size: 36px; } }
+        .center-btn span { font-size: 10px; font-weight: bold; }
+        .center-btn:active { transform: scale(0.9); }
+
+        .play-pause-big {
+            width: 65px; height: 65px;
+            background: rgba(255,255,255,0.12);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255,255,255,0.25);
+            font-size: 28px;
+        }
+        @media (min-width: 768px) { .play-pause-big { width: 80px; height: 80px; font-size: 35px; } }
+
+        /* BARRA INFERIOR */
+        .bottom-bar {
+            padding: 10px 15px 20px;
+            flex-shrink: 0;
+        }
+        @media (min-width: 768px) { .bottom-bar { padding: 15px 40px 35px; } }
+
+        .seekbar-wrapper { position: relative; margin-bottom: 18px; padding: 8px 0; cursor: pointer; }
+        .seekbar-container {
+            width: 100%; height: 4px; background: rgba(255,255,255,0.25);
+            border-radius: 2px; position: relative; display: flex; align-items: center;
+        }
+        .seekbar-fill {
+            height: 100%; background: var(--accent); border-radius: 2px;
+            position: relative; display: flex; align-items: center; justify-content: flex-end;
+            transition: width 0.1s linear;
+        }
+        .seekbar-handle {
+            width: 14px; height: 14px; background: #fff; border-radius: 50%;
+            box-shadow: 0 0 8px rgba(0,0,0,0.5); margin-right: -7px; flex-shrink: 0;
+        }
+
+        /* Preview da seekbar */
+        .seekbar-preview {
+            position: absolute; bottom: calc(100% + 10px); transform: translateX(-50%);
+            background: rgba(0,0,0,0.95); border: 2px solid var(--accent);
+            border-radius: 8px; padding: 5px; display: none; z-index: 150;
+            pointer-events: none; flex-direction: column; align-items: center;
+        }
+        .seekbar-preview.active { display: flex; }
+        .seekbar-preview img { width: 90px; height: 54px; object-fit: cover; border-radius: 4px; margin-bottom: 4px; }
+        .seekbar-preview-time { font-size: 11px; color: #fff; font-weight: bold; }
+
+        .bottom-actions { display: flex; justify-content: space-between; align-items: center; }
+        .actions-left, .actions-right { display: flex; align-items: center; gap: 20px; }
+        @media (min-width: 768px) { .actions-left, .actions-right { gap: 30px; } }
+
+        .action-btn {
+            background: none; border: none; color: #fff; font-size: 17px; cursor: pointer;
+            display: flex; flex-direction: column; align-items: center; gap: 5px;
+            opacity: 0.85; transition: 0.3s;
+        }
+        @media (min-width: 768px) { .action-btn { font-size: 20px; } }
+        .action-btn span { font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+        .action-btn:hover { opacity: 1; }
+
+        /* Botão mudar filme (admin) */
+        .change-movie-btn {
+            background: var(--accent); color: white; border: none;
+            padding: 7px 14px; border-radius: 20px; font-size: 11px;
+            font-weight: bold; cursor: pointer; display: none;
+            align-items: center; gap: 7px;
+        }
+        .admin-active .change-movie-btn { display: flex; }
+
+        .time-info { font-size: 13px; color: #fff; font-weight: 500; }
+        @media (min-width: 768px) { .time-info { font-size: 16px; } }
+
+        /* ===== ANÚNCIO ===== */
+        .ad-overlay {
+            position: absolute; inset: 0; z-index: 300;
+            background: #000; display: none;
+            flex-direction: column; align-items: center; justify-content: center;
+        }
+        .ad-overlay.active { display: flex; }
+        .ad-background { position: absolute; inset: 0; background: linear-gradient(45deg, #040714, #0072d2); opacity: 0.8; }
+        .ad-content {
+            width: 100%; height: 100%; position: relative; z-index: 305;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            text-align: center; color: #fff; padding: 30px;
+        }
+        .ad-card {
+            background: rgba(255,255,255,0.1); backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.2); padding: 30px;
+            border-radius: 20px; max-width: 500px;
+        }
+        .ad-card h2 { font-size: 22px; margin-bottom: 12px; }
+        .ad-card p { font-size: 14px; margin-bottom: 15px; opacity: 0.9; }
+        .ad-footer {
+            position: absolute; bottom: 40px; width: 100%;
+            display: flex; justify-content: center; align-items: center; gap: 15px;
+        }
+        .ad-btn {
+            padding: 12px 28px; border-radius: 50px; font-size: 14px;
+            font-weight: bold; cursor: pointer; transition: 0.3s; border: none;
+        }
+        .skip-ad-btn {
+            background: rgba(0,0,0,0.5); color: #fff;
+            border: 1px solid rgba(255,255,255,0.3); display: none;
+        }
+        .ad-timer-circle {
+            position: relative; width: 50px; height: 50px;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: bold; font-size: 15px; color: #fff;
+        }
+        .ad-timer-circle svg { position: absolute; top: 0; left: 0; width: 50px; height: 50px; transform: rotate(-90deg); }
+        .ad-timer-circle circle { fill: none; stroke: var(--accent); stroke-width: 3; stroke-dasharray: 145; stroke-dashoffset: 0; transition: stroke-dashoffset 1s linear; }
+
+        /* ===== EPISÓDIOS OVERLAY ===== */
+        .episodes-overlay {
+            position: absolute; inset: 0; background: rgba(4,7,20,0.96);
+            z-index: 400; display: none; flex-direction: column;
+            padding: 25px 0; backdrop-filter: blur(10px);
+        }
+        .episodes-overlay.active { display: flex; }
+        .episodes-header {
+            padding: 0 20px; display: flex; justify-content: space-between;
+            align-items: center; margin-bottom: 20px;
+        }
+        @media (min-width: 768px) { .episodes-header { padding: 0 40px; } }
+        .episodes-header h2 { font-size: 20px; color: #fff; }
+        .episodes-close-btn { background: none; border: none; color: #fff; font-size: 24px; cursor: pointer; }
+        .episodes-list {
+            display: flex; overflow-x: auto; gap: 12px;
+            padding: 0 20px; scrollbar-width: thin; -webkit-overflow-scrolling: touch;
+        }
+        @media (min-width: 768px) { .episodes-list { padding: 0 40px; gap: 15px; } }
+        .ep-card {
+            min-width: 160px; background: rgba(255,255,255,0.05);
+            border-radius: 10px; overflow: hidden; cursor: pointer;
+            border: 2px solid transparent; transition: 0.3s; flex-shrink: 0;
+        }
+        @media (min-width: 768px) { .ep-card { min-width: 200px; } }
+        .ep-card:hover { background: rgba(255,255,255,0.1); }
+        .ep-card.active { border-color: var(--accent); background: rgba(0,114,210,0.1); }
+        .ep-thumb { width: 100%; height: 95px; background-size: cover; background-position: center; }
+        @media (min-width: 768px) { .ep-thumb { height: 115px; } }
+        .ep-info { padding: 8px; }
+        .ep-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px; }
+        .ep-title { font-size: 12px; color: #fff; font-weight: 600; flex: 1; line-height: 1.2; }
+        .ep-meta { font-size: 10px; color: var(--accent); font-weight: bold; margin-left: 5px; white-space: nowrap; }
+        .ep-desc { font-size: 10px; color: #aaa; line-height: 1.2; height: 28px; overflow: hidden; }
+
+        /* ===== CHAT SECTION ===== */
+        .chat-section {
+            flex: 1; display: flex; flex-direction: column;
+            position: relative; overflow: hidden;
+            background: transparent; min-height: 0;
+        }
         .chat-bg-video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; overflow: hidden; }
-        .chat-bg-video video { width: 100%; height: 100%; object-fit: cover; filter: blur(40px) brightness(0.4); transform: scale(1.2); }
+        .chat-bg-video video { width: 100%; height: 100%; object-fit: cover; filter: blur(40px) brightness(0.35); transform: scale(1.2); }
 
         .chat-header {
-            padding: 15px 20px; border-bottom: 1px solid var(--border-color);
+            padding: 12px 18px; border-bottom: 1px solid var(--border-color);
             display: flex; justify-content: space-between; align-items: center;
-            background: rgba(0,0,0,0.2); backdrop-filter: blur(10px); flex-shrink: 0;
+            background: rgba(0,0,0,0.25); backdrop-filter: blur(10px); flex-shrink: 0;
         }
-        .chat-title-area { display: flex; align-items: center; gap: 12px; }
-        .chat-title-area h2 { font-size: 15px; color: white; }
+        .chat-title-area { display: flex; align-items: center; gap: 10px; }
+        .chat-title-area h2 { font-size: 14px; color: white; }
 
         .user-avatars { display: flex; align-items: center; }
         .avatar-stack {
             width: 24px; height: 24px; border-radius: 50%; border: 2px solid #000;
-            margin-left: -8px; background: var(--accent); display: flex; align-items: center;
-            justify-content: center; font-size: 9px; color: white; font-weight: bold; background-size: cover;
+            margin-left: -8px; background: var(--accent);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 9px; color: white; font-weight: bold; background-size: cover;
         }
         .avatar-stack:first-child { margin-left: 0; }
 
-        .chat-messages { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 15px; display: flex; flex-direction: column; gap: 12px; min-height: 0; }
-        .msg { display: flex; gap: 10px; animation: fadeIn 0.3s ease; position: relative; cursor: pointer; flex-shrink: 0; }
-        .msg:hover { background: rgba(255,255,255,0.05); border-radius: 8px; padding: 5px; }
-        .msg-avatar {
-            width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0; background: #333;
-            display: flex; align-items: center; justify-content: center; font-size: 12px;
-            color: white; font-weight: bold; background-size: cover;
+        .chat-messages {
+            flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
+            padding: 12px; display: flex; flex-direction: column; gap: 10px; min-height: 0;
         }
-        .msg-body { background: rgba(255,255,255,0.05); padding: 8px 12px; border-radius: 12px; max-width: 85%; position: relative; word-wrap: break-word; }
-        .msg-user { font-size: 12px; font-weight: bold; color: var(--accent-light); margin-bottom: 2px; }
+        .msg { display: flex; gap: 8px; animation: fadeIn 0.3s ease; position: relative; cursor: pointer; flex-shrink: 0; }
+        .msg:hover { background: rgba(255,255,255,0.05); border-radius: 8px; padding: 4px; }
+        .msg-avatar {
+            width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0;
+            background: #333; display: flex; align-items: center; justify-content: center;
+            font-size: 11px; color: white; font-weight: bold; background-size: cover;
+        }
+        .msg-body {
+            background: rgba(255,255,255,0.06); padding: 7px 11px;
+            border-radius: 12px; max-width: 85%; position: relative; word-wrap: break-word;
+        }
+        .msg-user { font-size: 11px; font-weight: bold; color: var(--accent-light); margin-bottom: 2px; }
         .msg-text { font-size: 13px; color: white; line-height: 1.4; }
 
-        /* REPLY SYSTEM */
-        .reply-preview { background: rgba(0,0,0,0.3); border-left: 3px solid var(--accent); padding: 4px 8px; margin-bottom: 5px; border-radius: 4px; font-size: 11px; color: #aaa; cursor: pointer; }
-        .reply-btn { font-size: 10px; color: #666; cursor: pointer; margin-top: 4px; display: inline-block; }
+        .reply-preview {
+            background: rgba(0,0,0,0.3); border-left: 3px solid var(--accent);
+            padding: 3px 7px; margin-bottom: 4px; border-radius: 4px;
+            font-size: 10px; color: #aaa; cursor: pointer;
+        }
+        .reply-btn { font-size: 10px; color: #666; cursor: pointer; margin-top: 3px; display: inline-block; }
         .reply-btn:hover { color: var(--accent-light); }
-        
+
         .active-reply-bar {
             background: rgba(0,114,210,0.1); border-top: 1px solid var(--accent);
-            padding: 8px 15px; display: none; justify-content: space-between; align-items: center;
+            padding: 7px 14px; display: none; justify-content: space-between; align-items: center;
             font-size: 12px; color: white; flex-shrink: 0;
         }
 
-        /* INPUT AREA & LIMITS */
-        .chat-input-area { padding: 15px; background: rgba(0,0,0,0.3); backdrop-filter: blur(20px); display: flex; flex-direction: column; gap: 10px; position: relative; flex-shrink: 0; }
-        .input-row { display: flex; gap: 10px; align-items: flex-end; width: 100%; }
-        .input-wrapper { flex: 1; background: rgba(255,255,255,0.1); border-radius: 24px; padding: 10px 16px; display: flex; align-items: center; transition: 0.3s; min-height: 40px; }
-        .input-wrapper input { 
-            flex: 1; background: none; border: none; color: white; font-size: 16px; outline: none; 
-            -webkit-appearance: none; -webkit-border-radius: 0; padding: 8px 0;
-            width: 100%; min-height: 40px; font-size: 16px;
+        /* INPUT ÁREA */
+        .chat-input-area {
+            padding: 12px; background: rgba(0,0,0,0.3); backdrop-filter: blur(20px);
+            display: flex; flex-direction: column; gap: 8px;
+            position: relative; flex-shrink: 0;
         }
-        .input-wrapper input::placeholder { color: rgba(255,255,255,0.5); }
+        .input-row { display: flex; gap: 8px; align-items: flex-end; width: 100%; }
+        .input-wrapper {
+            flex: 1; background: rgba(255,255,255,0.1); border-radius: 24px;
+            padding: 8px 14px; display: flex; align-items: center;
+            transition: 0.3s; min-height: 40px;
+        }
+        .input-wrapper input {
+            flex: 1; background: none; border: none; color: white;
+            font-size: 16px; outline: none; -webkit-appearance: none;
+            -webkit-border-radius: 0; padding: 6px 0; width: 100%; min-height: 28px;
+        }
+        .input-wrapper input::placeholder { color: rgba(255,255,255,0.45); }
 
-        /* BLOQUEIO CHAT TIMER */
+	        /* BLOQUEIO CHAT */
         .chat-lock-overlay {
-            position: absolute; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(15px);
-            display: none; align-items: center; justify-content: center; flex-direction: column;
-            z-index: 100; border-radius: 10px; text-align: center; color: white;
+            position: absolute; inset: 0; background: rgba(0,0,0,0.45);
+            backdrop-filter: blur(15px); display: none; align-items: center;
+            justify-content: center; flex-direction: column; z-index: 100;
+            border-radius: 10px; text-align: center; color: white;
         }
         .chat-lock-overlay.active { display: flex; }
         .lock-timer { font-size: 24px; font-weight: bold; margin: 10px 0; color: var(--accent-light); }
-        .premium-btn-small {
-            background: var(--premium-gold); color: #000; border: none; padding: 8px 20px;
-            border-radius: 20px; font-size: 12px; font-weight: bold; cursor: pointer; margin-top: 10px;
-        }
 
         .send-btn, .poll-btn {
             width: 40px; height: 40px; background: var(--accent); border: none;
@@ -164,150 +391,181 @@
         }
         .poll-btn { background: rgba(255,255,255,0.1); }
 
-        /* MODALS */
+        /* ===== MODAIS ===== */
         .modal {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 2000;
-            display: none; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(10px);
+            position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 2000;
+            display: none; align-items: center; justify-content: center;
+            padding: 20px; backdrop-filter: blur(10px);
         }
         .modal.active { display: flex; }
         .modal-content {
-            background: #1a1d29; width: 100%; max-width: 400px; border-radius: 24px;
-            padding: 30px; text-align: center; border: 1px solid var(--border-color);
-            max-height: 80vh; overflow-y: auto;
+            background: #1a1d29; width: 100%; max-width: 420px; border-radius: 22px;
+            padding: 28px; text-align: center; border: 1px solid var(--border-color);
+            max-height: 85vh; overflow-y: auto;
         }
-        
-        /* EPISODES GRID */
-        .episodes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 10px; margin-top: 15px; }
-        .ep-item { background: rgba(255,255,255,0.1); padding: 10px; border-radius: 8px; color: white; cursor: pointer; font-size: 11px; transition: 0.2s; text-align: center; }
-        .ep-item:hover { background: var(--accent); }
-
-        /* ENQUETE AVANÇADA */
-        .poll-card { background: linear-gradient(135deg, #0072d2, #003d7a); border-radius: 15px; padding: 15px; margin: 10px 0; color: white; position: relative; }
-        .poll-creator { display: flex; align-items: center; gap: 8px; font-size: 10px; margin-bottom: 8px; opacity: 0.8; }
-        .poll-creator img { width: 16px; height: 16px; border-radius: 50%; }
-        .poll-option {
-            background: rgba(255,255,255,0.1); padding: 10px; border-radius: 8px;
-            margin-top: 8px; cursor: pointer; font-size: 13px; display: flex; align-items: center; gap: 10px;
-            transition: 0.2s; position: relative;
+        .modal-content h3 { color: white; margin-bottom: 15px; font-size: 17px; }
+        .modal-input {
+            width: 100%; padding: 11px; border-radius: 8px;
+            background: #2a2d3a; border: 1px solid var(--border-color);
+            color: white; outline: none; font-size: 14px; margin-bottom: 10px;
         }
-        .poll-option:hover { background: rgba(255,255,255,0.2); }
-        .poll-option img { width: 30px; height: 40px; object-fit: cover; border-radius: 4px; }
-        .poll-vote-count { margin-left: auto; background: rgba(0,0,0,0.3); padding: 4px 8px; border-radius: 6px; font-size: 11px; }
+        .modal-input::placeholder { color: #666; }
 
-        /* BANNER ANÚNCIO - LIMITE DE 1 */
-        .ad-banner { background: rgba(255,255,255,0.05); padding: 10px; border-radius: 10px; margin: 10px 0; text-align: center; border: 1px solid var(--border-color); }
-
-        /* BUSCA DE FILMES NO MODAL */
-        .search-results { margin-top: 15px; display: flex; flex-direction: column; gap: 10px; text-align: left; }
+        /* Busca de filmes */
+        .search-results { margin-top: 12px; display: flex; flex-direction: column; gap: 8px; text-align: left; }
         .search-item {
-            display: flex; gap: 10px; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; cursor: pointer; transition: 0.2s;
+            display: flex; gap: 10px; background: rgba(255,255,255,0.05);
+            padding: 10px; border-radius: 8px; cursor: pointer; transition: 0.2s;
         }
         .search-item:hover { background: rgba(255,255,255,0.1); }
-        .search-item img { width: 40px; height: 60px; object-fit: cover; border-radius: 4px; }
+        .search-item img { width: 38px; height: 56px; object-fit: cover; border-radius: 4px; flex-shrink: 0; }
         .search-item-info { display: flex; flex-direction: column; justify-content: center; }
         .search-item-title { font-size: 13px; font-weight: bold; color: white; }
-        .search-item-type { font-size: 10px; color: var(--accent-light); }
+        .search-item-type { font-size: 10px; color: var(--accent-light); margin-top: 3px; }
 
-        /* POP-UP DE MODERAÇÃO */
+        /* Grid de episódios no modal */
+        .episodes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); gap: 8px; margin-top: 12px; }
+        .ep-item {
+            background: rgba(255,255,255,0.08); padding: 9px; border-radius: 8px;
+            color: white; cursor: pointer; font-size: 11px; transition: 0.2s; text-align: center;
+        }
+        .ep-item:hover { background: var(--accent); }
+
+        /* Enquete */
+        .poll-card {
+            background: linear-gradient(135deg, #0072d2, #003d7a);
+            border-radius: 14px; padding: 14px; margin: 8px 0; color: white; position: relative;
+        }
+        .poll-option {
+            background: rgba(255,255,255,0.1); padding: 9px; border-radius: 8px;
+            margin-top: 7px; cursor: pointer; font-size: 12px;
+            display: flex; align-items: center; gap: 8px; transition: 0.2s; position: relative;
+        }
+        .poll-option:hover { background: rgba(255,255,255,0.2); }
+        .poll-option img { width: 28px; height: 38px; object-fit: cover; border-radius: 3px; }
+        .poll-vote-count { margin-left: auto; background: rgba(0,0,0,0.3); padding: 3px 7px; border-radius: 5px; font-size: 10px; }
+
+        /* Banner anúncio no chat */
+        .ad-banner {
+            background: rgba(255,255,255,0.05); padding: 10px; border-radius: 10px;
+            margin: 8px 0; text-align: center; border: 1px solid var(--border-color);
+        }
+
+        /* Pop-up de moderação */
         .moderation-popup {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 3000;
-            display: none; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(10px);
+            position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 3000;
+            display: none; align-items: center; justify-content: center;
+            padding: 20px; backdrop-filter: blur(10px);
         }
         .moderation-popup.active { display: flex; }
         .moderation-content {
-            background: #1a1d29; width: 100%; max-width: 350px; border-radius: 24px;
-            padding: 30px; text-align: center; border: 1px solid var(--border-color);
+            background: #1a1d29; width: 100%; max-width: 340px; border-radius: 22px;
+            padding: 28px; text-align: center; border: 1px solid var(--border-color);
         }
-        .moderation-content h3 { color: white; margin-bottom: 20px; }
-        .moderation-content .user-info { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; margin-bottom: 20px; }
-        .moderation-content .user-info p { color: #aaa; font-size: 13px; margin: 5px 0; }
-        .moderation-buttons { display: flex; gap: 10px; flex-direction: column; }
-        .moderation-buttons button { padding: 12px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; font-size: 13px; }
+        .moderation-content h3 { color: white; margin-bottom: 18px; }
+        .moderation-content .user-info { background: rgba(255,255,255,0.05); padding: 13px; border-radius: 10px; margin-bottom: 18px; }
+        .moderation-content .user-info p { color: #aaa; font-size: 12px; margin: 4px 0; }
+        .moderation-buttons { display: flex; gap: 8px; flex-direction: column; }
+        .moderation-buttons button { padding: 11px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; font-size: 13px; }
         .btn-delete { background: #ff4444; color: white; }
         .btn-ban { background: #ff8800; color: white; }
         .btn-cancel { background: rgba(255,255,255,0.1); color: white; }
 
-        /* POP-UP PREMIUM */
+        /* Pop-up Premium */
         .premium-popup {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 3000;
-            display: none; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(10px);
+            position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 3000;
+            display: none; align-items: center; justify-content: center;
+            padding: 20px; backdrop-filter: blur(10px);
         }
         .premium-popup.active { display: flex; }
         .premium-content {
-            background: linear-gradient(135deg, #1a1d29, #2a2d39); width: 100%; max-width: 350px; border-radius: 24px;
-            padding: 30px; text-align: center; border: 2px solid var(--premium-gold);
+            background: linear-gradient(135deg, #1a1d29, #2a2d39); width: 100%; max-width: 340px;
+            border-radius: 22px; padding: 28px; text-align: center; border: 2px solid var(--premium-gold);
         }
-        .premium-content h3 { color: var(--premium-gold); margin-bottom: 15px; font-size: 18px; }
-        .premium-content p { color: #aaa; font-size: 13px; margin-bottom: 20px; line-height: 1.5; }
-        .premium-content .premium-icon { font-size: 48px; color: var(--premium-gold); margin-bottom: 15px; }
-        .premium-buttons { display: flex; gap: 10px; flex-direction: column; }
-        .premium-buttons button { padding: 12px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; font-size: 13px; }
+        .premium-content h3 { color: var(--premium-gold); margin-bottom: 13px; font-size: 17px; }
+        .premium-content p { color: #aaa; font-size: 13px; margin-bottom: 18px; line-height: 1.5; }
+        .premium-content .premium-icon { font-size: 44px; color: var(--premium-gold); margin-bottom: 13px; }
+        .premium-buttons { display: flex; gap: 8px; flex-direction: column; }
+        .premium-buttons button { padding: 11px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; font-size: 13px; }
         .btn-upgrade { background: var(--premium-gold); color: #000; }
         .btn-close-premium { background: rgba(255,255,255,0.1); color: white; }
 
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        /* Login */
+        .google-btn {
+            background: white; color: black; border: none; padding: 12px;
+            border-radius: 50px; width: 100%; margin-top: 18px; font-weight: bold;
+            display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer;
+            font-size: 14px;
+        }
 
-        /* FIX PARA iOS - Prevenir zoom ao focar em input */
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* iOS safe area */
         @supports (padding: max(0px)) {
-            .input-wrapper input {
-                padding-left: max(10px, env(safe-area-inset-left));
-                padding-right: max(10px, env(safe-area-inset-right));
-            }
+            .chat-input-area { padding-bottom: max(12px, env(safe-area-inset-bottom)); }
+            .bottom-bar { padding-bottom: max(20px, env(safe-area-inset-bottom)); }
         }
     </style>
 </head>
 <body>
 
-    <!-- LOGIN MODAL -->
-    <div class="modal" id="login-modal">
+    <!-- ===== LOGIN MODAL ===== -->
+    <div class="modal active" id="login-modal">
         <div class="modal-content">
-            <h2 style="color: white; margin-bottom: 10px;">Watch Party</h2>
-            <p style="color: #aaa; font-size: 14px;">Faça login para assistir com seus amigos</p>
-            <button class="google-btn" id="google-login" style="background:white; color:black; border:none; padding:12px; border-radius:50px; width:100%; margin-top:20px; font-weight:bold; display:flex; align-items:center; justify-content:center; gap:10px; cursor:pointer;">
-                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18"> Entrar com Google
+            <h2 style="color:white; margin-bottom:8px;">Watch Party</h2>
+            <p style="color:#aaa; font-size:13px;">Faça login para assistir com seus amigos</p>
+            <button class="google-btn" id="google-login">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18" alt="Google">
+                Entrar com Google
             </button>
         </div>
     </div>
 
-    <!-- MODAL MUDAR CONTEÚDO (ADMIN) -->
+    <!-- ===== MODAL MUDAR CONTEÚDO (ADMIN) ===== -->
     <div class="modal" id="admin-modal">
         <div class="modal-content">
-            <h3 style="color: white; margin-bottom: 15px;">Mudar Filme/Série</h3>
-            <input type="text" id="admin-search" placeholder="Pesquisar..." style="width:100%; padding:12px; border-radius:8px; background:#333; border:none; color:white; outline:none;">
+            <h3>Mudar Filme / Série</h3>
+            <input type="text" id="admin-search" class="modal-input" placeholder="Pesquisar título...">
             <div class="search-results" id="admin-results"></div>
-            <button onclick="document.getElementById('admin-modal').classList.remove('active')" style="margin-top:20px; background:none; border:none; color:#aaa; cursor:pointer;">Fechar</button>
+            <button onclick="document.getElementById('admin-modal').classList.remove('active')"
+                style="margin-top:18px; background:none; border:none; color:#aaa; cursor:pointer; font-size:13px;">Fechar</button>
         </div>
     </div>
-    
-    <!-- MODAL SELEÇÃO DE EPISÓDIOS -->
+
+    <!-- ===== MODAL SELEÇÃO DE EPISÓDIOS (ADMIN) ===== -->
     <div class="modal" id="episodes-modal">
         <div class="modal-content">
-            <h3 id="series-title" style="color: white; margin-bottom: 15px;">Escolha o Episódio</h3>
+            <h3 id="series-title-modal">Escolha o Episódio</h3>
             <div class="episodes-grid" id="episodes-container"></div>
-            <button onclick="document.getElementById('episodes-modal').classList.remove('active')" style="margin-top:20px; background:none; border:none; color:#aaa; cursor:pointer;">Voltar</button>
+            <button onclick="document.getElementById('episodes-modal').classList.remove('active')"
+                style="margin-top:18px; background:none; border:none; color:#aaa; cursor:pointer; font-size:13px;">Voltar</button>
         </div>
     </div>
 
-    <!-- MODAL ENQUETE -->
+    <!-- ===== MODAL ENQUETE ===== -->
     <div class="modal" id="poll-modal">
         <div class="modal-content">
-            <h3 style="color: white; margin-bottom: 15px;">Criar Enquete</h3>
-            <input type="text" id="poll-msg" placeholder="Pergunta da enquete..." style="width:100%; padding:12px; border-radius:8px; background:#333; border:none; color:white; outline:none; margin-bottom:10px;">
+            <h3>Criar Enquete</h3>
+            <input type="text" id="poll-msg" class="modal-input" placeholder="Pergunta da enquete...">
             <div id="selected-options" style="display:flex; flex-wrap:wrap; gap:5px; margin-bottom:10px;"></div>
-            <input type="text" id="poll-search" placeholder="Buscar filmes para opções..." style="width:100%; padding:12px; border-radius:8px; background:#333; border:none; color:white; outline:none;">
+            <input type="text" id="poll-search" class="modal-input" placeholder="Buscar filmes para opções...">
             <div class="search-results" id="poll-results"></div>
-            <button id="confirm-poll" style="width:100%; padding:12px; border-radius:8px; background:var(--accent); border:none; color:white; font-weight:bold; margin-top:15px; cursor:pointer;">Lançar Enquete</button>
-            <button onclick="document.getElementById('poll-modal').classList.remove('active')" style="margin-top:15px; background:none; border:none; color:#aaa; cursor:pointer;">Cancelar</button>
+            <button id="confirm-poll"
+                style="width:100%; padding:11px; border-radius:8px; background:var(--accent); border:none; color:white; font-weight:bold; margin-top:13px; cursor:pointer;">
+                Lançar Enquete
+            </button>
+            <button onclick="document.getElementById('poll-modal').classList.remove('active')"
+                style="margin-top:13px; background:none; border:none; color:#aaa; cursor:pointer; font-size:13px;">Cancelar</button>
         </div>
     </div>
 
-    <!-- POP-UP DE MODERAÇÃO (ADMIN) -->
+    <!-- ===== POP-UP MODERAÇÃO ===== -->
     <div class="moderation-popup" id="moderation-popup">
         <div class="moderation-content">
             <h3>Gerenciar Mensagem</h3>
             <div class="user-info">
                 <p><strong id="mod-user-name">Usuário</strong></p>
-                <p id="mod-user-email" style="font-size: 11px; color: #666;"></p>
+                <p id="mod-user-email" style="font-size:11px; color:#666;"></p>
             </div>
             <div class="moderation-buttons">
                 <button class="btn-delete" onclick="deleteMsgFromPopup()"><i class="fas fa-trash"></i> Deletar Mensagem</button>
@@ -317,12 +575,12 @@
         </div>
     </div>
 
-	    <!-- POP-UP PREMIUM -->
+    <!-- ===== POP-UP PREMIUM ===== -->
     <div class="premium-popup" id="premium-popup">
         <div class="premium-content">
             <div class="premium-icon"><i class="fas fa-crown"></i></div>
             <h3>Recurso Premium</h3>
-            <p>Apenas usuários Premium podem criar enquetes. Desbloqueia este e muitos outros recursos exclusivos!</p>
+            <p>Apenas usuários Premium podem criar enquetes. Desbloqueie este e muitos outros recursos exclusivos!</p>
             <div class="premium-buttons">
                 <button class="btn-upgrade" onclick="goToPremium()"><i class="fas fa-star"></i> Se Tornar Premium</button>
                 <button class="btn-close-premium" onclick="closePremiumPopup()">Cancelar</button>
@@ -330,38 +588,123 @@
         </div>
     </div>
 
+    <!-- ===== ESTRUTURA PRINCIPAL ===== -->
     <div class="watch-party-container">
+
         <!-- PLAYER -->
         <div class="player-section">
-            <div class="player-wrapper" id="player-wrapper">
-                <video id="main-video" playsinline webkit-playsinline muted="muted" crossorigin="anonymous"></video>
-                <div class="player-info-overlay">
-                    <div id="premium-badge-area"></div>
-                    <div class="badge viewers" id="viewer-count"><i class="fas fa-eye"></i> 1 assistindo</div>
-                </div>
-                <div class="bottom-controls">
-                    <div class="seekbar-container" id="seekbar">
-                        <div class="seekbar-fill" id="fill"></div>
-                    </div>
-                    <div class="control-row">
-                        <div id="admin-control-group" style="display:flex; align-items:center; gap:15px;">
-                            <i class="fas fa-play" id="play-pause" style="cursor:pointer;"></i>
-                            <span id="time-display">00:00 / 00:00</span>
+            <div class="player-container" id="player-container">
+
+                <!-- Vídeo principal -->
+                <video id="main-video" playsinline webkit-playsinline muted preload="auto" crossorigin="anonymous"></video>
+                <canvas id="preview-canvas" style="display:none;"></canvas>
+
+                <!-- Botão de tela travada -->
+                <button class="lock-screen-btn" id="lock-btn"><i class="fa-solid fa-lock-open"></i></button>
+
+                <!-- OVERLAY DE CONTROLES -->
+                <div class="controls-overlay" id="controls-overlay">
+
+                    <!-- BARRA SUPERIOR -->
+                    <div class="top-bar">
+                        <div class="top-left">
+                            <h3 id="video-title">Watch Party</h3>
                         </div>
-                        <div id="user-control-group" style="display:none; align-items:center; gap:15px;">
-                            <i class="fas fa-play" id="play-pause-user" style="cursor:pointer;"></i>
-                            <span id="time-display-user">00:00 / 00:00</span>
-                        </div>
-                        <div style="display:flex; gap:15px;">
-                            <button class="admin-btn" onclick="document.getElementById('admin-modal').classList.add('active')">
-                                <i class="fas fa-film"></i> Mudar Filme
+                        <div class="top-right">
+                            <div id="premium-badge-area"></div>
+                            <div class="viewers-badge" id="viewer-count"><i class="fas fa-eye"></i> 1</div>
+                            <button class="top-icon-btn" id="fullscreen-fill-btn" title="Preencher tela">
+                                <i class="fa-solid fa-maximize"></i>
                             </button>
-                            <i class="fas fa-expand" id="fs-btn" style="cursor:pointer;"></i>
+                        </div>
+                    </div>
+
+                    <!-- CONTROLES CENTRAIS -->
+                    <div class="center-controls">
+                        <button class="center-btn" id="rewind-btn"><i class="fa-solid fa-rotate-left"></i><span>10s</span></button>
+                        <button class="center-btn play-pause-big" id="play-pause-btn"><i class="fa-solid fa-play"></i></button>
+                        <button class="center-btn" id="forward-btn"><i class="fa-solid fa-rotate-right"></i><span>10s</span></button>
+                    </div>
+
+                    <!-- BARRA INFERIOR -->
+                    <div class="bottom-bar">
+                        <div class="seekbar-wrapper" id="seekbar-wrapper">
+                            <div class="seekbar-preview" id="seekbar-preview">
+                                <img id="preview-img" src="" alt="">
+                                <div class="seekbar-preview-time" id="preview-time">00:00</div>
+                            </div>
+                            <div class="seekbar-container" id="seekbar-container">
+                                <div class="seekbar-fill" id="seekbar-fill">
+                                    <div class="seekbar-handle"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bottom-actions">
+                            <div class="actions-left">
+                                <!-- Admin: play/pause e tempo -->
+                                <div id="admin-time-group" style="display:none; align-items:center; gap:12px;">
+                                    <div class="time-info" id="time-info">00:00 / 00:00</div>
+                                </div>
+                                <!-- Usuário: tempo somente -->
+                                <div id="user-time-group" style="display:none; align-items:center; gap:12px;">
+                                    <div class="time-info" id="time-info-user">00:00 / 00:00</div>
+                                </div>
+                            </div>
+                            <div class="actions-right">
+                                <!-- Botões admin -->
+                                <button class="change-movie-btn" id="change-movie-btn"
+                                    onclick="document.getElementById('admin-modal').classList.add('active')">
+                                    <i class="fas fa-film"></i> Mudar Filme
+                                </button>
+                                <!-- Episódios (admin, quando for série) -->
+                                <button class="action-btn" id="episodes-btn" style="display:none;"
+                                    onclick="document.getElementById('episodes-overlay').classList.add('active')">
+                                    <i class="fa-solid fa-list"></i><span>Episódios</span>
+                                </button>
+                                <!-- Próximo episódio (admin) -->
+                                <button class="action-btn" id="next-ep-btn" style="display:none;">
+                                    <i class="fa-solid fa-forward-step"></i><span>Próximo</span>
+                                </button>
+                                <!-- Fullscreen -->
+                                <button class="action-btn" id="fullscreen-btn">
+                                    <i class="fa-solid fa-expand"></i><span>Tela Cheia</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div><!-- fim controls-overlay -->
+
+                <!-- ANÚNCIO -->
+                <div class="ad-overlay" id="ad-overlay">
+                    <div class="ad-background"></div>
+                    <div class="ad-content">
+                        <div class="ad-card">
+                            <h2>Crie seu Próprio Império de Streaming</h2>
+                            <p>Aprenda a criar um site de filmes e séries completo como este!</p>
+                        </div>
+                        <div class="ad-footer">
+                            <div class="ad-timer-circle" id="ad-timer-container">
+                                <svg><circle cx="25" cy="25" r="22" id="timer-circle"></circle></svg>
+                                <span id="ad-timer-count">10</span>
+                            </div>
+                            <button class="ad-btn skip-ad-btn" id="skip-ad-btn">PULAR ANÚNCIO</button>
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
+
+                <!-- EPISÓDIOS OVERLAY (dentro do player) -->
+                <div class="episodes-overlay" id="episodes-overlay">
+                    <div class="episodes-header">
+                        <h2 id="episodes-overlay-title">Episódios</h2>
+                        <button class="episodes-close-btn" id="close-episodes">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+                    <div class="episodes-list" id="episodes-list"></div>
+                </div>
+
+            </div><!-- fim player-container -->
+        </div><!-- fim player-section -->
 
         <!-- CHAT -->
         <div class="chat-section">
@@ -375,16 +718,18 @@
                 <div class="user-avatars" id="user-avatars"></div>
             </div>
             <div class="chat-messages" id="chat-box"></div>
-            
+
             <div class="chat-input-area">
-                <!-- BLOQUEIO TIMER -->
+                <!-- Bloqueio timer -->
                 <div class="chat-lock-overlay" id="chat-lock">
                     <span>Muitas mensagens! Aguarde:</span>
                     <div class="lock-timer" id="lock-timer">02:00</div>
-                    <button class="premium-btn-small" onclick="goToPremium()">Remover Limite com Premium</button>
+                    <button class="btn-upgrade" style="margin-top:10px; padding:8px 18px; border-radius:20px; font-size:12px; border:none; cursor:pointer;" onclick="goToPremium()">
+                        <i class="fas fa-crown"></i> Seja Premium — sem limites
+                    </button>
                 </div>
-                
-                <!-- BARRA DE REPLY -->
+
+		                <!-- Barra de reply -->
                 <div class="active-reply-bar" id="reply-bar">
                     <span>Respondendo a <strong id="reply-user"></strong></span>
                     <i class="fas fa-times" style="cursor:pointer;" onclick="cancelReply()"></i>
@@ -393,511 +738,945 @@
                 <div class="input-row">
                     <button class="poll-btn" id="open-poll-btn" type="button"><i class="fas fa-poll"></i></button>
                     <div class="input-wrapper">
-                        <input type="text" id="chat-input" placeholder="Diga algo..." autocomplete="off">
+                        <input type="text" id="chat-input" placeholder="Diga algo..." autocomplete="off" enterkeyhint="send">
                     </div>
                     <button class="send-btn" id="send-msg" type="button"><i class="fas fa-paper-plane"></i></button>
                 </div>
             </div>
         </div>
-    </div>
+
+    </div><!-- fim watch-party-container -->
 
     <script>
-        // CONFIGURAÇÃO FIREBASE
-        const firebaseConfig = {
-            apiKey: "AIzaSyB0IJNOMSnpHEazCNA7Nu02gsbAUNvmIYE",
-            authDomain: "nupmatch---filmes-com-amigos.firebaseapp.com", // Voltando para o padrão do Firebase para garantir o redirecionamento
-            databaseURL: "https://nupmatch---filmes-com-amigos-default-rtdb.firebaseio.com",
-            projectId: "nupmatch---filmes-com-amigos",
-            storageBucket: "nupmatch---filmes-com-amigos.firebasestorage.app",
-            messagingSenderId: "635179962057",
-            appId: "1:635179962057:android:74e392a19328c77d450718"
-        };
+    // =============================================
+    //  CONFIGURAÇÃO FIREBASE
+    // =============================================
+    const firebaseConfig = {
+        apiKey: "AIzaSyB0IJNOMSnpHEazCNA7Nu02gsbAUNvmIYE",
+        authDomain: "nupmatch---filmes-com-amigos.firebaseapp.com",
+        databaseURL: "https://nupmatch---filmes-com-amigos-default-rtdb.firebaseio.com",
+        projectId: "nupmatch---filmes-com-amigos",
+        storageBucket: "nupmatch---filmes-com-amigos.firebasestorage.app",
+        messagingSenderId: "635179962057",
+        appId: "1:635179962057:android:74e392a19328c77d450718"
+    };
 
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.database();
-        const roomRef = db.ref('rooms/default_room');
-        const API_URL = "https://pkfilmes.pages.dev/movies_data.json";
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.database();
+    const roomRef = db.ref('rooms/default_room');
+    const API_URL = "https://pkfilmes.pages.dev/movies_data.json";
+    const ADMIN_EMAILS = ["grudentt@gmail.com", "nz.pett@gmail.com"];
 
-        // LISTA DE ADMINS
-        const ADMIN_EMAILS = ["grudentt@gmail.com", "nz.pett@gmail.com"];
-        
-        const video = document.getElementById('main-video');
-        const bgVideo = document.getElementById('bg-video');
-        const seekFill = document.getElementById('fill');
-        const chatBox = document.getElementById('chat-box');
-        const chatInput = document.getElementById('chat-input');
-        
-        let currentUser = null;
-        let userData = { isPremium: false, isAdmin: false };
-        let localMsgCount = 0;
-        let globalMsgCounter = 0;
-        let adShownCount = 0;
-        let isChatLocked = false;
-        let activeReply = null;
-        let allMovies = [];
-        let selectedPollOptions = [];
-        let currentMsgForModeration = null;
-        
-        // Detectar iOS
-        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-        const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-        const isIOSBrowser = isIOS || (isSafari && /iPhone|iPad|iPod/.test(navigator.userAgent));
+    // =============================================
+    //  DETECÇÃO DE DISPOSITIVO
+    // =============================================
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+    const isIOSDevice = isIOS || (isSafari && /iPhone|iPad|iPod/.test(navigator.userAgent));
+    console.log('iOS:', isIOS, '| Safari:', isSafari);
 
-        // --- AUTENTICAÇÃO ---
-        auth.onAuthStateChanged(user => {
-            if (user) {
-                currentUser = user;
-                checkUserRole();
-            } else {
-                document.getElementById('login-modal').classList.add('active');
-            }
-        });
+    // =============================================
+    //  VARIÁVEIS GLOBAIS
+    // =============================================
+    const video = document.getElementById('main-video');
+    const bgVideo = document.getElementById('bg-video');
+    const chatBox = document.getElementById('chat-box');
+    const chatInput = document.getElementById('chat-input');
+    const seekbarFill = document.getElementById('seekbar-fill');
+    const seekbarContainer = document.getElementById('seekbar-container');
+    const seekbarPreview = document.getElementById('seekbar-preview');
+    const previewImg = document.getElementById('preview-img');
+    const previewTime = document.getElementById('preview-time');
+    const controls = document.getElementById('controls-overlay');
+    const playPauseBtn = document.getElementById('play-pause-btn');
+    const lockBtn = document.getElementById('lock-btn');
+    const adOverlay = document.getElementById('ad-overlay');
+    const adTimerCount = document.getElementById('ad-timer-count');
+    const skipAdBtn = document.getElementById('skip-ad-btn');
+    const timerCircle = document.getElementById('timer-circle');
 
-        // Capturar resultado do redirect no iOS e domínios customizados
-        auth.getRedirectResult().then(result => {
-            if (result && result.user) {
-                currentUser = result.user;
-                checkUserRole();
-            }
-        }).catch(error => {
-            console.error('Erro ao processar login:', error);
-            // Se houver erro de domínio, o Firebase costuma avisar aqui
-        });
-        
-        // Log para debug
-        console.log('Dispositivo detectado - iOS:', isIOS, 'Safari:', isSafari);
+    let currentUser = null;
+    let userData = { isPremium: false, isAdmin: false };
+    let allMovies = [];
+    let currentItem = null;
+    let currentSeason = 1;
+    let currentEp = 1;
+    let localMsgCount = 0;
+    let globalMsgCounter = 0;
+    let adShownCount = 0;
+    let isChatLocked = false;
+    let activeReply = null;
+    let selectedPollOptions = [];
+    let currentMsgForModeration = null;
+    let isLocked = false;
+    let isFillMode = false;
+    let adActive = false;
+    let firstAdShown = false;
+    let lastAdTimestamp = 0;
+    let isDragging = false;
+    let controlsTimeout = null;
+    let hlsInstance = null;
+    let isSyncingFromFirebase = false;
 
-        document.getElementById('google-login').onclick = () => {
-            const provider = new firebase.auth.GoogleAuthProvider();
-            // Forçar o uso de popup no iOS se o redirect estiver falhando
-            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-            if (isIOS) {
-                auth.signInWithPopup(provider).then(result => {
-                    if (result.user) {
-                        currentUser = result.user;
-                        checkUserRole();
-                    }
-                }).catch(err => {
-                    console.log("Popup blocked or failed, trying redirect...", err);
+    // =============================================
+    //  AUTENTICAÇÃO
+    // =============================================
+    auth.onAuthStateChanged(user => {
+        if (user) {
+            currentUser = user;
+            checkUserRole();
+        } else {
+            document.getElementById('login-modal').classList.add('active');
+        }
+    });
+
+    // Capturar resultado do redirect (especialmente iOS)
+    auth.getRedirectResult().then(result => {
+        if (result && result.user) {
+            currentUser = result.user;
+            checkUserRole();
+        }
+    }).catch(err => console.error('Redirect result error:', err));
+
+    document.getElementById('google-login').onclick = () => {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        if (isIOSDevice) {
+            // No iOS, popup é mais confiável que redirect
+            auth.signInWithPopup(provider)
+                .then(result => { if (result.user) { currentUser = result.user; checkUserRole(); } })
+                .catch(err => {
+                    console.log('Popup falhou, tentando redirect...', err);
                     auth.signInWithRedirect(provider);
                 });
-            } else {
-                auth.signInWithRedirect(provider);
-            }
-        };
+        } else {
+            auth.signInWithRedirect(provider);
+        }
+    };
 
-        async function checkUserRole() {
-            const userRef = db.ref('users/' + currentUser.uid);
-            const snapshot = await userRef.get();
-            let data = snapshot.val();
-            
-            const isAdmin = ADMIN_EMAILS.includes(currentUser.email);
+    async function checkUserRole() {
+        const userRef = db.ref('users/' + currentUser.uid);
+        const snapshot = await userRef.get();
+        let data = snapshot.val();
+        const isAdmin = ADMIN_EMAILS.includes(currentUser.email);
 
-            if (!data) {
-                data = { name: currentUser.displayName, email: currentUser.email, photo: currentUser.photoURL, isPremium: isAdmin, lastPoll: 0 };
-                userRef.set(data);
-            } else if (isAdmin && !data.isPremium) {
-                db.ref('users/' + currentUser.uid).update({ isPremium: true });
-                data.isPremium = true;
-            }
-
-            userData = data;
-            userData.isAdmin = isAdmin;
-            
-            if (userData.isAdmin) {
-                document.body.classList.add('admin-active');
-                document.getElementById('admin-control-group').style.display = 'flex';
-                document.getElementById('user-control-group').style.display = 'none';
-            } else {
-                document.getElementById('admin-control-group').style.display = 'none';
-                document.getElementById('user-control-group').style.display = 'flex';
-            }
-            
-            if (userData.isPremium) {
-                document.getElementById('premium-badge-area').innerHTML = '<div class="badge premium"><i class="fas fa-crown"></i> PREMIUM</div>';
-            }
-            
-            document.getElementById('login-modal').classList.remove('active');
-            initParty();
+        if (!data) {
+            data = { name: currentUser.displayName, email: currentUser.email, photo: currentUser.photoURL, isPremium: isAdmin, lastPoll: 0 };
+            userRef.set(data);
+        } else if (isAdmin && !data.isPremium) {
+            userRef.update({ isPremium: true });
+            data.isPremium = true;
         }
 
-        async function initParty() {
-            try {
-                const res = await fetch(API_URL);
-                allMovies = await res.json();
-            } catch (e) {
-                console.error("Erro ao carregar filmes:", e);
-                allMovies = [];
-            }
+        userData = { ...data, isAdmin };
 
-            // Presença
-            const presenceRef = roomRef.child('users').child(currentUser.uid);
-            presenceRef.set({ name: currentUser.displayName, photo: currentUser.photoURL, initial: currentUser.displayName.charAt(0) });
-            presenceRef.onDisconnect().remove();
+        if (userData.isAdmin) {
+            document.body.classList.add('admin-active');
+            document.getElementById('admin-time-group').style.display = 'flex';
+            document.getElementById('user-time-group').style.display = 'none';
+        } else {
+            document.getElementById('admin-time-group').style.display = 'none';
+            document.getElementById('user-time-group').style.display = 'flex';
+        }
 
-            // Sincronização
-            roomRef.child('sync').on('value', snapshot => {
-                const data = snapshot.val();
-                if (!data) return;
-                
-                if (video.src !== data.url) { 
-                    video.src = data.url; 
-                    bgVideo.src = data.url;
-                }
-                
-                if (Math.abs(video.currentTime - data.time) > 2) {
+        if (userData.isPremium) {
+            document.getElementById('premium-badge-area').innerHTML =
+                '<div class="badge-premium"><i class="fas fa-crown"></i> PREMIUM</div>';
+        }
+
+        document.getElementById('login-modal').classList.remove('active');
+        initParty();
+    }
+
+    // =============================================
+    //  INICIALIZAÇÃO DA PARTY
+    // =============================================
+    async function initParty() {
+        try {
+            const res = await fetch(API_URL);
+            allMovies = await res.json();
+        } catch (e) {
+            console.error('Erro ao carregar filmes:', e);
+            allMovies = [];
+        }
+
+        // Presença online
+        const presenceRef = roomRef.child('users').child(currentUser.uid);
+        presenceRef.set({
+            name: currentUser.displayName,
+            photo: currentUser.photoURL,
+            initial: currentUser.displayName.charAt(0)
+        });
+        presenceRef.onDisconnect().remove();
+
+        // Sincronização do player via Firebase
+        roomRef.child('sync').on('value', snapshot => {
+            const data = snapshot.val();
+            if (!data) return;
+
+            isSyncingFromFirebase = true;
+
+            // Carregar vídeo se mudou
+            if (data.url && video.getAttribute('data-loaded-url') !== data.url) {
+                loadVideoUrl(data.url, data.title || 'Watch Party', data.time || 0, data.playing);
+                video.setAttribute('data-loaded-url', data.url);
+                // Atualizar bg-video
+                loadBgVideo(data.url);
+            } else {
+                // Sincronizar tempo (tolerância de 2s)
+                if (data.time !== undefined && Math.abs(video.currentTime - data.time) > 2) {
                     video.currentTime = data.time;
                 }
-                
+                // Sincronizar play/pause
                 if (data.playing && video.paused) {
                     video.muted = true;
-                    video.play().catch(err => {
-                        console.log('Play failed:', err);
-                    });
-                }
-                else if (!data.playing && !video.paused) {
+                    video.play().catch(() => {});
+                } else if (!data.playing && !video.paused) {
                     video.pause();
                 }
-            });
-
-            // Chat & Contador Global
-            roomRef.child('chat').limitToLast(50).on('child_added', snapshot => {
-                const msg = snapshot.val();
-                globalMsgCounter++;
-                
-                if (!userData.isPremium && globalMsgCounter % 15 === 0 && adShownCount < 1) {
-                    renderAd();
-                    adShownCount++;
-                }
-
-                if (msg.type === 'poll') renderPoll(msg, snapshot.key);
-                else renderMsg(msg, snapshot.key);
-            });
-
-            // Escutar remoção de mensagens
-            roomRef.child('chat').on('child_removed', snapshot => {
-                const el = document.getElementById('msg-' + snapshot.key);
-                if (el) el.remove();
-            });
-
-            // Usuários Online
-            roomRef.child('users').on('value', snapshot => {
-                const users = Object.values(snapshot.val() || {});
-                document.getElementById('viewer-count').innerHTML = 
-                    `<i class="fas fa-eye"></i> ${users.length} ${users.length === 1 ? 'assistindo' : 'assistindo'}`;
-                
-                const avatarArea = document.getElementById('user-avatars');
-                avatarArea.innerHTML = users.slice(0, 5).map(u => 
-                    `<div class="avatar-stack" style="${u.photo ? `background-image:url(${u.photo})` : ''}" title="${u.name}">${u.photo ? '' : u.initial}</div>`
-                ).join('');
-            });
-        }
-
-        // --- LÓGICA DE MENSAGENS ---
-        function sendMessage() {
-            if (isChatLocked) return;
-            const text = chatInput.value.trim();
-            if (!text) return;
-
-            if (!userData.isPremium) {
-                localMsgCount++;
-                if (localMsgCount >= 5) lockChat();
             }
 
-            const msgData = {
-                uid: currentUser.uid,
-                name: currentUser.displayName,
-                photo: currentUser.photoURL,
-                text: text,
-                timestamp: Date.now()
-            };
-
-            if (activeReply) {
-                msgData.replyTo = activeReply;
-                cancelReply();
+            // Atualizar título
+            if (data.title) {
+                document.getElementById('video-title').innerText = data.title;
             }
 
-            roomRef.child('chat').push(msgData);
-            chatInput.value = '';
-            chatInput.blur();
-        }
-
-        function lockChat() {
-            isChatLocked = true;
-            document.getElementById('chat-lock').classList.add('active');
-            let timeLeft = 120;
-            const timerEl = document.getElementById('lock-timer');
-            const interval = setInterval(() => {
-                timeLeft--;
-                const m = Math.floor(timeLeft / 60), s = timeLeft % 60;
-                timerEl.innerText = `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
-                if (timeLeft <= 0) {
-                    clearInterval(interval);
-                    isChatLocked = false;
-                    localMsgCount = 0;
-                    document.getElementById('chat-lock').classList.remove('active');
-                }
-            }, 1000);
-        }
-
-        function deleteMsg(key) {
-            if (!userData.isAdmin) return;
-            roomRef.child('chat').child(key).remove();
-        }
-
-        function deleteMsgFromPopup() {
-            if (currentMsgForModeration) {
-                deleteMsg(currentMsgForModeration.key);
-                closeModeration();
-            }
-        }
-
-        function banUserFromPopup() {
-            if (currentMsgForModeration) {
-                const bannedRef = db.ref('banned_users/' + currentMsgForModeration.uid);
-                bannedRef.set({ 
-                    name: currentMsgForModeration.name, 
-                    bannedAt: Date.now(),
-                    bannedBy: currentUser.uid 
-                });
-                alert(`Usuário ${currentMsgForModeration.name} foi banido!`);
-                closeModeration();
-            }
-        }
-
-        function closeModeration() {
-            document.getElementById('moderation-popup').classList.remove('active');
-            currentMsgForModeration = null;
-        }
-
-        // --- SISTEMA DE REPLY ---
-        function setReply(name, text) {
-            activeReply = { name, text };
-            document.getElementById('reply-user').innerText = name;
-            document.getElementById('reply-bar').style.display = 'flex';
-            chatInput.focus();
-        }
-
-        function cancelReply() {
-            activeReply = null;
-            document.getElementById('reply-bar').style.display = 'none';
-        }
-
-        function renderMsg(msg, key) {
-            const div = document.createElement('div');
-            div.className = 'msg';
-            div.id = 'msg-' + key;
-            
-            if (userData.isAdmin) {
-                div.onclick = (e) => {
-                    if (e.target.closest('.reply-btn')) return;
-                    openModerationPopup(msg, key);
-                };
-            }
-            
-            div.innerHTML = `
-                <div class="msg-avatar" style="${msg.photo ? `background-image:url(${msg.photo})` : ''}">${msg.photo ? '' : msg.name.charAt(0)}</div>
-                <div class="msg-body">
-                    ${msg.replyTo ? `<div class="reply-preview"><strong>@${msg.replyTo.name}:</strong> ${msg.replyTo.text.substring(0,30)}...</div>` : ''}
-                    <div class="msg-user">${msg.name}</div>
-                    <div class="msg-text">${msg.text}</div>
-                    <span class="reply-btn" onclick="setReply('${msg.name}', '${msg.text.replace(/'/g, "\\'")}')"><i class="fas fa-reply"></i> Responder</span>
-                </div>
-            `;
-            chatBox.appendChild(div);
-            chatBox.scrollTop = chatBox.scrollHeight;
-        }
-
-        function openModerationPopup(msg, key) {
-            currentMsgForModeration = { ...msg, key };
-            document.getElementById('mod-user-name').innerText = msg.name;
-            document.getElementById('mod-user-email').innerText = msg.text.substring(0, 50) + '...';
-            document.getElementById('moderation-popup').classList.add('active');
-        }
-
-        function renderAd() {
-            const div = document.createElement('div');
-            div.className = 'ad-banner';
-            div.innerHTML = `
-                <div style="font-size:10px; color:#aaa; margin-bottom:5px;">Publicidade</div>
-                <div style="color:white; font-size:12px; margin: 10px 0;">Patrocinado: Conheça nossos planos Premium!</div>
-                <p style="color:#666; font-size:11px;">Desfrute de recursos exclusivos e sem anúncios.</p>
-            `;
-            chatBox.appendChild(div);
-            chatBox.scrollTop = chatBox.scrollHeight;
-        }
-
-        // --- ENQUETE ---
-        document.getElementById('open-poll-btn').onclick = () => {
-            if (!userData.isPremium) {
-                document.getElementById('premium-popup').classList.add('active');
-                return;
-            }
-            document.getElementById('poll-modal').classList.add('active');
-            selectedPollOptions = [];
-            renderSelectedOptions();
-        };
-
-        document.getElementById('poll-search').oninput = (e) => {
-            const query = e.target.value.toLowerCase();
-            const filtered = allMovies.filter(m => m.titulo.toLowerCase().includes(query)).slice(0, 5);
-            const container = document.getElementById('poll-results');
-            container.innerHTML = filtered.map(item => `
-                <div class="search-item" onclick='addPollOption(${JSON.stringify(item).replace(/'/g, "&apos;")})'>
-                    <img src="${item.capa}">
-                    <div class="search-item-info">
-                        <div class="search-item-title">${item.titulo}</div>
-                        <div class="search-item-type">${item.tipo}</div>
-                    </div>
-                </div>
-            `).join('');
-        };
-
-        window.addPollOption = (item) => {
-            if (selectedPollOptions.length >= 3) return;
-            selectedPollOptions.push(item);
-            renderSelectedOptions();
-        };
-
-        function renderSelectedOptions() {
-            const area = document.getElementById('selected-options');
-            area.innerHTML = selectedPollOptions.map((opt, idx) => `
-                <div style="background:var(--accent); padding:5px 10px; border-radius:15px; font-size:10px; color:white; display:flex; align-items:center; gap:5px;">
-                    ${opt.titulo}
-                    <i class="fas fa-times" style="cursor:pointer;" onclick="removePollOption(${idx})"></i>
-                </div>
-            `).join('');
-        }
-
-	        // --- FUNÇÕES PREMIUM ---
-        function goToPremium() {
-            window.location.href = 'premium.html';
-        }
-
-        function closePremiumPopup() {
-            document.getElementById('premium-popup').classList.remove('active');
-        }
-
-        // --- EVENTOS BÁSICOS ---
-        document.getElementById('send-msg').addEventListener('click', sendMessage);
-        chatInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                sendMessage();
-            }
+            setTimeout(() => { isSyncingFromFirebase = false; }, 500);
         });
-        
-        document.getElementById('play-pause').onclick = () => {
-            if (userData.isAdmin) {
-                togglePlay();
-            }
-        };
 
-        document.getElementById('play-pause-user').onclick = () => {
-            if (userData.isAdmin) {
-                togglePlay();
+        // Chat
+        roomRef.child('chat').limitToLast(50).on('child_added', snapshot => {
+            const msg = snapshot.val();
+            globalMsgCounter++;
+            if (!userData.isPremium && globalMsgCounter % 15 === 0 && adShownCount < 1) {
+                renderAdBanner();
+                adShownCount++;
             }
-        };
+            if (msg.type === 'poll') renderPoll(msg, snapshot.key);
+            else renderMsg(msg, snapshot.key);
+        });
 
-        function togglePlay() {
-            if (!userData.isAdmin) return;
-            
-            if (video.paused) {
-                video.muted = true;
-                video.play().then(() => {
-                    roomRef.child('sync').update({ playing: true, time: video.currentTime });
-                }).catch(err => {
-                    console.log('Play failed:', err);
+        roomRef.child('chat').on('child_removed', snapshot => {
+            const el = document.getElementById('msg-' + snapshot.key);
+            if (el) el.remove();
+        });
+
+        // Usuários online
+        roomRef.child('users').on('value', snapshot => {
+            const users = Object.values(snapshot.val() || {});
+            document.getElementById('viewer-count').innerHTML =
+                `<i class="fas fa-eye"></i> ${users.length}`;
+            const avatarArea = document.getElementById('user-avatars');
+            avatarArea.innerHTML = users.slice(0, 5).map(u =>
+                `<div class="avatar-stack" style="${u.photo ? `background-image:url(${u.photo})` : ''}" title="${u.name}">${u.photo ? '' : u.initial}</div>`
+            ).join('');
+        });
+
+             // Setup dos controles do player
+        setupPlayerControls();
+    }
+
+    // =============================================
+    //  CARREGAMENTO DE VÍDEO (com HLS.js + iOS)
+    // =============================================
+    function loadVideoUrl(url, title, startTime, autoPlay) {
+        if (!url) return;
+
+        // Destruir instância HLS anterior
+        if (hlsInstance) { hlsInstance.destroy(); hlsInstance = null; }
+
+        const isHLS = url.includes('.m3u8');
+
+        if (isHLS) {
+            if (isIOSDevice) {
+                // iOS Safari suporta HLS nativamente
+                video.src = url;
+                video.load();
+                video.onloadedmetadata = () => {
+                    if (startTime > 0) video.currentTime = startTime;
+                    if (autoPlay) video.play().catch(() => {});
+                };
+            } else if (Hls.isSupported()) {
+                // Outros navegadores: usar HLS.js
+                hlsInstance = new Hls({
+                    enableWorker: true,
+                    lowLatencyMode: false,
+                    backBufferLength: 90
+                });
+                hlsInstance.loadSource(url);
+                hlsInstance.attachMedia(video);
+                hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => {
+                    if (startTime > 0) video.currentTime = startTime;
+                    if (autoPlay) {
+                        video.muted = true;
+                        video.play().catch(() => {});
+                    }
+                });
+                hlsInstance.on(Hls.Events.ERROR, (event, data) => {
+                    if (data.fatal) {
+                        console.error('HLS fatal error:', data.type, data.details);
+                        if (data.type === Hls.ErrorTypes.NETWORK_ERROR) hlsInstance.startLoad();
+                        else if (data.type === Hls.ErrorTypes.MEDIA_ERROR) hlsInstance.recoverMediaError();
+                    }
                 });
             } else {
-                video.pause();
-                roomRef.child('sync').update({ playing: false, time: video.currentTime });
+                // Fallback: tentar direto
+                video.src = url;
+                video.load();
             }
+        } else {
+            // MP4 ou outro formato direto
+            video.src = url;
+            video.load();
+            video.onloadedmetadata = () => {
+                if (startTime > 0) video.currentTime = startTime;
+                if (autoPlay) {
+                    video.muted = true;
+                    video.play().catch(() => {});
+                }
+            };
         }
-        
-        // Seekbar - apenas para admins
-        document.getElementById('seekbar').addEventListener('click', (e) => {
+
+        if (title) document.getElementById('video-title').innerText = title;
+    }
+
+    function loadBgVideo(url) {
+        if (!url) return;
+        // Bg video só usa MP4 (não HLS para economizar recursos)
+        if (!url.includes('.m3u8')) {
+            bgVideo.src = url;
+            bgVideo.load();
+            bgVideo.play().catch(() => {});
+        }
+    }
+
+    // =============================================
+    //  CONTROLES DO PLAYER
+    // =============================================
+    function setupPlayerControls() {
+        // Play/Pause
+        video.addEventListener('play', () => {
+            playPauseBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
+            lastAdTimestamp = Date.now();
+        });
+        video.addEventListener('pause', () => {
+            playPauseBtn.innerHTML = '<i class="fa-solid fa-play"></i>';
+        });
+        video.addEventListener('timeupdate', updateProgress);
+        video.addEventListener('ended', () => {
+            playPauseBtn.innerHTML = '<i class="fa-solid fa-play"></i>';
+        });
+
+        // Erro de vídeo
+        video.addEventListener('error', (e) => {
+            console.error('Erro no vídeo:', e);
+        });
+
+        // Play/Pause central
+        playPauseBtn.onclick = () => {
+            if (adActive) return;
+            if (userData.isAdmin) {
+                // Admin controla para todos
+                const newPlaying = video.paused;
+                const syncData = {
+                    playing: newPlaying,
+                    time: video.currentTime,
+                    url: video.getAttribute('data-loaded-url') || '',
+                    title: document.getElementById('video-title').innerText
+                };
+                roomRef.child('sync').update(syncData);
+                if (newPlaying) video.play().catch(() => {});
+                else video.pause();
+            } else {
+                // Usuário comum: apenas localmente (mudo)
+                if (video.paused) { video.muted = true; video.play().catch(() => {}); }
+                else video.pause();
+            }
+        };
+
+        // Rewind / Forward (admin only)
+        document.getElementById('rewind-btn').onclick = () => {
+            if (!userData.isAdmin || adActive) return;
+            video.currentTime = Math.max(0, video.currentTime - 10);
+            pushSyncTime();
+        };
+        document.getElementById('forward-btn').onclick = () => {
+            if (!userData.isAdmin || adActive) return;
+            video.currentTime = Math.min(video.duration || 0, video.currentTime + 10);
+            pushSyncTime();
+        };
+
+        // Tela travada
+        lockBtn.onclick = toggleLock;
+
+        // Fullscreen
+        document.getElementById('fullscreen-btn').onclick = toggleFullscreen;
+        document.getElementById('fullscreen-fill-btn').onclick = () => {
+            isFillMode = !isFillMode;
+            video.classList.toggle('fill-mode', isFillMode);
+            document.getElementById('fullscreen-fill-btn').innerHTML =
+                isFillMode ? '<i class="fa-solid fa-compress"></i>' : '<i class="fa-solid fa-maximize"></i>';
+        };
+
+        // Próximo episódio (admin)
+        document.getElementById('next-ep-btn').onclick = () => {
+            if (!currentItem || !userData.isAdmin) return;
+            const next = currentItem.episodios.find(e => e.temporada == currentSeason && e.episodio == currentEp + 1) ||
+                         currentItem.episodios.find(e => e.temporada == currentSeason + 1 && e.episodio == 1);
+            if (next) playEpisode(next.temporada, next.episodio);
+        };
+
+        // Fechar episódios overlay
+        document.getElementById('close-episodes').onclick = () => {
+            document.getElementById('episodes-overlay').classList.remove('active');
+        };
+
+        // Anúncio skip
+        skipAdBtn.onclick = () => {
+            adOverlay.classList.remove('active');
+            document.getElementById('ad-timer-container').style.display = 'flex';
+            adActive = false;
+            lockBtn.style.opacity = '1';
+            lastAdTimestamp = Date.now();
+            video.play().catch(() => {});
+        };
+
+        // Seekbar (admin only)
+        setupSeekbar();
+
+        // Mostrar controles ao interagir
+        const showEvents = ['mousemove', 'touchstart', 'mousedown', 'keydown'];
+        showEvents.forEach(e => document.addEventListener(e, showControls, { passive: true }));
+        video.onclick = (e) => { e.stopPropagation(); showControls(); };
+
+        // Duplo toque para avançar/retroceder (admin)
+        let lastTap = 0;
+        video.addEventListener('touchend', (e) => {
             if (!userData.isAdmin) return;
-            const rect = e.currentTarget.getBoundingClientRect();
-            const percent = (e.clientX - rect.left) / rect.width;
-            video.currentTime = percent * video.duration;
-            roomRef.child('sync').update({ time: video.currentTime });
+            const now = Date.now();
+            if (now - lastTap < 300) {
+                const rect = video.getBoundingClientRect();
+                const x = e.changedTouches[0].clientX - rect.left;
+                if (x < rect.width / 2) video.currentTime -= 10;
+                else video.currentTime += 10;
+                pushSyncTime();
+            }
+            lastTap = now;
         });
-        
-        video.ontimeupdate = () => {
-            if (video.duration && !isNaN(video.duration)) {
-                seekFill.style.width = (video.currentTime / video.duration * 100) + '%';
-                const timeStr = formatTime(video.currentTime) + " / " + formatTime(video.duration);
-                document.getElementById('time-display').innerText = timeStr;
-                document.getElementById('time-display-user').innerText = timeStr;
-            }
-            
-            // Atualizar ícone de play/pause para todos
-            const icon = video.paused ? 'fa-play' : 'fa-pause';
-            if (document.getElementById('play-pause')) {
-                document.getElementById('play-pause').className = 'fas ' + icon;
-            }
-            if (document.getElementById('play-pause-user')) {
-                document.getElementById('play-pause-user').className = 'fas ' + icon;
+    }
+
+    function setupSeekbar() {
+        const handleSeek = (e) => {
+            if (isLocked || adActive || !userData.isAdmin) return;
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const rect = seekbarContainer.getBoundingClientRect();
+            let pos = (clientX - rect.left) / rect.width;
+            pos = Math.max(0, Math.min(1, pos));
+            if (video.duration) {
+                video.currentTime = pos * video.duration;
+                updatePreviewUI(pos);
+                pushSyncTime();
             }
         };
 
-        function formatTime(s) {
-            if (isNaN(s)) return "00:00";
-            const m = Math.floor(s/60), sec = Math.floor(s%60);
-            return m.toString().padStart(2,'0') + ":" + sec.toString().padStart(2,'0');
+        seekbarContainer.onmousedown = seekbarContainer.ontouchstart = (e) => {
+            if (!userData.isAdmin) return;
+            isDragging = true;
+            seekbarPreview.classList.add('active');
+            handleSeek(e);
+        };
+
+        window.onmousemove = window.ontouchmove = (e) => {
+            if (isDragging) handleSeek(e);
+        };
+
+        window.onmouseup = window.ontouchend = () => {
+            if (isDragging) { isDragging = false; seekbarPreview.classList.remove('active'); }
+        };
+    }
+
+    function updatePreviewUI(pos) {
+        if (!video.duration) return;
+        const time = pos * video.duration;
+        previewTime.innerText = formatTime(time);
+        seekbarPreview.style.left = (pos * 100) + '%';
+        try {
+            const canvas = document.getElementById('preview-canvas');
+            canvas.width = 90; canvas.height = 54;
+            canvas.getContext('2d').drawImage(video, 0, 0, 90, 54);
+            previewImg.src = canvas.toDataURL();
+        } catch (e) {
+            if (currentItem) previewImg.src = currentItem.capa || '';
         }
-        
-        document.getElementById('fs-btn').onclick = () => {
-            const elem = document.getElementById('player-wrapper');
-            if (elem.requestFullscreen) {
-                elem.requestFullscreen();
-            } else if (elem.webkitRequestFullscreen) {
-                elem.webkitRequestFullscreen();
-            } else if (elem.mozRequestFullScreen) {
-                elem.mozRequestFullScreen();
-            } else if (elem.msRequestFullscreen) {
-                elem.msRequestFullscreen();
+    }
+
+    function updateProgress() {
+        if (adActive || !video.duration) return;
+        const percent = (video.currentTime / video.duration) * 100;
+        seekbarFill.style.width = percent + '%';
+        const timeEl = userData.isAdmin ? document.getElementById('time-info') : document.getElementById('time-info-user');
+        if (timeEl) timeEl.innerText = `${formatTime(video.currentTime)} / ${formatTime(video.duration)}`;
+
+        // Anúncios (não-premium)
+        if (!userData.isPremium) {
+            if (!firstAdShown && video.currentTime >= 10) { firstAdShown = true; startAd(); }
+            if (firstAdShown && (Date.now() - lastAdTimestamp) >= 1200000) { lastAdTimestamp = Date.now(); startAd(); }
+        }
+
+        // Sincronizar tempo periodicamente (admin, a cada 5s)
+        if (userData.isAdmin && !isSyncingFromFirebase && Math.floor(video.currentTime) % 5 === 0) {
+            pushSyncTime();
+        }
+    }
+
+    function pushSyncTime() {
+        if (!userData.isAdmin) return;
+        roomRef.child('sync').update({
+            time: video.currentTime,
+            playing: !video.paused
+        });
+    }
+
+    function toggleLock() {
+        isLocked = !isLocked;
+        lockBtn.innerHTML = isLocked ? '<i class="fa-solid fa-lock"></i>' : '<i class="fa-solid fa-lock-open"></i>';
+        lockBtn.classList.toggle('active', isLocked);
+        if (isLocked) controls.classList.remove('visible');
+    }
+
+    let controlsTimeoutId;
+    function showControls() {
+        if (adActive || isLocked) return;
+        controls.classList.add('visible');
+        clearTimeout(controlsTimeoutId);
+        controlsTimeoutId = setTimeout(() => {
+            if (!video.paused) controls.classList.remove('visible');
+        }, 4000);
+    }
+
+    function toggleFullscreen() {
+        if (document.fullscreenElement || document.webkitFullscreenElement) {
+            (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+        } else {
+            const el = document.getElementById('player-container');
+            if (el.requestFullscreen) el.requestFullscreen().catch(() => {});
+            else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+        }
+    }
+
+    function startAd() {
+        adActive = true;
+        video.pause();
+        controls.classList.remove('visible');
+        lockBtn.style.opacity = '0';
+        adOverlay.classList.add('active');
+        let timeLeft = 10;
+        adTimerCount.innerText = timeLeft;
+        skipAdBtn.style.display = 'none';
+        timerCircle.style.strokeDashoffset = '0';
+        const adInterval = setInterval(() => {
+            timeLeft--;
+            adTimerCount.innerText = timeLeft;
+            timerCircle.style.strokeDashoffset = 145 - (145 * (10 - timeLeft) / 10);
+            if (timeLeft <= 0) {
+                clearInterval(adInterval);
+                skipAdBtn.style.display = 'flex';
+                document.getElementById('ad-timer-container').style.display = 'none';
             }
+        }, 1000);
+    }
+
+    // =============================================
+    //  BOTÃO MUDAR FILME (ADMIN)
+    // =============================================
+    let selectedSeriesForAdmin = null;
+
+    document.getElementById('admin-search').oninput = (e) => {
+        const query = e.target.value.toLowerCase();
+        if (query.length < 2) { document.getElementById('admin-results').innerHTML = ''; return; }
+        const filtered = allMovies.filter(m => m.titulo.toLowerCase().includes(query)).slice(0, 8);
+        const container = document.getElementById('admin-results');
+        container.innerHTML = filtered.map(item => `
+            <div class="search-item" onclick='adminSelectContent(${JSON.stringify(item).replace(/'/g, "&#39;")})'>
+                <img src="${item.capa}" alt="${item.titulo}" onerror="this.style.display='none'">
+                <div class="search-item-info">
+                    <div class="search-item-title">${item.titulo}</div>
+                    <div class="search-item-type">${item.tipo === 'serie' ? 'Série' : 'Filme'} ${item.ano || ''}</div>
+                </div>
+            </div>
+        `).join('');
+    };
+
+    function adminSelectContent(item) {
+        if (item.tipo === 'serie') {
+            selectedSeriesForAdmin = item;
+            document.getElementById('admin-modal').classList.remove('active');
+            openEpisodesModal(item);
+        } else {
+            // Filme: carregar direto
+            document.getElementById('admin-modal').classList.remove('active');
+            const url = item.link_mp4 || item.link || '';
+            const title = item.titulo;
+            if (!url) { alert('URL do filme não encontrada.'); return; }
+            pushNewContent(url, title, item);
+        }
+    }
+
+    function openEpisodesModal(item) {
+        document.getElementById('series-title-modal').innerText = item.titulo;
+        const container = document.getElementById('episodes-container');
+        container.innerHTML = '';
+        if (!item.episodios || item.episodios.length === 0) {
+            container.innerHTML = '<p style="color:#aaa; font-size:13px;">Nenhum episódio encontrado.</p>';
+        } else {
+            // Agrupar por temporada
+            const seasons = [...new Set(item.episodios.map(e => e.temporada))].sort((a,b) => a-b);
+            seasons.forEach(season => {
+                const seasonLabel = document.createElement('div');
+                seasonLabel.style.cssText = 'color:#aaa; font-size:11px; font-weight:bold; margin:10px 0 5px; width:100%; text-align:left;';
+                seasonLabel.innerText = `Temporada ${season}`;
+                container.appendChild(seasonLabel);
+                item.episodios.filter(e => e.temporada == season).forEach(ep => {
+                    const div = document.createElement('div');
+                    div.className = 'ep-item';
+                    div.innerText = `EP ${ep.episodio}`;
+                    div.title = ep.nome || '';
+                    div.onclick = () => {
+                        document.getElementById('episodes-modal').classList.remove('active');
+                        const url = ep.link_mp4 || ep.link || '';
+                        const title = `${item.titulo} - T${ep.temporada}:E${ep.episodio} ${ep.nome || ''}`;
+                        pushNewContent(url, title, item, ep.temporada, ep.episodio);
+                    };
+                    container.appendChild(div);
+                });
+            });
+        }
+        document.getElementById('episodes-modal').classList.add('active');
+    }
+
+    function pushNewContent(url, title, item, season, ep) {
+        if (!url) { alert('URL não disponível para este conteúdo.'); return; }
+        currentItem = item;
+        if (season) currentSeason = season;
+        if (ep) currentEp = ep;
+
+        // Publicar no Firebase para todos
+        roomRef.child('sync').set({
+            url: url,
+            title: title,
+            time: 0,
+            playing: true,
+            updatedAt: Date.now()
+        });
+
+        // Atualizar episódios overlay
+        if (item.tipo === 'serie') {
+            renderEpisodesOverlay(item);
+            document.getElementById('episodes-btn').style.display = 'flex';
+            const next = item.episodios.find(e => e.temporada == currentSeason && e.episodio == currentEp + 1) ||
+                         item.episodios.find(e => e.temporada == currentSeason + 1 && e.episodio == 1);
+            document.getElementById('next-ep-btn').style.display = next ? 'flex' : 'none';
+        } else {
+            document.getElementById('episodes-btn').style.display = 'none';
+            document.getElementById('next-ep-btn').style.display = 'none';
+        }
+    }
+
+    function playEpisode(season, ep) {
+        if (!currentItem || !userData.isAdmin) return;
+        const episode = currentItem.episodios.find(e => e.temporada == season && e.episodio == ep);
+        if (!episode) return;
+        currentSeason = season;
+        currentEp = ep;
+        const url = episode.link_mp4 || episode.link || '';
+        const title = `${currentItem.titulo} - T${season}:E${ep} ${episode.nome || ''}`;
+        pushNewContent(url, title, currentItem, season, ep);
+        document.getElementById('episodes-overlay').classList.remove('active');
+    }
+
+    function renderEpisodesOverlay(item) {
+        const list = document.getElementById('episodes-list');
+        list.innerHTML = '';
+        document.getElementById('episodes-overlay-title').innerText = item.titulo;
+        if (!item.episodios) return;
+        item.episodios.forEach(ep => {
+            const card = document.createElement('div');
+            card.className = `ep-card ${ep.temporada == currentSeason && ep.episodio == currentEp ? 'active' : ''}`;
+            card.innerHTML = `
+                <div class="ep-thumb" style="background-image:url('${ep.capa || item.capa}')"></div>
+                <div class="ep-info">
+                    <div class="ep-header">
+                        <div class="ep-title">${ep.nome || 'Episódio ' + ep.episodio}</div>
+                        <div class="ep-meta">T${ep.temporada} EP${ep.episodio}</div>
+                    </div>
+                    <div class="ep-desc">${ep.sinopse || 'Sem sinopse disponível.'}</div>
+                </div>
+            `;
+            card.onclick = () => {
+                if (userData.isAdmin) playEpisode(ep.temporada, ep.episodio);
+            };
+            list.appendChild(card);
+        });
+    }
+    // =============================================
+    //  CHAT
+    // =============================================
+    function sendMessage() {
+        if (isChatLocked) return;
+        const text = chatInput.value.trim();
+        if (!text) return;
+
+        if (!userData.isPremium) {
+            localMsgCount++;
+            if (localMsgCount >= 5) lockChat();
+        }
+
+        const msgData = {
+            uid: currentUser.uid,
+            name: currentUser.displayName,
+            photo: currentUser.photoURL,
+            text: text,
+            timestamp: Date.now()
         };
+        if (activeReply) { msgData.replyTo = activeReply; cancelReply(); }
 
-        // Suporte para fullscreen
-        video.addEventListener('fullscreenchange', () => {
-            if (document.fullscreenElement) {
-                video.style.width = '100%';
-                video.style.height = '100%';
-            }
-        });
-        
-        // Sincronização de seek (apenas admin)
-        video.addEventListener('seeking', () => {
-            if (userData && userData.isAdmin) {
-                roomRef.child('sync').update({ time: video.currentTime });
-            }
-        });
+        roomRef.child('chat').push(msgData);
+        chatInput.value = '';
+        chatInput.blur();
+    }
 
-        // Permitir unmute ao tocar na tela para qualquer usuário
-        document.addEventListener('touchend', () => {
-            if (video.muted) {
-                video.muted = false;
+    function lockChat() {
+        isChatLocked = true;
+        document.getElementById('chat-lock').classList.add('active');
+        let timeLeft = 120;
+        const timerEl = document.getElementById('lock-timer');
+        const interval = setInterval(() => {
+            timeLeft--;
+            const m = Math.floor(timeLeft / 60), s = timeLeft % 60;
+            timerEl.innerText = `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+            if (timeLeft <= 0) {
+                clearInterval(interval);
+                isChatLocked = false;
+                localMsgCount = 0;
+                document.getElementById('chat-lock').classList.remove('active');
             }
-        }, false);
-        
-        // Permitir unmute ao clicar no vídeo para qualquer usuário
-        video.addEventListener('click', () => {
-            if (video.muted) {
-                video.muted = false;
-            }
-        });
+        }, 1000);
+    }
 
-        // Prevenir zoom ao focar em input
-        document.addEventListener('touchstart', function(e) {
-            if (e.target.tagName === 'INPUT') {
-                e.target.style.fontSize = '16px';
-            }
+    function renderMsg(msg, key) {
+        const div = document.createElement('div');
+        div.className = 'msg';
+        div.id = 'msg-' + key;
+        if (userData.isAdmin) {
+            div.onclick = (e) => {
+                if (e.target.closest('.reply-btn')) return;
+                openModerationPopup(msg, key);
+            };
+        }
+        div.innerHTML = `
+            <div class="msg-avatar" style="${msg.photo ? `background-image:url(${msg.photo})` : ''}">${msg.photo ? '' : msg.name.charAt(0)}</div>
+            <div class="msg-body">
+                ${msg.replyTo ? `<div class="reply-preview"><strong>@${msg.replyTo.name}:</strong> ${msg.replyTo.text.substring(0,30)}...</div>` : ''}
+                <div class="msg-user">${msg.name}</div>
+                <div class="msg-text">${msg.text}</div>
+                <span class="reply-btn" onclick="setReply('${msg.name.replace(/'/g,"\\'")}', '${msg.text.replace(/'/g,"\\'").substring(0,50)}')">
+                    <i class="fas fa-reply"></i> Responder
+                </span>
+            </div>
+        `;
+        chatBox.appendChild(div);
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function renderAdBanner() {
+        const div = document.createElement('div');
+        div.className = 'ad-banner';
+        div.innerHTML = `
+            <div style="font-size:10px; color:#aaa; margin-bottom:4px;">Publicidade</div>
+            <div style="color:white; font-size:12px; margin:8px 0;">Conheça nossos planos Premium!</div>
+            <p style="color:#666; font-size:11px;">Recursos exclusivos e sem anúncios.</p>
+        `;
+        chatBox.appendChild(div);
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function setReply(name, text) {
+        activeReply = { name, text };
+        document.getElementById('reply-user').innerText = name;
+        document.getElementById('reply-bar').style.display = 'flex';
+        chatInput.focus();
+    }
+
+    function cancelReply() {
+        activeReply = null;
+        document.getElementById('reply-bar').style.display = 'none';
+    }
+
+    function openModerationPopup(msg, key) {
+        currentMsgForModeration = { ...msg, key };
+        document.getElementById('mod-user-name').innerText = msg.name;
+        document.getElementById('mod-user-email').innerText = msg.text.substring(0, 50) + '...';
+        document.getElementById('moderation-popup').classList.add('active');
+    }
+
+    function deleteMsgFromPopup() {
+        if (currentMsgForModeration) {
+            roomRef.child('chat').child(currentMsgForModeration.key).remove();
+            closeModeration();
+        }
+    }
+
+    function banUserFromPopup() {
+        if (currentMsgForModeration) {
+            db.ref('banned_users/' + currentMsgForModeration.uid).set({
+                name: currentMsgForModeration.name,
+                bannedAt: Date.now(),
+                bannedBy: currentUser.uid
+            });
+            alert(`Usuário ${currentMsgForModeration.name} foi banido!`);
+            closeModeration();
+        }
+    }
+
+    function closeModeration() {
+        document.getElementById('moderation-popup').classList.remove('active');
+        currentMsgForModeration = null;
+    }
+
+    // =============================================
+    //  ENQUETE
+    // =============================================
+    document.getElementById('open-poll-btn').onclick = () => {
+        if (!userData.isPremium) { document.getElementById('premium-popup').classList.add('active'); return; }
+        document.getElementById('poll-modal').classList.add('active');
+        selectedPollOptions = [];
+        renderSelectedOptions();
+    };
+
+    document.getElementById('poll-search').oninput = (e) => {
+        const query = e.target.value.toLowerCase();
+        const filtered = allMovies.filter(m => m.titulo.toLowerCase().includes(query)).slice(0, 5);
+        const container = document.getElementById('poll-results');
+        container.innerHTML = filtered.map(item => `
+            <div class="search-item" onclick='addPollOption(${JSON.stringify(item).replace(/'/g,"&#39;")})'>
+                <img src="${item.capa}" alt="${item.titulo}" onerror="this.style.display='none'">
+                <div class="search-item-info">
+                    <div class="search-item-title">${item.titulo}</div>
+                    <div class="search-item-type">${item.tipo === 'serie' ? 'Série' : 'Filme'}</div>
+                </div>
+            </div>
+        `).join('');
+    };
+
+    function addPollOption(item) {
+        if (selectedPollOptions.length >= 4) return;
+        if (selectedPollOptions.find(o => o.id === item.id)) return;
+        selectedPollOptions.push(item);
+        renderSelectedOptions();
+    }
+
+    function renderSelectedOptions() {
+        const container = document.getElementById('selected-options');
+        container.innerHTML = selectedPollOptions.map((item, i) => `
+            <div style="background:rgba(0,114,210,0.2); border:1px solid var(--accent); padding:4px 10px; border-radius:20px; font-size:11px; color:white; display:flex; align-items:center; gap:5px;">
+                ${item.titulo}
+                <i class="fas fa-times" style="cursor:pointer;" onclick="removePollOption(${i})"></i>
+            </div>
+        `).join('');
+    }
+
+    function removePollOption(index) {
+        selectedPollOptions.splice(index, 1);
+        renderSelectedOptions();
+    }
+
+    document.getElementById('confirm-poll').onclick = () => {
+        const question = document.getElementById('poll-msg').value.trim();
+        if (!question || selectedPollOptions.length < 2) {
+            alert('Adicione uma pergunta e pelo menos 2 opções.');
+            return;
+        }
+        const pollData = {
+            type: 'poll',
+            uid: currentUser.uid,
+            name: currentUser.displayName,
+            photo: currentUser.photoURL,
+            question,
+            options: selectedPollOptions.map(o => ({ id: o.id, titulo: o.titulo, capa: o.capa, votes: 0 })),
+            voters: {},
+            timestamp: Date.now()
+        };
+        roomRef.child('chat').push(pollData);
+        document.getElementById('poll-modal').classList.remove('active');
+    };
+
+    function renderPoll(msg, key) {
+        const div = document.createElement('div');
+        div.className = 'poll-card';
+        div.id = 'msg-' + key;
+        div.innerHTML = `
+            <div style="font-size:13px; font-weight:bold; margin-bottom:5px;">${msg.question}</div>
+            ${msg.options.map((opt, i) => `
+                <div class="poll-option" onclick="votePoll('${key}', ${i})">
+                    <img src="${opt.capa}" alt="${opt.titulo}" onerror="this.style.display='none'">
+                    <span>${opt.titulo}</span>
+                    <span class="poll-vote-count" id="poll-vote-${key}-${i}">${opt.votes || 0} votos</span>
+                </div>
+            `).join('')}
+        `;
+        chatBox.appendChild(div);
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function votePoll(key, optionIndex) {
+        const pollRef = roomRef.child('chat').child(key);
+        pollRef.once('value', snapshot => {
+            const poll = snapshot.val();
+            if (!poll || poll.voters?.[currentUser.uid]) return;
+            poll.options[optionIndex].votes = (poll.options[optionIndex].votes || 0) + 1;
+            if (!poll.voters) poll.voters = {};
+            poll.voters[currentUser.uid] = optionIndex;
+            pollRef.update({ options: poll.options, voters: poll.voters });
+            const voteEl = document.getElementById(`poll-vote-${key}-${optionIndex}`);
+            if (voteEl) voteEl.innerText = poll.options[optionIndex].votes + ' votos';
         });
+    }
+
+    // =============================================
+    //  UTILITÁRIOS
+    // =============================================
+    function formatTime(s) {
+        if (!s || isNaN(s)) return '00:00';
+        const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = Math.floor(s % 60);
+        return h > 0
+            ? `${h}:${m.toString().padStart(2,'0')}:${sec.toString().padStart(2,'0')}`
+            : `${m.toString().padStart(2,'0')}:${sec.toString().padStart(2,'0')}`;
+    }
+
+    function goToPremium() {
+        alert('Redirecionando para página Premium...');
+        closePremiumPopup();
+    }
+
+    function closePremiumPopup() {
+        document.getElementById('premium-popup').classList.remove('active');
+    }
+
+    // =============================================
+    //  EVENTOS DE INPUT
+    // =============================================
+    document.getElementById('send-msg').onclick = sendMessage;
+    chatInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); sendMessage(); }
+    });
+
+    // Prevenir zoom no iOS ao focar no input
+    chatInput.addEventListener('focus', () => {
+        if (isIOSDevice) {
+            document.querySelector('meta[name=viewport]').setAttribute('content',
+                'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
+        }
+    });
     </script>
 </body>
 </html>
-
