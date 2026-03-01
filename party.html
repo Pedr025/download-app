@@ -349,6 +349,7 @@
                             <span id="time-display">00:00 / 00:00</span>
                         </div>
                         <div id="user-control-group" style="display:none; align-items:center; gap:15px;">
+                            <i class="fas fa-play" id="play-pause-user" style="cursor:pointer;"></i>
                             <span id="time-display-user">00:00 / 00:00</span>
                         </div>
                         <div style="display:flex; gap:15px;">
@@ -404,7 +405,7 @@
         // CONFIGURAÇÃO FIREBASE
         const firebaseConfig = {
             apiKey: "AIzaSyB0IJNOMSnpHEazCNA7Nu02gsbAUNvmIYE",
-            authDomain: "filmesrave.com", // Domínio customizado configurado
+            authDomain: "nupmatch---filmes-com-amigos.firebaseapp.com", // Voltando para o padrão do Firebase para garantir o redirecionamento
             databaseURL: "https://nupmatch---filmes-com-amigos-default-rtdb.firebaseio.com",
             projectId: "nupmatch---filmes-com-amigos",
             storageBucket: "nupmatch---filmes-com-amigos.firebasestorage.app",
@@ -460,7 +461,22 @@
         });
 
         document.getElementById('google-login').onclick = () => {
-            auth.signInWithRedirect(new firebase.auth.GoogleAuthProvider());
+            const provider = new firebase.auth.GoogleAuthProvider();
+            // Forçar o uso de popup no iOS se o redirect estiver falhando
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+            if (isIOS) {
+                auth.signInWithPopup(provider).then(result => {
+                    if (result.user) {
+                        currentUser = result.user;
+                        checkUserRole();
+                    }
+                }).catch(err => {
+                    console.log("Popup blocked or failed, trying redirect...", err);
+                    auth.signInWithRedirect(provider);
+                });
+            } else {
+                auth.signInWithRedirect(provider);
+            }
         };
 
         async function checkUserRole() {
@@ -694,7 +710,6 @@
             chatBox.appendChild(div);
             chatBox.scrollTop = chatBox.scrollHeight;
         }
-
         // --- ENQUETE ---
         document.getElementById('open-poll-btn').onclick = () => {
             if (!userData.isPremium) {
@@ -737,7 +752,153 @@
             `).join('');
         }
 
-         // --- FUNÇÕES PREMIUM ---
+        window.removePollOption = (idx) => {
+            selectedPollOptions.splice(idx, 1);
+            renderSelectedOptions();
+        };
+
+        document.getElementById('confirm-poll').onclick = () => {
+            const msg = document.getElementById('poll-msg').value;
+            if (!msg || selectedPollOptions.length === 0) return;
+            roomRef.child('chat').push({
+                type: 'poll',
+                uid: currentUser.uid,
+                name: currentUser.displayName,
+                photo: currentUser.photoURL,
+                text: msg,
+                options: selectedPollOptions.map(o => ({ 
+                    id: o.id, 
+                    titulo: o.titulo, 
+                    capa: o.capa, 
+                    link: o.link_mp4,
+                    tipo: o.tipo,
+                    episodios: o.episodios || null
+                })),
+                votes: {}
+            });
+            document.getElementById('poll-modal').classList.remove('active');
+            document.getElementById('poll-msg').value = '';
+            selectedPollOptions = [];
+        };
+
+        function renderPoll(poll, key) {
+            const div = document.createElement('div');
+            div.className = 'poll-card';
+            div.id = 'msg-' + key;
+            
+            const totalVotes = Object.keys(poll.votes || {}).length;
+            
+            div.innerHTML = `
+                <div class="poll-creator">
+                    <img src="${poll.photo}"> <span>${poll.name} criou uma enquete</span>
+                </div>
+                <div style="font-weight:bold; margin-bottom:10px;">${poll.text}</div>
+                ${poll.options.map(opt => {
+                    const optionVotes = Object.values(poll.votes || {}).filter(v => v === opt.id).length;
+                    const votePercentage = totalVotes > 0 ? Math.round((optionVotes / totalVotes) * 100) : 0;
+                    return `
+                        <div class="poll-option" onclick="handlePollVote('${opt.id}', '${key}')">
+                            <img src="${opt.capa}">
+                            <span>${opt.titulo}</span>
+                            <div class="poll-vote-count">${optionVotes} ${optionVotes === 1 ? 'voto' : 'votos'} (${votePercentage}%)</div>
+                        </div>
+                    `;
+                }).join('')}
+                <div style="font-size:10px; color:#aaa; margin-top:10px; text-align:center;">Total: ${totalVotes} ${totalVotes === 1 ? 'voto' : 'votos'}</div>
+            `;
+            chatBox.appendChild(div);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        window.handlePollVote = (movieId, pollKey) => {
+            roomRef.child('chat').child(pollKey).get().then(snap => {
+                const poll = snap.val();
+                const option = poll.options.find(o => o.id == movieId);
+                
+                if (option) {
+                    const votes = poll.votes || {};
+                    votes[currentUser.uid] = movieId;
+                    roomRef.child('chat').child(pollKey).update({ votes });
+                    
+                    if (userData.isAdmin) {
+                        if (option.tipo === 'serie') {
+                            showEpisodes(option);
+                        } else {
+                            updateVideo(option.link);
+                        }
+                    }
+                }
+            });
+        };
+
+        // --- MUDAR FILME / SÉRIE ---
+        function handleSelect(item) {
+            if (item.tipo === 'serie') {
+                showEpisodes(item);
+            } else {
+                updateVideo(item.link_mp4);
+                document.getElementById('admin-modal').classList.remove('active');
+            }
+        }
+
+        function showEpisodes(serie) {
+            document.getElementById('series-title').innerText = serie.titulo;
+            const container = document.getElementById('episodes-container');
+            container.innerHTML = '';
+            
+            if (serie.episodios && Array.isArray(serie.episodios)) {
+                serie.episodios.forEach((ep) => {
+                    const btn = document.createElement('div');
+                    btn.className = 'ep-item';
+                    const label = `T${ep.temporada || 1} EP${ep.episodio || '?'}`;
+                    btn.innerText = label;
+                    btn.onclick = () => {
+                        updateVideo(ep.link_mp4);
+                        document.getElementById('episodes-modal').classList.remove('active');
+                        document.getElementById('admin-modal').classList.remove('active');
+                    };
+                    container.appendChild(btn);
+                });
+            } else {
+                const btn = document.createElement('div');
+                btn.className = 'ep-item';
+                btn.innerText = `Iniciar Série (EP1)`;
+                btn.onclick = () => {
+                    updateVideo(serie.link_mp4);
+                    document.getElementById('episodes-modal').classList.remove('active');
+                    document.getElementById('admin-modal').classList.remove('active');
+                };
+                container.appendChild(btn);
+            }
+            document.getElementById('episodes-modal').classList.add('active');
+        }
+
+        function updateVideo(url) {
+            if (!userData.isAdmin) return;
+            video.muted = true;
+            video.src = url;
+            bgVideo.src = url;
+            video.load();
+            roomRef.child('sync').set({ url: url, time: 0, playing: true, sender: currentUser.uid });
+        }
+
+        // --- BUSCA ADMIN ---
+        document.getElementById('admin-search').oninput = (e) => {
+            const query = e.target.value.toLowerCase();
+            const results = allMovies.filter(m => m.titulo.toLowerCase().includes(query)).slice(0, 10);
+            const container = document.getElementById('admin-results');
+            container.innerHTML = results.map(item => `
+                <div class="search-item" onclick='handleSelect(${JSON.stringify(item).replace(/'/g, "&apos;")})'>
+                    <img src="${item.capa}">
+                    <div class="search-item-info">
+                        <div class="search-item-title">${item.titulo}</div>
+                        <div class="search-item-type">${item.tipo}</div>
+                    </div>
+                </div>
+            `).join('');
+        };
+
+        // --- FUNÇÕES PREMIUM ---
         function goToPremium() {
             window.location.href = 'premium.html';
         }
@@ -756,15 +917,39 @@
         });
         
         document.getElementById('play-pause').onclick = () => {
-            if (!userData.isAdmin) return;
+            togglePlay();
+        };
+
+        // Novo botão de play para usuários comuns (iOS fix)
+        document.getElementById('play-pause-user').onclick = () => {
+            togglePlay();
+        };
+
+        function togglePlay() {
             if (video.paused) {
-                video.muted = true;
-                video.play().catch(err => console.log('Play failed:', err));
+                video.muted = false; // Tentar desmutar ao clicar
+                video.play().then(() => {
+                    // Após o play manual, sincronizar com o tempo do Firebase
+                    roomRef.child('sync').once('value', snapshot => {
+                        const data = snapshot.val();
+                        if (data && Math.abs(video.currentTime - data.time) > 2) {
+                            video.currentTime = data.time;
+                        }
+                    });
+                }).catch(err => {
+                    console.log('Play failed, trying muted:', err);
+                    video.muted = true;
+                    video.play();
+                });
             } else {
                 video.pause();
             }
-            roomRef.child('sync').update({ playing: !video.paused, time: video.currentTime });
-        };
+            
+            // Apenas admin atualiza o estado global no Firebase
+            if (userData.isAdmin) {
+                roomRef.child('sync').update({ playing: !video.paused, time: video.currentTime });
+            }
+        }
         
         // Seekbar - apenas para admins
         document.getElementById('seekbar').addEventListener('click', (e) => {
@@ -782,6 +967,11 @@
                 document.getElementById('time-display').innerText = timeStr;
                 document.getElementById('time-display-user').innerText = timeStr;
             }
+            
+            // Atualizar ícone de play/pause para todos
+            const icon = video.paused ? 'fa-play' : 'fa-pause';
+            document.getElementById('play-pause').className = 'fas ' + icon;
+            document.getElementById('play-pause-user').className = 'fas ' + icon;
         };
 
         function formatTime(s) {
