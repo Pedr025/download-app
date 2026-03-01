@@ -36,8 +36,8 @@
         /* PLAYER SECTION */
         .player-section { position: relative; width: 100%; flex: 0 0 auto; aspect-ratio: 16 / 9; background: #000; z-index: 10; min-height: 0; }
         @media (min-width: 1024px) { .player-section { flex: 1; height: 100%; aspect-ratio: auto; } }
-        .player-wrapper { width: 100%; height: 100%; position: relative; overflow: hidden; display: block; }
-        video { width: 100% !important; height: 100% !important; object-fit: contain; display: block; background: #000; }
+        .player-wrapper { width: 100%; height: 100%; position: relative; overflow: hidden; display: block; -webkit-user-select: none; user-select: none; }
+        video { width: 100% !important; height: 100% !important; object-fit: contain; display: block; background: #000; position: relative; z-index: 10; }
 
         /* OVERLAYS */
         .player-info-overlay {
@@ -317,7 +317,7 @@
         </div>
     </div>
 
-	    <!-- POP-UP PREMIUM -->
+    <!-- POP-UP PREMIUM -->
     <div class="premium-popup" id="premium-popup">
         <div class="premium-content">
             <div class="premium-icon"><i class="fas fa-crown"></i></div>
@@ -334,7 +334,7 @@
         <!-- PLAYER -->
         <div class="player-section">
             <div class="player-wrapper" id="player-wrapper">
-                <video id="main-video" playsinline webkit-playsinline muted="muted" crossorigin="anonymous" controls></video>
+                <video id="main-video" playsinline webkit-playsinline muted="muted" crossorigin="anonymous"></video>
                 <div class="player-info-overlay">
                     <div id="premium-badge-area"></div>
                     <div class="badge viewers" id="viewer-count"><i class="fas fa-eye"></i> 1 assistindo</div>
@@ -543,24 +543,18 @@
                 if (video.src !== data.url) { 
                     video.src = data.url; 
                     bgVideo.src = data.url;
-                    // No iOS, carregar o vídeo explicitamente
-                    if (isIOSBrowser) {
-                        video.load();
-                    }
+                    video.load();
                 }
                 if (Math.abs(video.currentTime - data.time) > 2) video.currentTime = data.time;
                 if (data.playing && video.paused) {
-                    // No iOS, tentar sem mute primeiro se for o admin ou se o usuário clicar
-                    if (isIOSBrowser && !userData.isAdmin) {
+                    // Admins sempre com som, usuários comuns com mute (exceto iOS com interação)
+                    if (userData.isAdmin) {
                         video.muted = false;
                     } else {
                         video.muted = true;
                     }
                     video.play().catch(err => {
                         console.log('Play failed:', err);
-                        // Fallback: tentar com mute
-                        video.muted = true;
-                        video.play().catch(e => console.log('Muted play failed:', e));
                     });
                 }
                 else if (!data.playing && !video.paused) video.pause();
@@ -627,7 +621,8 @@
             chatInput.value = '';
             chatInput.blur();
         }
-	        function lockChat() {
+
+        function lockChat() {
             isChatLocked = true;
             document.getElementById('chat-lock').classList.add('active');
             let timeLeft = 120;
@@ -699,8 +694,7 @@
                     openModerationPopup(msg, key);
                 };
             }
-            
-            div.innerHTML = `
+	            div.innerHTML = `
                 <div class="msg-avatar" style="${msg.photo ? `background-image:url(${msg.photo})` : ''}">${msg.photo ? '' : msg.name.charAt(0)}</div>
                 <div class="msg-body">
                     ${msg.replyTo ? `<div class="reply-preview"><strong>@${msg.replyTo.name}:</strong> ${msg.replyTo.text.substring(0,30)}...</div>` : ''}
@@ -1001,8 +995,12 @@
             
             // Atualizar ícone de play/pause para todos
             const icon = video.paused ? 'fa-play' : 'fa-pause';
-            document.getElementById('play-pause').className = 'fas ' + icon;
-            document.getElementById('play-pause-user').className = 'fas ' + icon;
+            if (document.getElementById('play-pause')) {
+                document.getElementById('play-pause').className = 'fas ' + icon;
+            }
+            if (document.getElementById('play-pause-user')) {
+                document.getElementById('play-pause-user').className = 'fas ' + icon;
+            }
         };
 
         function formatTime(s) {
@@ -1024,7 +1022,7 @@
             }
         };
 
-        // Suporte para iOS - Permitir fullscreen no vídeo
+        // Suporte para fullscreen
         video.addEventListener('fullscreenchange', () => {
             if (document.fullscreenElement) {
                 video.style.width = '100%';
@@ -1032,7 +1030,7 @@
             }
         });
 
-        // Suporte para iOS - Tratar erros de reprodução
+        // Tratar erros de reprodução
         video.addEventListener('error', (e) => {
             console.error('Erro de vídeo:', e);
             const error = video.error;
@@ -1056,58 +1054,34 @@
 
         // Suporte para iOS - Permitir reprodução com gesto de toque
         document.addEventListener('touchend', () => {
-            if (video.paused && currentUser) {
-                // No iOS, tentar desmutar ao tocar
-                if (isIOSBrowser) {
-                    video.muted = false;
-                } else if (userData.isAdmin) {
-                    video.muted = true;
-                }
+            if (video.paused && currentUser && userData.isAdmin) {
+                video.muted = false;
                 video.play().catch(err => {
                     console.log('Play failed on touch:', err);
-                    // Fallback: tentar com mute
-                    video.muted = true;
-                    video.play().catch(e => console.log('Muted play failed on touch:', e));
                 });
             }
         }, false);
         
-	        // Monitorar eventos do player nativo no iOS
-        if (isIOSBrowser) {
-            video.addEventListener('play', () => {
-                console.log('Video play event triggered');
-                // Sincronizar com Firebase quando o usuário clicar play no controle nativo
-                if (userData.isAdmin) {
-                    roomRef.child('sync').update({ playing: true, time: video.currentTime });
-                }
-            });
-            
-            video.addEventListener('pause', () => {
-                console.log('Video pause event triggered');
-                // Sincronizar com Firebase quando o usuário clicar pause no controle nativo
-                if (userData.isAdmin) {
-                    roomRef.child('sync').update({ playing: false, time: video.currentTime });
-                }
-            });
-            
-            video.addEventListener('seeking', () => {
-                console.log('Video seeking to:', video.currentTime);
-                // Sincronizar seek com Firebase (apenas admin)
-                if (userData.isAdmin) {
-                    roomRef.child('sync').update({ time: video.currentTime });
-                }
-            });
-            
-            video.addEventListener('loadstart', () => {
-                console.log('Video loading started');
-            });
-            
-            video.addEventListener('canplay', () => {
-                console.log('Video can play');
-            });
-        }
+        // Monitorar eventos do player para sincronização (apenas admins)
+        video.addEventListener('play', () => {
+            if (userData && userData.isAdmin) {
+                roomRef.child('sync').update({ playing: true, time: video.currentTime });
+            }
+        });
+        
+        video.addEventListener('pause', () => {
+            if (userData && userData.isAdmin) {
+                roomRef.child('sync').update({ playing: false, time: video.currentTime });
+            }
+        });
+        
+        video.addEventListener('seeking', () => {
+            if (userData && userData.isAdmin) {
+                roomRef.child('sync').update({ time: video.currentTime });
+            }
+        });
 
-        // Prevenir zoom ao focar em input no iOS
+        // Prevenir zoom ao focar em input
         document.addEventListener('touchstart', function(e) {
             if (e.target.tagName === 'INPUT') {
                 e.target.style.fontSize = '16px';
