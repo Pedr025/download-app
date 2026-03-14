@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WebStudio - Venda de Templates Premium</title>
+    <title>Sites Lucrativos - Venda de Templates Premium</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
     <style>
@@ -37,6 +37,7 @@
         .carousel-item {
             min-width: 100%;
             flex-shrink: 0;
+            position: relative;
         }
 
         .glow-effect {
@@ -58,11 +59,27 @@
             border-radius: 12px;
             overflow: hidden;
             transition: all 0.3s ease;
+            position: relative;
         }
 
         .product-card:hover {
             border-color: rgba(0, 212, 255, 0.6);
             box-shadow: 0 0 30px rgba(0, 212, 255, 0.2);
+        }
+
+        .promotion-badge {
+            position: absolute;
+            top-4;
+            right-4;
+            background: linear-gradient(135deg, #ff006e, #ff4757);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            z-index: 10;
         }
 
         .btn-primary {
@@ -140,6 +157,89 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
+
+        .horizontal-scroll {
+            display: flex;
+            overflow-x: auto;
+            scroll-behavior: smooth;
+            gap: 1.5rem;
+            padding: 2rem 0;
+            scroll-snap-type: x mandatory;
+        }
+
+        .horizontal-scroll::-webkit-scrollbar {
+            height: 6px;
+        }
+
+        .horizontal-scroll::-webkit-scrollbar-track {
+            background: rgba(0, 212, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        .horizontal-scroll::-webkit-scrollbar-thumb {
+            background: rgba(0, 212, 255, 0.3);
+            border-radius: 10px;
+        }
+
+        .horizontal-scroll::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 212, 255, 0.6);
+        }
+
+        .benefit-card {
+            flex-shrink: 0;
+            width: 300px;
+            scroll-snap-align: start;
+            background: linear-gradient(135deg, #1a1f3a 0%, #16213e 100%);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-radius: 12px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .benefit-card:hover {
+            border-color: rgba(0, 212, 255, 0.6);
+            box-shadow: 0 0 30px rgba(0, 212, 255, 0.2);
+        }
+
+        .benefit-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #00d4ff, #0099ff);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+        }
+
+        .hero-content {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 2rem;
+            background: linear-gradient(to right, rgba(10, 14, 39, 0.95) 0%, rgba(10, 14, 39, 0.7) 50%, transparent 100%);
+            z-index: 10;
+        }
+
+        @media (max-width: 768px) {
+            .hero-content {
+                background: linear-gradient(to right, rgba(10, 14, 39, 0.98) 0%, rgba(10, 14, 39, 0.85) 100%);
+                padding: 1.5rem;
+                justify-content: flex-end;
+                padding-bottom: 3rem;
+            }
+
+            .hero-content h1 {
+                font-size: 2rem !important;
+            }
+
+            .hero-content p {
+                font-size: 0.875rem !important;
+            }
+        }
     </style>
 </head>
 <body>
@@ -149,9 +249,9 @@
         <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
             <div class="flex items-center space-x-2">
                 <div class="w-10 h-10 bg-gradient-to-br from-cyan-400 to-blue-600 rounded-lg flex items-center justify-center">
-                    <span class="text-white font-black text-lg">WS</span>
+                    <span class="text-white font-black text-lg">SL</span>
                 </div>
-                <span class="text-xl font-black gradient-text">WebStudio</span>
+                <span class="text-xl font-black gradient-text">Sites Lucrativos</span>
             </div>
 
             <div class="hidden md:flex space-x-8">
@@ -178,12 +278,12 @@
             <!-- Slide 1: Site de Shorts Filmes/Vídeos -->
             <div class="carousel-item relative w-full h-full">
                 <img src="https://cdn.dribbble.com/userupload/24335833/file/original-738006328a326650b1985eaa9d2ad5a5.png?resize=1600x1200&vertical=center" alt="Site de Shorts" class="w-full h-full object-cover">
-                <div class="absolute inset-0 bg-gradient-to-r from-[#0a0e27] via-transparent to-[#0a0e27] flex flex-col justify-center items-start pl-12 md:pl-20">
+                <div class="hero-content">
                     <div class="badge mb-4">NOVO PROJETO</div>
-                    <h1 class="text-5xl md:text-7xl nike-bold mb-6 max-w-2xl">Site de Shorts Filmes/Vídeos</h1>
-                    <p class="text-lg text-gray-300 mb-8 max-w-xl">Plataforma moderna para compartilhamento de conteúdo em vídeo curto. Design responsivo e otimizado para conversão.</p>
-                    <div class="flex space-x-4">
-                        <button class="btn-primary">Comprar Agora</button>
+                    <h1 class="text-4xl md:text-6xl nike-bold mb-4 md:mb-6 max-w-2xl">Site de Shorts Filmes/Vídeos</h1>
+                    <p class="text-base md:text-lg text-gray-300 mb-6 md:mb-8 max-w-xl">Plataforma moderna para compartilhamento de conteúdo em vídeo curto. Design responsivo e otimizado para conversão.</p>
+                    <div class="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4">
+                        <button onclick="window.location.href='produto.html'" class="btn-primary">Comprar Agora</button>
                         <button class="btn-secondary">Ver Detalhes</button>
                     </div>
                 </div>
@@ -192,12 +292,12 @@
             <!-- Slide 2: Streaming de Filmes/Séries -->
             <div class="carousel-item relative w-full h-full">
                 <img src="https://cdn.dribbble.com/userupload/15085856/file/original-ab41d881a2e4ea86c6cbdc82a7f3ed76.png?resize=1200x900&vertical=center" alt="Streaming" class="w-full h-full object-cover">
-                <div class="absolute inset-0 bg-gradient-to-r from-[#0a0e27] via-transparent to-[#0a0e27] flex flex-col justify-center items-start pl-12 md:pl-20">
+                <div class="hero-content">
                     <div class="badge mb-4">PREMIUM</div>
-                    <h1 class="text-5xl md:text-7xl nike-bold mb-6 max-w-2xl">Streaming de Filmes/Séries</h1>
-                    <p class="text-lg text-gray-300 mb-8 max-w-xl">Plataforma completa de streaming responsiva. Sistema de categorias, recomendações e interface intuitiva.</p>
-                    <div class="flex space-x-4">
-                        <button class="btn-primary">Comprar Agora</button>
+                    <h1 class="text-4xl md:text-6xl nike-bold mb-4 md:mb-6 max-w-2xl">Streaming de Filmes/Séries</h1>
+                    <p class="text-base md:text-lg text-gray-300 mb-6 md:mb-8 max-w-xl">Plataforma completa de streaming responsiva. Sistema de recomendações inteligente, perfis de usuário e interface intuitiva.</p>
+                    <div class="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4">
+                        <button onclick="window.location.href='produto.html'" class="btn-primary">Comprar Agora</button>
                         <button class="btn-secondary">Ver Detalhes</button>
                     </div>
                 </div>
@@ -225,8 +325,68 @@
         </div>
     </section>
 
+    <!-- Benefits Horizontal Scroll Section -->
+    <section class="max-w-7xl mx-auto px-6 py-20 border-t border-[rgba(0,212,255,0.1)]">
+        <h2 class="text-4xl nike-bold mb-8">Por que escolher Sites Lucrativos?</h2>
+        <div class="horizontal-scroll" id="benefitsScroll">
+            <!-- Benefit 1: 7 Days Refund -->
+            <div class="benefit-card">
+                <div class="benefit-icon">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                </div>
+                <h3 class="text-xl font-bold mb-3">7 Dias para Reembolso</h3>
+                <p class="text-gray-400">Não gostou? Devolvemos 100% do seu dinheiro em 7 dias, sem perguntas.</p>
+            </div>
+
+            <!-- Benefit 2: 24/7 Support -->
+            <div class="benefit-card">
+                <div class="benefit-icon">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                </div>
+                <h3 class="text-xl font-bold mb-3">Suporte 24/7</h3>
+                <p class="text-gray-400">Equipe disponível 24 horas, 7 dias da semana para ajudar você.</p>
+            </div>
+
+            <!-- Benefit 3: Mobile & PC -->
+            <div class="benefit-card">
+                <div class="benefit-icon">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                </div>
+                <h3 class="text-xl font-bold mb-3">Gerencie em Qualquer Lugar</h3>
+                <p class="text-gray-400">Administre e lance seu site tanto pelo celular quanto pelo PC, sempre sincronizado.</p>
+            </div>
+
+            <!-- Benefit 4: Totalmente Responsivo -->
+            <div class="benefit-card">
+                <div class="benefit-icon">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                </div>
+                <h3 class="text-xl font-bold mb-3">Totalmente Responsivo</h3>
+                <p class="text-gray-400">Funciona perfeitamente em todos os dispositivos e tamanhos de tela.</p>
+            </div>
+
+            <!-- Benefit 5: Fácil Customização -->
+            <div class="benefit-card">
+                <div class="benefit-icon">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path></svg>
+                </div>
+                <h3 class="text-xl font-bold mb-3">Fácil Customização</h3>
+                <p class="text-gray-400">Código limpo e bem organizado para personalizações rápidas.</p>
+            </div>
+
+            <!-- Benefit 6: Suporte Completo -->
+            <div class="benefit-card">
+                <div class="benefit-icon">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                </div>
+                <h3 class="text-xl font-bold mb-3">Suporte Completo</h3>
+                <p class="text-gray-400">Receba suporte técnico e atualizações regulares do template.</p>
+            </div>
+        </div>
+    </section>
+
     <!-- Projects Section -->
-    <section id="projects" class="max-w-7xl mx-auto px-6 py-20">
+    <section id="projects" class="max-w-7xl mx-auto px-6 py-20 border-t border-[rgba(0,212,255,0.1)]">
         <div class="mb-16">
             <h2 class="text-5xl nike-bold mb-4">Projetos Disponíveis</h2>
             <p class="text-gray-400 text-lg">Escolha entre nossos templates premium e comece seu negócio hoje</p>
@@ -235,11 +395,9 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
             <!-- Product 1 -->
             <div class="product-card hover-lift">
+                <div class="promotion-badge">EM PROMOÇÃO</div>
                 <div class="relative h-80 overflow-hidden bg-gradient-to-br from-[#1a1f3a] to-[#0f1628]">
                     <img src="https://cdn.dribbble.com/userupload/24335833/file/original-738006328a326650b1985eaa9d2ad5a5.png?resize=1600x1200&vertical=center" alt="Site de Shorts" class="w-full h-full object-cover opacity-80 hover:opacity-100 transition duration-300">
-                    <div class="absolute top-4 right-4">
-                        <span class="badge">NOVO</span>
-                    </div>
                 </div>
                 <div class="p-8">
                     <h3 class="text-2xl font-bold mb-3">Site de Shorts Filmes/Vídeos</h3>
@@ -254,18 +412,16 @@
                             <p class="text-2xl font-bold">4.9★</p>
                         </div>
                     </div>
-                    <button class="btn-primary w-full mb-3">Comprar Agora</button>
+                    <button onclick="window.location.href='produto.html'" class="btn-primary w-full mb-3">Comprar Agora</button>
                     <button class="btn-secondary w-full">Ver Demonstração</button>
                 </div>
             </div>
 
-            <!-- Product 2 -->
+	            <!-- Product 2 -->
             <div class="product-card hover-lift">
+                <div class="promotion-badge">EM PROMOÇÃO</div>
                 <div class="relative h-80 overflow-hidden bg-gradient-to-br from-[#1a1f3a] to-[#0f1628]">
                     <img src="https://cdn.dribbble.com/userupload/15085856/file/original-ab41d881a2e4ea86c6cbdc82a7f3ed76.png?resize=1200x900&vertical=center" alt="Streaming" class="w-full h-full object-cover opacity-80 hover:opacity-100 transition duration-300">
-                    <div class="absolute top-4 right-4">
-                        <span class="badge">PREMIUM</span>
-                    </div>
                 </div>
                 <div class="p-8">
                     <h3 class="text-2xl font-bold mb-3">Streaming de Filmes/Séries</h3>
@@ -280,39 +436,9 @@
                             <p class="text-2xl font-bold">5.0★</p>
                         </div>
                     </div>
-                    <button class="btn-primary w-full mb-3">Comprar Agora</button>
+                    <button onclick="window.location.href='produto.html'" class="btn-primary w-full mb-3">Comprar Agora</button>
                     <button class="btn-secondary w-full">Ver Demonstração</button>
                 </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Features Section -->
-    <section class="max-w-7xl mx-auto px-6 py-20 border-t border-[rgba(0,212,255,0.1)]">
-        <h2 class="text-4xl nike-bold mb-12">Por que escolher nossos templates?</h2>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div class="p-8 rounded-lg border border-[rgba(0,212,255,0.2)] hover:border-[rgba(0,212,255,0.6)] transition">
-                <div class="w-12 h-12 bg-gradient-to-br from-cyan-400 to-blue-600 rounded-lg flex items-center justify-center mb-4">
-                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                </div>
-                <h3 class="text-xl font-bold mb-3">Totalmente Responsivo</h3>
-                <p class="text-gray-400">Funciona perfeitamente em todos os dispositivos e tamanhos de tela.</p>
-            </div>
-
-            <div class="p-8 rounded-lg border border-[rgba(0,212,255,0.2)] hover:border-[rgba(0,212,255,0.6)] transition">
-                <div class="w-12 h-12 bg-gradient-to-br from-cyan-400 to-blue-600 rounded-lg flex items-center justify-center mb-4">
-                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path></svg>
-                </div>
-                <h3 class="text-xl font-bold mb-3">Fácil Customização</h3>
-                <p class="text-gray-400">Código limpo e bem organizado para personalizações rápidas.</p>
-            </div>
-
-            <div class="p-8 rounded-lg border border-[rgba(0,212,255,0.2)] hover:border-[rgba(0,212,255,0.6)] transition">
-                <div class="w-12 h-12 bg-gradient-to-br from-cyan-400 to-blue-600 rounded-lg flex items-center justify-center mb-4">
-                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                </div>
-                <h3 class="text-xl font-bold mb-3">Suporte Completo</h3>
-                <p class="text-gray-400">Receba suporte técnico e atualizações regulares do template.</p>
             </div>
         </div>
     </section>
@@ -336,9 +462,9 @@
                 <div>
                     <div class="flex items-center space-x-2 mb-4">
                         <div class="w-8 h-8 bg-gradient-to-br from-cyan-400 to-blue-600 rounded-lg flex items-center justify-center">
-                            <span class="text-white font-black text-sm">WS</span>
+                            <span class="text-white font-black text-sm">SL</span>
                         </div>
-                        <span class="font-black gradient-text">WebStudio</span>
+                        <span class="font-black gradient-text">Sites Lucrativos</span>
                     </div>
                     <p class="text-gray-400 text-sm">Templates premium para seu negócio digital.</p>
                 </div>
@@ -372,7 +498,7 @@
             </div>
 
             <div class="border-t border-[rgba(0,212,255,0.1)] pt-8 flex flex-col md:flex-row justify-between items-center text-gray-400 text-sm">
-                <p>© 2024 WebStudio. Todos os direitos reservados.</p>
+                <p>© 2024 Sites Lucrativos. Todos os direitos reservados.</p>
                 <div class="flex space-x-6 mt-4 md:mt-0">
                     <a href="#" class="hover:text-[#00d4ff] transition">Twitter</a>
                     <a href="#" class="hover:text-[#00d4ff] transition">Instagram</a>
@@ -382,7 +508,7 @@
         </div>
     </footer>
 
-	    <script>
+    <script>
         let currentSlide = 0;
         const slides = document.querySelectorAll('.carousel-item');
         const totalSlides = slides.length;
