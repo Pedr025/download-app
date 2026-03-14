@@ -3,153 +3,427 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nike Inspired UI - Just Do It</title>
+    <title>WebStudio - Venda de Templates Premium</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
     <style>
-        body {
+        * {
             font-family: 'Inter', sans-serif;
         }
+        
+        body {
+            background-color: #0a0e27;
+            color: #ffffff;
+        }
+
         .nike-bold {
             font-weight: 900;
             text-transform: uppercase;
             letter-spacing: -0.05em;
         }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #00d4ff, #0099ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .carousel {
+            display: flex;
+            transition: transform 0.5s ease-in-out;
+        }
+
+        .carousel-item {
+            min-width: 100%;
+            flex-shrink: 0;
+        }
+
+        .glow-effect {
+            box-shadow: 0 0 30px rgba(0, 212, 255, 0.3);
+        }
+
+        .hover-lift {
+            transition: all 0.3s ease;
+        }
+
+        .hover-lift:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 212, 255, 0.2);
+        }
+
+        .product-card {
+            background: linear-gradient(135deg, #1a1f3a 0%, #16213e 100%);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .product-card:hover {
+            border-color: rgba(0, 212, 255, 0.6);
+            box-shadow: 0 0 30px rgba(0, 212, 255, 0.2);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #00d4ff, #0099ff);
+            color: #0a0e27;
+            font-weight: 700;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 32px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: #00d4ff;
+            font-weight: 700;
+            border: 2px solid #00d4ff;
+            border-radius: 8px;
+            padding: 10px 28px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            background: #00d4ff;
+            color: #0a0e27;
+        }
+
+        .nav-link {
+            position: relative;
+            font-weight: 600;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: color 0.3s ease;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: #00d4ff;
+            transition: width 0.3s ease;
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        .scroll-indicator {
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(10px); }
+        }
+
+        .badge {
+            background: linear-gradient(135deg, #ff006e, #00d4ff);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
     </style>
 </head>
-<body class="bg-white text-black">
+<body>
 
-    <!-- Top Utility Bar -->
-    <div class="bg-[#f5f5f5] px-12 py-2 flex justify-between items-center text-xs font-medium hidden md:flex">
-        <div class="flex space-x-4">
-            <img src="https://upload.wikimedia.org/wikipedia/en/thumb/3/37/Jumpman_logo.svg/1200px-Jumpman_logo.svg.png" alt="Jordan" class="h-4">
-            <span class="border-l border-gray-300 h-4 mx-2"></span>
-            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a6/Logo_NIKE.svg/1200px-Logo_NIKE.svg.png" alt="SNKRS" class="h-3">
-        </div>
-        <div class="flex space-x-4">
-            <a href="#" class="hover:text-gray-500">Ajuda</a>
-            <span>|</span>
-            <a href="#" class="hover:text-gray-500">Junte-se a nós</a>
-            <span>|</span>
-            <a href="#" class="hover:text-gray-500">Entrar</a>
-        </div>
-    </div>
-
-    <!-- Main Navigation -->
-    <nav class="px-6 md:px-12 py-4 flex justify-between items-center sticky top-0 bg-white z-50">
-        <div class="flex-shrink-0">
-            <svg class="h-16 w-16" viewBox="0 0 24 24" fill="black"><path d="M21 8.719L7.836 14.303C6.74 14.768 5.818 15 5.075 15c-.836 0-1.445-.295-1.819-.884-.485-.76-.273-1.982.559-3.272.494-.754 1.122-1.446 1.734-2.108-.144.234-1.415 2.349-.025 3.345.275.2.666.298 1.147.298.386 0 .829-.063 1.316-.19L21 8.719z"></path></svg>
-        </div>
-        <div class="hidden md:flex space-x-6 font-bold uppercase text-sm tracking-tight">
-            <a href="#" class="hover:border-b-2 border-black pb-1">Lançamentos</a>
-            <a href="#" class="hover:border-b-2 border-black pb-1">Masculino</a>
-            <a href="#" class="hover:border-b-2 border-black pb-1">Feminino</a>
-            <a href="#" class="hover:border-b-2 border-black pb-1">Infantil</a>
-            <a href="#" class="hover:border-b-2 border-black pb-1">Ofertas</a>
-        </div>
-        <div class="flex items-center space-x-4">
-            <div class="relative hidden sm:block">
-                <input type="text" placeholder="Buscar" class="bg-[#f5f5f5] rounded-full py-2 px-10 focus:outline-none w-40 focus:w-64 transition-all duration-300">
-                <svg class="absolute left-3 top-2.5 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+    <!-- Navigation Bar -->
+    <nav class="fixed top-0 w-full bg-[#0a0e27] bg-opacity-95 backdrop-blur-md z-50 border-b border-[rgba(0,212,255,0.1)]">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <div class="w-10 h-10 bg-gradient-to-br from-cyan-400 to-blue-600 rounded-lg flex items-center justify-center">
+                    <span class="text-white font-black text-lg">WS</span>
+                </div>
+                <span class="text-xl font-black gradient-text">WebStudio</span>
             </div>
-            <button class="p-2 hover:bg-gray-100 rounded-full">
-                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
-            </button>
-            <button class="p-2 hover:bg-gray-100 rounded-full">
-                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
-            </button>
+
+            <div class="hidden md:flex space-x-8">
+                <a href="#" class="nav-link">Início</a>
+                <a href="#projects" class="nav-link">Projetos</a>
+                <a href="#" class="nav-link">Sobre</a>
+                <a href="#" class="nav-link">Contato</a>
+            </div>
+
+            <div class="flex items-center space-x-4">
+                <button class="p-2 hover:bg-[rgba(0,212,255,0.1)] rounded-lg transition">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                </button>
+                <button class="p-2 hover:bg-[rgba(0,212,255,0.1)] rounded-lg transition">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+                </button>
+            </div>
         </div>
     </nav>
 
-    <!-- Hero Section -->
-    <section class="px-6 md:px-12 mb-12">
-        <div class="relative h-[70vh] w-full overflow-hidden rounded-lg">
-            <img src="https://images.unsplash.com/photo-1556906781-9a412961c28c?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80" alt="Hero Image" class="w-full h-full object-cover">
-            <div class="absolute inset-0 bg-black bg-opacity-20 flex flex-col justify-end p-12 text-white">
-                <p class="text-lg font-medium mb-2">Novo Air Max Dn</p>
-                <h1 class="text-5xl md:text-7xl nike-bold mb-6">Sinta o Irreal</h1>
-                <div class="flex space-x-4">
-                    <button class="bg-white text-black px-6 py-2 rounded-full font-bold hover:bg-gray-200 transition">Comprar</button>
-                    <button class="bg-white text-black px-6 py-2 rounded-full font-bold hover:bg-gray-200 transition">Saiba Mais</button>
+    <!-- Hero Banner with Carousel -->
+    <section class="w-full h-screen mt-16 relative overflow-hidden">
+        <div class="carousel" id="carousel">
+            <!-- Slide 1: Site de Shorts Filmes/Vídeos -->
+            <div class="carousel-item relative w-full h-full">
+                <img src="https://cdn.dribbble.com/userupload/24335833/file/original-738006328a326650b1985eaa9d2ad5a5.png?resize=1600x1200&vertical=center" alt="Site de Shorts" class="w-full h-full object-cover">
+                <div class="absolute inset-0 bg-gradient-to-r from-[#0a0e27] via-transparent to-[#0a0e27] flex flex-col justify-center items-start pl-12 md:pl-20">
+                    <div class="badge mb-4">NOVO PROJETO</div>
+                    <h1 class="text-5xl md:text-7xl nike-bold mb-6 max-w-2xl">Site de Shorts Filmes/Vídeos</h1>
+                    <p class="text-lg text-gray-300 mb-8 max-w-xl">Plataforma moderna para compartilhamento de conteúdo em vídeo curto. Design responsivo e otimizado para conversão.</p>
+                    <div class="flex space-x-4">
+                        <button class="btn-primary">Comprar Agora</button>
+                        <button class="btn-secondary">Ver Detalhes</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 2: Streaming de Filmes/Séries -->
+            <div class="carousel-item relative w-full h-full">
+                <img src="https://cdn.dribbble.com/userupload/15085856/file/original-ab41d881a2e4ea86c6cbdc82a7f3ed76.png?resize=1200x900&vertical=center" alt="Streaming" class="w-full h-full object-cover">
+                <div class="absolute inset-0 bg-gradient-to-r from-[#0a0e27] via-transparent to-[#0a0e27] flex flex-col justify-center items-start pl-12 md:pl-20">
+                    <div class="badge mb-4">PREMIUM</div>
+                    <h1 class="text-5xl md:text-7xl nike-bold mb-6 max-w-2xl">Streaming de Filmes/Séries</h1>
+                    <p class="text-lg text-gray-300 mb-8 max-w-xl">Plataforma completa de streaming responsiva. Sistema de categorias, recomendações e interface intuitiva.</p>
+                    <div class="flex space-x-4">
+                        <button class="btn-primary">Comprar Agora</button>
+                        <button class="btn-secondary">Ver Detalhes</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Carousel Controls -->
+        <button onclick="prevSlide()" class="absolute left-6 top-1/2 -translate-y-1/2 z-40 p-3 bg-[rgba(0,212,255,0.1)] hover:bg-[rgba(0,212,255,0.3)] rounded-full transition">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+        </button>
+        <button onclick="nextSlide()" class="absolute right-6 top-1/2 -translate-y-1/2 z-40 p-3 bg-[rgba(0,212,255,0.1)] hover:bg-[rgba(0,212,255,0.3)] rounded-full transition">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+        </button>
+
+        <!-- Carousel Indicators -->
+        <div class="absolute bottom-8 left-1/2 -translate-x-1/2 flex space-x-3 z-40">
+            <button onclick="goToSlide(0)" class="w-3 h-3 rounded-full bg-[rgba(0,212,255,0.3)] hover:bg-[#00d4ff] transition" id="dot-0"></button>
+            <button onclick="goToSlide(1)" class="w-3 h-3 rounded-full bg-[rgba(0,212,255,0.3)] hover:bg-[#00d4ff] transition" id="dot-1"></button>
+        </div>
+
+        <!-- Scroll Indicator -->
+        <div class="absolute bottom-20 left-1/2 -translate-x-1/2 flex flex-col items-center scroll-indicator">
+            <span class="text-sm text-gray-400 mb-2">Scroll para explorar</span>
+            <svg class="w-5 h-5 text-[#00d4ff]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
+        </div>
+    </section>
+
+    <!-- Projects Section -->
+    <section id="projects" class="max-w-7xl mx-auto px-6 py-20">
+        <div class="mb-16">
+            <h2 class="text-5xl nike-bold mb-4">Projetos Disponíveis</h2>
+            <p class="text-gray-400 text-lg">Escolha entre nossos templates premium e comece seu negócio hoje</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- Product 1 -->
+            <div class="product-card hover-lift">
+                <div class="relative h-80 overflow-hidden bg-gradient-to-br from-[#1a1f3a] to-[#0f1628]">
+                    <img src="https://cdn.dribbble.com/userupload/24335833/file/original-738006328a326650b1985eaa9d2ad5a5.png?resize=1600x1200&vertical=center" alt="Site de Shorts" class="w-full h-full object-cover opacity-80 hover:opacity-100 transition duration-300">
+                    <div class="absolute top-4 right-4">
+                        <span class="badge">NOVO</span>
+                    </div>
+                </div>
+                <div class="p-8">
+                    <h3 class="text-2xl font-bold mb-3">Site de Shorts Filmes/Vídeos</h3>
+                    <p class="text-gray-400 mb-6">Plataforma completa para compartilhamento de vídeos curtos com sistema de categorias, recomendações e interface moderna.</p>
+                    <div class="flex items-center justify-between mb-6">
+                        <div>
+                            <p class="text-gray-500 text-sm">A partir de</p>
+                            <p class="text-3xl font-black gradient-text">R$ 299</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-gray-500 text-sm">Avaliação</p>
+                            <p class="text-2xl font-bold">4.9★</p>
+                        </div>
+                    </div>
+                    <button class="btn-primary w-full mb-3">Comprar Agora</button>
+                    <button class="btn-secondary w-full">Ver Demonstração</button>
+                </div>
+            </div>
+
+            <!-- Product 2 -->
+            <div class="product-card hover-lift">
+                <div class="relative h-80 overflow-hidden bg-gradient-to-br from-[#1a1f3a] to-[#0f1628]">
+                    <img src="https://cdn.dribbble.com/userupload/15085856/file/original-ab41d881a2e4ea86c6cbdc82a7f3ed76.png?resize=1200x900&vertical=center" alt="Streaming" class="w-full h-full object-cover opacity-80 hover:opacity-100 transition duration-300">
+                    <div class="absolute top-4 right-4">
+                        <span class="badge">PREMIUM</span>
+                    </div>
+                </div>
+                <div class="p-8">
+                    <h3 class="text-2xl font-bold mb-3">Streaming de Filmes/Séries</h3>
+                    <p class="text-gray-400 mb-6">Plataforma de streaming responsiva com sistema de recomendações inteligente, perfis de usuário e interface intuitiva.</p>
+                    <div class="flex items-center justify-between mb-6">
+                        <div>
+                            <p class="text-gray-500 text-sm">A partir de</p>
+                            <p class="text-3xl font-black gradient-text">R$ 499</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-gray-500 text-sm">Avaliação</p>
+                            <p class="text-2xl font-bold">5.0★</p>
+                        </div>
+                    </div>
+                    <button class="btn-primary w-full mb-3">Comprar Agora</button>
+                    <button class="btn-secondary w-full">Ver Demonstração</button>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Featured Categories -->
-    <section class="px-6 md:px-12 mb-12">
-        <h2 class="text-2xl font-bold mb-6">Destaques</h2>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div class="relative h-[500px] group cursor-pointer overflow-hidden">
-                <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Category 1" class="w-full h-full object-cover transition duration-500 group-hover:scale-105">
-                <div class="absolute bottom-8 left-8">
-                    <h3 class="text-white text-xl font-bold mb-4">Corrida</h3>
-                    <button class="bg-white text-black px-6 py-2 rounded-full font-bold hover:bg-gray-200 transition">Ver Tudo</button>
+    <!-- Features Section -->
+    <section class="max-w-7xl mx-auto px-6 py-20 border-t border-[rgba(0,212,255,0.1)]">
+        <h2 class="text-4xl nike-bold mb-12">Por que escolher nossos templates?</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="p-8 rounded-lg border border-[rgba(0,212,255,0.2)] hover:border-[rgba(0,212,255,0.6)] transition">
+                <div class="w-12 h-12 bg-gradient-to-br from-cyan-400 to-blue-600 rounded-lg flex items-center justify-center mb-4">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
                 </div>
+                <h3 class="text-xl font-bold mb-3">Totalmente Responsivo</h3>
+                <p class="text-gray-400">Funciona perfeitamente em todos os dispositivos e tamanhos de tela.</p>
             </div>
-            <div class="relative h-[500px] group cursor-pointer overflow-hidden">
-                <img src="https://images.unsplash.com/photo-1514444984083-580442ba15a3?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Category 2" class="w-full h-full object-cover transition duration-500 group-hover:scale-105">
-                <div class="absolute bottom-8 left-8">
-                    <h3 class="text-white text-xl font-bold mb-4">Treino</h3>
-                    <button class="bg-white text-black px-6 py-2 rounded-full font-bold hover:bg-gray-200 transition">Ver Tudo</button>
+
+            <div class="p-8 rounded-lg border border-[rgba(0,212,255,0.2)] hover:border-[rgba(0,212,255,0.6)] transition">
+                <div class="w-12 h-12 bg-gradient-to-br from-cyan-400 to-blue-600 rounded-lg flex items-center justify-center mb-4">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path></svg>
                 </div>
+                <h3 class="text-xl font-bold mb-3">Fácil Customização</h3>
+                <p class="text-gray-400">Código limpo e bem organizado para personalizações rápidas.</p>
             </div>
-            <div class="relative h-[500px] group cursor-pointer overflow-hidden">
-                <img src="https://images.unsplash.com/photo-1511746315387-c4a76990fdce?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Category 3" class="w-full h-full object-cover transition duration-500 group-hover:scale-105">
-                <div class="absolute bottom-8 left-8">
-                    <h3 class="text-white text-xl font-bold mb-4">Casual</h3>
-                    <button class="bg-white text-black px-6 py-2 rounded-full font-bold hover:bg-gray-200 transition">Ver Tudo</button>
+
+            <div class="p-8 rounded-lg border border-[rgba(0,212,255,0.2)] hover:border-[rgba(0,212,255,0.6)] transition">
+                <div class="w-12 h-12 bg-gradient-to-br from-cyan-400 to-blue-600 rounded-lg flex items-center justify-center mb-4">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
                 </div>
+                <h3 class="text-xl font-bold mb-3">Suporte Completo</h3>
+                <p class="text-gray-400">Receba suporte técnico e atualizações regulares do template.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="max-w-7xl mx-auto px-6 py-20">
+        <div class="relative rounded-2xl overflow-hidden p-12 md:p-20 border border-[rgba(0,212,255,0.3)]">
+            <div class="absolute inset-0 bg-gradient-to-r from-[#00d4ff] to-[#0099ff] opacity-5"></div>
+            <div class="relative z-10 text-center">
+                <h2 class="text-4xl md:text-5xl nike-bold mb-6">Pronto para começar?</h2>
+                <p class="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">Escolha um dos nossos templates premium e lance seu projeto hoje mesmo.</p>
+                <button class="btn-primary text-lg px-8 py-4">Explorar Todos os Projetos</button>
             </div>
         </div>
     </section>
 
     <!-- Footer -->
-    <footer class="bg-black text-white px-12 py-16">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
-            <div>
-                <h4 class="font-bold uppercase text-sm mb-4">Encontrar uma loja</h4>
-                <h4 class="font-bold uppercase text-sm mb-4">Seja um membro</h4>
-                <h4 class="font-bold uppercase text-sm mb-4">Feedback</h4>
+    <footer class="border-t border-[rgba(0,212,255,0.1)] mt-20 py-12">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
+                <div>
+                    <div class="flex items-center space-x-2 mb-4">
+                        <div class="w-8 h-8 bg-gradient-to-br from-cyan-400 to-blue-600 rounded-lg flex items-center justify-center">
+                            <span class="text-white font-black text-sm">WS</span>
+                        </div>
+                        <span class="font-black gradient-text">WebStudio</span>
+                    </div>
+                    <p class="text-gray-400 text-sm">Templates premium para seu negócio digital.</p>
+                </div>
+
+                <div>
+                    <h4 class="font-bold text-white mb-4 uppercase text-sm">Produtos</h4>
+                    <ul class="space-y-2 text-gray-400 text-sm">
+                        <li><a href="#" class="hover:text-[#00d4ff] transition">Todos os Templates</a></li>
+                        <li><a href="#" class="hover:text-[#00d4ff] transition">Novidades</a></li>
+                        <li><a href="#" class="hover:text-[#00d4ff] transition">Premium</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="font-bold text-white mb-4 uppercase text-sm">Suporte</h4>
+                    <ul class="space-y-2 text-gray-400 text-sm">
+                        <li><a href="#" class="hover:text-[#00d4ff] transition">Documentação</a></li>
+                        <li><a href="#" class="hover:text-[#00d4ff] transition">Contato</a></li>
+                        <li><a href="#" class="hover:text-[#00d4ff] transition">FAQ</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="font-bold text-white mb-4 uppercase text-sm">Legal</h4>
+                    <ul class="space-y-2 text-gray-400 text-sm">
+                        <li><a href="#" class="hover:text-[#00d4ff] transition">Privacidade</a></li>
+                        <li><a href="#" class="hover:text-[#00d4ff] transition">Termos</a></li>
+                        <li><a href="#" class="hover:text-[#00d4ff] transition">Cookies</a></li>
+                    </ul>
+                </div>
             </div>
-            <div class="text-gray-400 text-sm">
-                <h4 class="text-white font-bold uppercase mb-4">Ajuda</h4>
-                <ul class="space-y-2">
-                    <li><a href="#" class="hover:text-white">Status do pedido</a></li>
-                    <li><a href="#" class="hover:text-white">Envio e entrega</a></li>
-                    <li><a href="#" class="hover:text-white">Devoluções</a></li>
-                    <li><a href="#" class="hover:text-white">Opções de pagamento</a></li>
-                </ul>
-            </div>
-            <div class="text-gray-400 text-sm">
-                <h4 class="text-white font-bold uppercase mb-4">Sobre a Nike</h4>
-                <ul class="space-y-2">
-                    <li><a href="#" class="hover:text-white">Notícias</a></li>
-                    <li><a href="#" class="hover:text-white">Carreiras</a></li>
-                    <li><a href="#" class="hover:text-white">Investidores</a></li>
-                    <li><a href="#" class="hover:text-white">Sustentabilidade</a></li>
-                </ul>
-            </div>
-            <div class="flex space-x-4 justify-end">
-                <!-- Social Icons Placeholders -->
-                <div class="w-8 h-8 bg-gray-600 rounded-full"></div>
-                <div class="w-8 h-8 bg-gray-600 rounded-full"></div>
-                <div class="w-8 h-8 bg-gray-600 rounded-full"></div>
-            </div>
-        </div>
-        <div class="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between text-[10px] text-gray-400">
-            <div class="flex space-x-4 mb-4 md:mb-0">
-                <span class="text-white">Brasil</span>
-                <span>© 2024 Nike, Inc. Todos os direitos reservados</span>
-            </div>
-            <div class="flex space-x-4">
-                <a href="#" class="hover:text-white">Guias</a>
-                <a href="#" class="hover:text-white">Termos de Uso</a>
-                <a href="#" class="hover:text-white">Termos de Venda</a>
-                <a href="#" class="hover:text-white">Privacidade</a>
+
+            <div class="border-t border-[rgba(0,212,255,0.1)] pt-8 flex flex-col md:flex-row justify-between items-center text-gray-400 text-sm">
+                <p>© 2024 WebStudio. Todos os direitos reservados.</p>
+                <div class="flex space-x-6 mt-4 md:mt-0">
+                    <a href="#" class="hover:text-[#00d4ff] transition">Twitter</a>
+                    <a href="#" class="hover:text-[#00d4ff] transition">Instagram</a>
+                    <a href="#" class="hover:text-[#00d4ff] transition">LinkedIn</a>
+                </div>
             </div>
         </div>
     </footer>
+
+	    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.carousel-item');
+        const totalSlides = slides.length;
+
+        function updateCarousel() {
+            const carousel = document.getElementById('carousel');
+            carousel.style.transform = `translateX(-${currentSlide * 100}%)`;
+            
+            // Update dots
+            document.querySelectorAll('[id^="dot-"]').forEach((dot, index) => {
+                if (index === currentSlide) {
+                    dot.classList.remove('bg-[rgba(0,212,255,0.3)]');
+                    dot.classList.add('bg-[#00d4ff]');
+                } else {
+                    dot.classList.add('bg-[rgba(0,212,255,0.3)]');
+                    dot.classList.remove('bg-[#00d4ff]');
+                }
+            });
+        }
+
+        function nextSlide() {
+            currentSlide = (currentSlide + 1) % totalSlides;
+            updateCarousel();
+        }
+
+        function prevSlide() {
+            currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
+            updateCarousel();
+        }
+
+        function goToSlide(n) {
+            currentSlide = n;
+            updateCarousel();
+        }
+
+        // Auto-advance carousel every 8 seconds
+        setInterval(nextSlide, 8000);
+
+        // Initialize
+        updateCarousel();
+    </script>
 
 </body>
 </html>
