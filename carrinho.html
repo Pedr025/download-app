@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carrinho de Compras - Sites Lucrativos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        body {
+            background-color: #0a0e27;
+            color: #ffffff;
+        }
+
+        .nike-bold {
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: -0.05em;
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #00d4ff, #0099ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-link {
+            position: relative;
+            font-weight: 600;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: color 0.3s ease;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: #00d4ff;
+            transition: width 0.3s ease;
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #00d4ff, #0099ff);
+            color: #0a0e27;
+            font-weight: 700;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 32px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: #00d4ff;
+            font-weight: 700;
+            border: 2px solid #00d4ff;
+            border-radius: 8px;
+            padding: 10px 28px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            background: #00d4ff;
+            color: #0a0e27;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ff006e, #ff4757);
+            color: white;
+            font-weight: 700;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .btn-danger:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(255, 71, 87, 0.5);
+        }
+
+        .cart-item {
+            background: linear-gradient(135deg, #1a1f3a 0%, #16213e 100%);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            display: grid;
+            grid-template-columns: 120px 1fr auto;
+            gap: 2rem;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .cart-item:hover {
+            border-color: rgba(0, 212, 255, 0.6);
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.2);
+        }
+
+        .cart-item-image {
+            width: 120px;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 1px solid rgba(0, 212, 255, 0.2);
+        }
+
+        .cart-item-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .cart-item-info h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .cart-item-info p {
+            color: #00d4ff;
+            font-weight: 600;
+            font-size: 1.25rem;
+        }
+
+        .quantity-control {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: #1a1f3a;
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-radius: 8px;
+            padding: 0.5rem;
+        }
+
+        .quantity-control button {
+            background: transparent;
+            border: none;
+            color: #00d4ff;
+            cursor: pointer;
+            padding: 0.25rem 0.5rem;
+            font-weight: 700;
+            transition: all 0.3s ease;
+        }
+
+        .quantity-control button:hover {
+            color: #ffffff;
+            transform: scale(1.2);
+        }
+
+        .quantity-control input {
+            width: 50px;
+            text-align: center;
+            background: transparent;
+            border: none;
+            color: #ffffff;
+            font-weight: 700;
+        }
+
+        .summary-card {
+            background: linear-gradient(135deg, #1a1f3a 0%, #16213e 100%);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-radius: 12px;
+            padding: 2rem;
+            position: sticky;
+            top: 80px;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(0, 212, 255, 0.1);
+        }
+
+        .summary-row.total {
+            border-bottom: none;
+            padding-top: 1rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .empty-cart {
+            text-align: center;
+            padding: 4rem 2rem;
+            background: linear-gradient(135deg, #1a1f3a 0%, #16213e 100%);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-radius: 12px;
+        }
+
+        .empty-cart svg {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 1.5rem;
+            opacity: 0.5;
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            display: none;
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            z-index: 3000;
+            min-width: 300px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .alert.active {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
+        }
+
+        .alert-success {
+            background: #065f46;
+            border: 1px solid #059669;
+            color: #ecfdf5;
+        }
+
+        .alert-error {
+            background: #991b1b;
+            border: 1px solid #dc2626;
+            color: #fef2f2;
+        }
+
+        @media (max-width: 768px) {
+            .cart-item {
+                grid-template-columns: 80px 1fr;
+                gap: 1rem;
+            }
+
+            .cart-item-image {
+                width: 80px;
+                height: 80px;
+            }
+
+            .cart-item > div:last-child {
+                grid-column: 1 / -1;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            .summary-card {
+                position: static;
+                margin-top: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Alert -->
+    <div id="alert" class="alert"></div>
+
+    <!-- Navigation Bar -->
+    <nav class="fixed top-0 w-full bg-[#0a0e27] bg-opacity-95 backdrop-blur-md z-50 border-b border-[rgba(0,212,255,0.1)]">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <div class="w-10 h-10 bg-gradient-to-br from-cyan-400 to-blue-600 rounded-lg flex items-center justify-center">
+                    <span class="text-white font-black text-lg">SL</span>
+                </div>
+                <span class="text-xl font-black gradient-text">Sites Lucrativos</span>
+            </div>
+
+            <div class="hidden md:flex space-x-8">
+                <a href="index.html" class="nav-link">Início</a>
+                <a href="index.html#projects" class="nav-link">Projetos</a>
+                <a href="#" class="nav-link">Sobre</a>
+                <a href="#" class="nav-link">Contato</a>
+            </div>
+
+            <div class="flex items-center space-x-4">
+                <button onclick="window.location.href='index.html'" class="p-2 hover:bg-[rgba(0,212,255,0.1)] rounded-lg transition">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                </button>
+                <button class="p-2 hover:bg-[rgba(0,212,255,0.1)] rounded-lg transition relative">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+                    <span id="cartBadge" class="absolute top-0 right-0 bg-[#ff006e] text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">0</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="pt-24 pb-20">
+        <div class="max-w-7xl mx-auto px-6">
+            <!-- Breadcrumb -->
+            <div class="mb-8 text-gray-400 text-sm">
+                <a href="index.html" class="hover:text-[#00d4ff] transition">Início</a> / 
+                <span>Carrinho de Compras</span>
+            </div>
+
+            <!-- Page Title -->
+            <div class="mb-12">
+                <h1 class="text-5xl nike-bold mb-4">Carrinho de Compras</h1>
+                <p class="text-gray-400 text-lg">Revise seus itens e finalize a compra</p>
+            </div>
+
+            <!-- Cart Content -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Cart Items -->
+                <div class="lg:col-span-2">
+                    <div id="cartItemsContainer">
+                        <div class="empty-cart">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+                            <h3 class="text-2xl font-bold mb-2">Seu carrinho está vazio</h3>
+                            <p class="text-gray-400 mb-6">Explore nossos produtos e adicione itens ao carrinho</p>
+                            <a href="index.html#projects" class="btn-primary inline-block">Continuar Comprando</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Summary -->
+                <div class="lg:col-span-1">
+                    <div class="summary-card">
+                        <h2 class="text-2xl font-bold mb-6">Resumo do Pedido</h2>
+                        
+                        <div class="summary-row">
+                            <span>Subtotal</span>
+                            <span id="subtotal">R$ 0.00</span>
+                        </div>
+
+                        <div class="summary-row">
+                            <span>Desconto</span>
+                            <span id="discount" class="text-green-400">- R$ 0.00</span>
+                        </div>
+
+                        <div class="summary-row">
+                            <span>Frete</span>
+                            <span id="shipping">R$ 0.00</span>
+                        </div>
+
+                        <div class="summary-row total">
+                            <span>Total</span>
+                            <span id="total" class="gradient-text">R$ 0.00</span>
+                        </div>
+
+                        <button onclick="checkout()" class="btn-primary w-full py-4 text-lg mb-4">
+                            Finalizar Compra
+                        </button>
+
+                        <button onclick="window.location.href='index.html#projects'" class="btn-secondary w-full py-4 text-lg">
+                            Continuar Comprando
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-[rgba(0,212,255,0.1)] mt-20 py-12 bg-[#0a0e27]">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
+                <div>
+                    <div class="flex items-center space-x-2 mb-4">
+                        <div class="w-8 h-8 bg-gradient-to-br from-cyan-400 to-blue-600 rounded-lg flex items-center justify-center">
+                            <span class="text-white font-black text-sm">SL</span>
+                        </div>
+                        <span class="font-black gradient-text">Sites Lucrativos</span>
+                    </div>
+                    <p class="text-gray-400 text-sm">Templates premium para seu negócio digital.</p>
+                </div>
+
+                <div>
+                    <h4 class="font-bold text-white mb-4 uppercase text-sm">Produtos</h4>
+                    <ul class="space-y-2 text-gray-400 text-sm">
+                        <li><a href="#" class="hover:text-[#00d4ff] transition">Todos os Templates</a></li>
+                        <li><a href="#" class="hover:text-[#00d4ff] transition">Novidades</a></li>
+                        <li><a href="#" class="hover:text-[#00d4ff] transition">Premium</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="font-bold text-white mb-4 uppercase text-sm">Suporte</h4>
+                    <ul class="space-y-2 text-gray-400 text-sm">
+                        <li><a href="#" class="hover:text-[#00d4ff] transition">Documentação</a></li>
+                        <li><a href="#" class="hover:text-[#00d4ff] transition">Contato</a></li>
+                        <li><a href="#" class="hover:text-[#00d4ff] transition">FAQ</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="font-bold text-white mb-4 uppercase text-sm">Legal</h4>
+                    <ul class="space-y-2 text-gray-400 text-sm">
+                        <li><a href="#" class="hover:text-[#00d4ff] transition">Privacidade</a></li>
+                        <li><a href="#" class="hover:text-[#00d4ff] transition">Termos</a></li>
+                        <li><a href="#" class="hover:text-[#00d4ff] transition">Cookies</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="border-t border-[rgba(0,212,255,0.1)] pt-8">
+                <div class="flex flex-col md:flex-row justify-between items-center text-gray-400 text-sm">
+                    <div>
+                        <p>© 2026 Todos os direitos reservados</p>
+                        <p class="mt-2 md:mt-0">ZucroLTDA 2026</p>
+                    </div>
+                    <div class="flex space-x-6 mt-4 md:mt-0">
+                        <a href="#" class="hover:text-[#00d4ff] transition">Twitter</a>
+                        <a href="#" class="hover:text-[#00d4ff] transition">Instagram</a>
+                        <a href="#" class="hover:text-[#00d4ff] transition">LinkedIn</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        let cart = [];
+
+        // Carregar carrinho do localStorage
+        function loadCart() {
+            const savedCart = localStorage.getItem('cart');
+            cart = savedCart ? JSON.parse(savedCart) : [];
+            renderCart();
+            updateCartBadge();
+        }
+
+        // Renderizar itens do carrinho
+        function renderCart() {
+            const container = document.getElementById('cartItemsContainer');
+            
+            if (cart.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-cart">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+                        <h3 class="text-2xl font-bold mb-2">Seu carrinho está vazio</h3>
+                        <p class="text-gray-400 mb-6">Explore nossos produtos e adicione itens ao carrinho</p>
+                        <a href="index.html#projects" class="btn-primary inline-block">Continuar Comprando</a>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = '';
+            cart.forEach((item, index) => {
+                const discountedPrice = item.price - (item.price * (item.discount || 0) / 100);
+                const itemTotal = discountedPrice * item.quantity;
+
+                const cartItem = document.createElement('div');
+                cartItem.className = 'cart-item';
+                cartItem.innerHTML = `
+                    <img src="${item.imageUrl}" alt="${item.title}" class="cart-item-image">
+                    <div class="cart-item-info">
+                        <h3>${item.title}</h3>
+                        <p>R$ ${discountedPrice.toFixed(2)}</p>
+                        <p class="text-gray-400 text-sm">Total: R$ ${itemTotal.toFixed(2)}</p>
+                    </div>
+                    <div class="flex flex-col gap-3">
+                        <div class="quantity-control">
+                            <button onclick="decreaseQuantity(${index})">−</button>
+                            <input type="number" value="${item.quantity}" onchange="updateQuantity(${index}, this.value)" min="1">
+                            <button onclick="increaseQuantity(${index})">+</button>
+                        </div>
+                        <button onclick="removeFromCart(${index})" class="btn-danger">Remover</button>
+                    </div>
+                `;
+                container.appendChild(cartItem);
+            });
+
+            calculateTotals();
+        }
+
+        // Aumentar quantidade
+        function increaseQuantity(index) {
+            cart[index].quantity += 1;
+            saveCart();
+            renderCart();
+        }
+
+        // Diminuir quantidade
+        function decreaseQuantity(index) {
+            if (cart[index].quantity > 1) {
+                cart[index].quantity -= 1;
+                saveCart();
+                renderCart();
+            }
+        }
+
+        // Atualizar quantidade
+        function updateQuantity(index, value) {
+            const qty = parseInt(value);
+            if (qty > 0) {
+                cart[index].quantity = qty;
+                saveCart();
+                renderCart();
+            }
+        }
+
+        // Remover do carrinho
+        function removeFromCart(index) {
+            cart.splice(index, 1);
+            saveCart();
+            renderCart();
+            showAlert('Produto removido do carrinho', 'success');
+        }
+
+        // Salvar carrinho no localStorage
+        function saveCart() {
+            localStorage.setItem('cart', JSON.stringify(cart));
+            updateCartBadge();
+        }
+
+        // Calcular totais
+        function calculateTotals() {
+            let subtotal = 0;
+            let totalDiscount = 0;
+
+            cart.forEach(item => {
+                const itemPrice = item.price;
+                const discountAmount = itemPrice * (item.discount || 0) / 100;
+                const discountedPrice = itemPrice - discountAmount;
+                
+                subtotal += itemPrice * item.quantity;
+                totalDiscount += discountAmount * item.quantity;
+            });
+
+            const shipping = 0; // Frete grátis
+            const total = subtotal - totalDiscount + shipping;
+
+            document.getElementById('subtotal').textContent = `R$ ${subtotal.toFixed(2)}`;
+            document.getElementById('discount').textContent = `- R$ ${totalDiscount.toFixed(2)}`;
+            document.getElementById('shipping').textContent = `R$ ${shipping.toFixed(2)}`;
+            document.getElementById('total').textContent = `R$ ${total.toFixed(2)}`;
+        }
+
+        // Atualizar badge do carrinho
+        function updateCartBadge() {
+            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+            document.getElementById('cartBadge').textContent = totalItems;
+        }
+
+        // Finalizar compra
+        function checkout() {
+            if (cart.length === 0) {
+                showAlert('Seu carrinho está vazio', 'error');
+                return;
+            }
+
+            // Aqui você pode integrar com seu gateway de pagamento
+            // Por enquanto, vamos simular uma compra bem-sucedida
+            showAlert('Redirecionando para pagamento...', 'success');
+            
+            setTimeout(() => {
+                // Limpar carrinho após "compra"
+                localStorage.removeItem('cart');
+                cart = [];
+                
+                // Redirecionar para página de sucesso ou checkout
+                alert('Compra realizada com sucesso! Obrigado por sua compra.');
+                window.location.href = 'index.html';
+            }, 2000);
+        }
+
+        // Mostrar alerta
+        function showAlert(msg, type) {
+            const alert = document.getElementById('alert');
+            alert.textContent = msg;
+            alert.className = `alert active alert-${type}`;
+            setTimeout(() => alert.classList.remove('active'), 4000);
+        }
+
+        // Inicializar
+        loadCart();
+    </script>
+
+</body>
+</html>
