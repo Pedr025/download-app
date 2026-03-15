@@ -362,14 +362,14 @@
             </div>
 
             <div class="hidden md:flex space-x-8">
-                <a href="index.html" class="nav-link">Início</a>
+                <a href="index_loja.html" class="nav-link">Início</a>
                 <a href="index.html#projects" class="nav-link">Projetos</a>
                 <a href="#" class="nav-link">Sobre</a>
                 <a href="#" class="nav-link">Contato</a>
             </div>
 
             <div class="flex items-center space-x-4">
-                <button onclick="window.location.href='index.html'" class="p-2 hover:bg-[rgba(0,212,255,0.1)] rounded-lg transition">
+                <button onclick="window.location.href='index_loja.html'" class="p-2 hover:bg-[rgba(0,212,255,0.1)] rounded-lg transition">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                 </button>
                 <button onclick="window.location.href='carrinho.html'" class="p-2 hover:bg-[rgba(0,212,255,0.1)] rounded-lg transition relative">
@@ -385,7 +385,7 @@
         <div class="max-w-7xl mx-auto px-6">
             <!-- Breadcrumb -->
             <div class="mb-8 text-gray-400 text-sm">
-                <a href="index.html" class="hover:text-[#00d4ff] transition">Início</a> / 
+                <a href="index_loja.html" class="hover:text-[#00d4ff] transition">Início</a> / 
                 <span id="breadcrumbTitle">Carregando...</span>
             </div>
 
@@ -447,7 +447,7 @@
         </div>
     </main>
 
-    <!-- Share Modal -->
+	    <!-- Share Modal -->
     <div id="shareModal" class="share-modal">
         <div class="share-modal-content">
             <div class="flex justify-between items-center mb-6">
@@ -486,7 +486,8 @@
             </div>
         </div>
     </div>
-	    <!-- Footer -->
+
+    <!-- Footer -->
     <footer class="border-t border-[rgba(0,212,255,0.1)] mt-20 py-12 bg-[#0a0e27]">
         <div class="max-w-7xl mx-auto px-6">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
@@ -559,10 +560,7 @@
 
         try {
             firebase.initializeApp(firebaseConfig);
-            // Usando Firestore conforme o admin.html anterior, 
-            // embora o arquivo original usasse database-compat, o admin.html usa firestore.
-            // Vou ajustar para Firestore para ser consistente com o armazenamento do paymentLink.
-            db = firebase.firestore();
+            db = firebase.database();
             console.log("Firebase inicializado com sucesso.");
         } catch (e) {
             console.error("Erro ao inicializar Firebase:", e);
@@ -575,26 +573,27 @@
         }
 
         // Carregar dados do produto
-        async function loadProduct() {
+        function loadProduct() {
             const productId = getProductIdFromUrl();
             if (!productId) {
                 showAlert('Produto não encontrado.', 'error');
                 return;
             }
 
-            try {
-                const doc = await db.collection('produtos').doc(productId).get();
-                if (doc.exists) {
-                    currentProduct = { id: doc.id, ...doc.data() };
+            const ref = db.ref(`produtos/${productId}`);
+            ref.once('value', (snapshot) => {
+                const product = snapshot.val();
+                if (product) {
+                    currentProduct = { id: productId, ...product };
                     displayProduct(currentProduct);
                     updateCartBadge();
                 } else {
                     showAlert('Produto não encontrado.', 'error');
                 }
-            } catch (error) {
+            }, (error) => {
                 console.error("Erro ao carregar produto:", error);
                 showAlert('Erro ao conectar com o banco de dados.', 'error');
-            }
+            });
         }
 
         // Exibir produto
@@ -610,7 +609,7 @@
         }
 
         // Aplicar cupom
-        async function applyCoupon() {
+        function applyCoupon() {
             const couponCode = document.getElementById('couponInput').value.trim().toUpperCase();
             
             if (!couponCode) {
@@ -618,11 +617,10 @@
                 return;
             }
 
-            try {
-                // No Firestore, buscamos na coleção 'cupons'
-                const doc = await db.collection('cupons').doc(couponCode).get();
-                if (doc.exists) {
-                    const coupon = doc.data();
+            const ref = db.ref(`cupons/${couponCode}`);
+            ref.once('value', (snapshot) => {
+                const coupon = snapshot.val();
+                if (coupon) {
                     currentDiscount = coupon.desconto || 0;
                     
                     document.getElementById('discountValue').textContent = currentDiscount;
@@ -643,10 +641,7 @@
                     document.getElementById('productPrice').textContent = `R$ ${parseFloat(currentProduct.price).toFixed(2)}`;
                     showAlert('Cupom inválido.', 'error');
                 }
-            } catch (error) {
-                console.error("Erro ao aplicar cupom:", error);
-                showAlert('Erro ao validar cupom.', 'error');
-            }
+            });
         }
 
         // Adicionar ao carrinho
