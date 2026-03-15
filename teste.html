@@ -1,10 +1,9 @@
-<!DOCTYPE htm
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sites Lucrativos - Venda de Templates Premium</title>
+    <title>ZucroBay - Venda de Templates Premium</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
     
@@ -226,6 +225,112 @@
             box-shadow: 0 0 30px rgba(0, 212, 255, 0.2);
         }
 
+        .testimonial-card {
+            flex-shrink: 0;
+            width: 320px;
+            scroll-snap-align: start;
+            background: linear-gradient(135deg, #1a1f3a 0%, #16213e 100%);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-radius: 12px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .testimonial-card:hover {
+            border-color: rgba(0, 212, 255, 0.6);
+            box-shadow: 0 0 30px rgba(0, 212, 255, 0.2);
+        }
+
+        .testimonial-text {
+            font-size: 1rem;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+            color: #e0e0e0;
+            font-style: italic;
+        }
+
+        .testimonial-author {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .testimonial-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #00d4ff, #0099ff);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: #0a0e27;
+        }
+
+        .testimonial-info h4 {
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .testimonial-info p {
+            font-size: 0.875rem;
+            color: #888;
+        }
+
+        .testimonial-rating {
+            color: #fbbf24;
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .featured-product-card {
+            flex-shrink: 0;
+            width: 280px;
+            scroll-snap-align: start;
+            background: linear-gradient(135deg, #1a1f3a 0%, #16213e 100%);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .featured-product-card:hover {
+            border-color: rgba(0, 212, 255, 0.6);
+            box-shadow: 0 0 30px rgba(0, 212, 255, 0.2);
+        }
+
+        .featured-product-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            background: #0f1628;
+        }
+
+        .featured-product-info {
+            padding: 1.5rem;
+        }
+
+        .featured-product-title {
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .featured-product-price {
+            color: #00d4ff;
+            font-weight: 700;
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+        }
+
+        .featured-product-rating {
+            color: #fbbf24;
+            font-size: 0.875rem;
+        }
+
         .benefit-icon {
             width: 48px;
             height: 48px;
@@ -379,9 +484,9 @@
         <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
             <div class="flex items-center space-x-2">
                 <div class="w-10 h-10 bg-gradient-to-br from-cyan-400 to-blue-600 rounded-lg flex items-center justify-center">
-                    <span class="text-white font-black text-lg">SL</span>
+                    <span class="text-white font-black text-lg">ZCB</span>
                 </div>
-                <span class="text-xl font-black gradient-text">Sites Lucrativos</span>
+                <span class="text-xl font-black gradient-text">ZucroBay</span>
             </div>
 
             <div class="hidden md:flex space-x-8">
@@ -392,6 +497,9 @@
             </div>
 
             <div class="flex items-center space-x-4">
+                <a href="https://www.instagram.com/zucrobay?igsh=MTdmbXF1dTNtNmNrYw==" target="_blank" class="p-2 hover:bg-[rgba(0,212,255,0.1)] rounded-lg transition">
+                    <svg class="w-6 h-6 text-pink-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.266.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zM5.838 12a6.162 6.162 0 1 1 12.324 0 6.162 6.162 0 0 1-12.324 0zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm4.965-10.322a1.44 1.44 0 1 1 2.881.001 1.44 1.44 0 0 1-2.881-.001z"></path></svg>
+                </a>
                 <button onclick="openSearchModal()" class="p-2 hover:bg-[rgba(0,212,255,0.1)] rounded-lg transition">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                 </button>
@@ -401,6 +509,7 @@
             </div>
         </div>
     </nav>
+
     <!-- Hero Banner with Carousel -->
     <section class="pt-16">
         <div class="carousel-wrapper">
@@ -434,9 +543,20 @@
     <!-- Spacing after banner -->
     <div class="h-20"></div>
 
+    <!-- Featured Products Horizontal Scroll Section -->
+    <section class="max-w-7xl mx-auto px-6 py-12">
+        <div class="mb-8">
+            <h2 class="text-3xl nike-bold mb-2">Produtos em Destaque</h2>
+            <p class="text-gray-400">Explore nossos templates mais populares</p>
+        </div>
+        <div class="horizontal-scroll" id="featuredProductsScroll">
+            <!-- Produtos carregados dinamicamente do Firebase -->
+        </div>
+    </section>
+
     <!-- Benefits Horizontal Scroll Section -->
     <section class="max-w-7xl mx-auto px-6 py-20 border-t border-[rgba(0,212,255,0.1)]">
-        <h2 class="text-4xl nike-bold mb-8">Por que escolher Sites Lucrativos?</h2>
+        <h2 class="text-4xl nike-bold mb-8">Por que escolher ZucroBay?</h2>
         <div class="horizontal-scroll" id="benefitsScroll">
             <!-- Benefit 1: 7 Days Refund -->
             <div class="benefit-card">
@@ -456,7 +576,7 @@
                 <p class="text-gray-400">Equipe disponível 24 horas, 7 dias da semana para ajudar você.</p>
             </div>
 
-            <!-- Benefit 3: Mobile & PC -->
+	            <!-- Benefit 3: Mobile & PC -->
             <div class="benefit-card">
                 <div class="benefit-icon">
                     <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
@@ -493,6 +613,17 @@
         </div>
     </section>
 
+    <!-- Customer Testimonials Section -->
+    <section class="max-w-7xl mx-auto px-6 py-20 border-t border-[rgba(0,212,255,0.1)]">
+        <div class="mb-8">
+            <h2 class="text-4xl nike-bold mb-4">O que nossos clientes dizem</h2>
+            <p class="text-gray-400">Confira os depoimentos de quem já conquistou sucesso com ZucroBay</p>
+        </div>
+        <div class="horizontal-scroll" id="testimonialsScroll">
+            <!-- Testimonials carregados dinamicamente -->
+        </div>
+    </section>
+
     <!-- Projects Section -->
     <section id="projects" class="max-w-7xl mx-auto px-6 py-20 border-t border-[rgba(0,212,255,0.1)]">
         <div class="mb-16">
@@ -524,9 +655,9 @@
                 <div>
                     <div class="flex items-center space-x-2 mb-4">
                         <div class="w-8 h-8 bg-gradient-to-br from-cyan-400 to-blue-600 rounded-lg flex items-center justify-center">
-                            <span class="text-white font-black text-sm">SL</span>
+                            <span class="text-white font-black text-sm">ZCB</span>
                         </div>
-                        <span class="font-black gradient-text">Sites Lucrativos</span>
+                        <span class="font-black gradient-text">ZucroBay</span>
                     </div>
                     <p class="text-gray-400 text-sm">Templates premium para seu negócio digital.</p>
                 </div>
@@ -560,7 +691,7 @@
             </div>
 
             <div class="border-t border-[rgba(0,212,255,0.1)] pt-8 flex flex-col md:flex-row justify-between items-center text-gray-400 text-sm">
-                <p>© 2024 Sites Lucrativos. Todos os direitos reservados.</p>
+                <p>© 2024 ZucroBay. Todos os direitos reservados.</p>
                 <div class="flex space-x-6 mt-4 md:mt-0">
                     <a href="#" class="hover:text-[#00d4ff] transition">Twitter</a>
                     <a href="#" class="hover:text-[#00d4ff] transition">Instagram</a>
@@ -740,7 +871,7 @@
             autoPlayInterval = setInterval(nextSlide, 8000);
         }
 
-	        // Funções de Busca
+        // Funções de Busca
         function openSearchModal() {
             document.getElementById('searchModal').classList.add('active');
             document.getElementById('searchInput').focus();
@@ -788,6 +919,92 @@
             });
         }
 
+        // Renderizar produtos em destaque na horizontal
+        function renderFeaturedProducts() {
+            const scroll = document.getElementById('featuredProductsScroll');
+            scroll.innerHTML = '';
+            
+            // Mostrar apenas os 6 primeiros produtos
+            const featured = allProducts.slice(0, 6);
+            
+            featured.forEach(product => {
+                const card = document.createElement('div');
+                card.className = 'featured-product-card';
+                card.innerHTML = `
+                    <img src="${product.imageUrl}" alt="${product.title}" class="featured-product-image">
+                    <div class="featured-product-info">
+                        <h3 class="featured-product-title">${product.title}</h3>
+                        <div class="testimonial-rating">${product.rating}★</div>
+                        <p class="featured-product-price">R$ ${parseFloat(product.price).toFixed(2)}</p>
+                        <button onclick="goToProductDetails('${product.id}')" class="btn-primary w-full text-sm py-2">Ver Detalhes</button>
+                    </div>
+                `;
+                scroll.appendChild(card);
+            });
+        }
+
+	        // Renderizar depoimentos de clientes
+        function renderTestimonials() {
+            const scroll = document.getElementById('testimonialsScroll');
+            scroll.innerHTML = '';
+            
+            // Depoimentos de exemplo (você pode carregar do Firebase se desejar)
+            const testimonials = [
+                {
+                    text: "Excelente qualidade! Meu site ficou profissional e moderno. Recomendo muito!",
+                    author: "João Silva",
+                    role: "Empreendedor Digital",
+                    rating: 5,
+                    avatar: "JS"
+                },
+                {
+                    text: "Suporte impecável e templates incríveis. Consegui lançar meu projeto em poucos dias!",
+                    author: "Maria Santos",
+                    role: "Designer",
+                    rating: 5,
+                    avatar: "MS"
+                },
+                {
+                    text: "Melhor investimento que fiz para meu negócio. Muito bom mesmo!",
+                    author: "Carlos Oliveira",
+                    role: "Consultor",
+                    rating: 5,
+                    avatar: "CO"
+                },
+                {
+                    text: "Templates responsivos e bem estruturados. Perfeito para meus clientes!",
+                    author: "Ana Costa",
+                    role: "Desenvolvedora",
+                    rating: 5,
+                    avatar: "AC"
+                },
+                {
+                    text: "Fantástico! Economizei muito tempo e dinheiro com esses templates.",
+                    author: "Pedro Martins",
+                    role: "Empresário",
+                    rating: 5,
+                    avatar: "PM"
+                }
+            ];
+            
+            testimonials.forEach(testimonial => {
+                const card = document.createElement('div');
+                card.className = 'testimonial-card';
+                card.innerHTML = `
+                    <div class="testimonial-rating">${'★'.repeat(testimonial.rating)}</div>
+                    <p class="testimonial-text">"${testimonial.text}"</p>
+                    <div class="testimonial-author">
+                        <div class="testimonial-avatar">${testimonial.avatar}</div>
+                        <div class="testimonial-info">
+                            <h4>${testimonial.author}</h4>
+                            <p>${testimonial.role}</p>
+                        </div>
+                    </div>
+                `;
+                scroll.appendChild(card);
+            });
+        }
+
         // Fechar modal ao clicar fora
         document.getElementById('searchModal').onclick = (e) => {
             if (e.target.id === 'searchModal') {
@@ -797,6 +1014,12 @@
 
         // Inicializar
         loadProducts();
+        
+        // Renderizar produtos em destaque e depoimentos quando os produtos forem carregados
+        setTimeout(() => {
+            renderFeaturedProducts();
+            renderTestimonials();
+        }, 500);
     </script>
 
 </body>
