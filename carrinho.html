@@ -346,7 +346,7 @@
                     </div>
                 </div>
 
-	                <!-- Summary -->
+                <!-- Summary -->
                 <div class="lg:col-span-1">
                     <div class="summary-card">
                         <h2 class="text-2xl font-bold mb-6">Resumo do Pedido</h2>
@@ -441,8 +441,7 @@
             </div>
         </div>
     </footer>
-
-    <script>
+	    <script>
         // Configuração do Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyCpi9LmOel3NXEQNLd8y8zEZxVqZzBhCso",
@@ -589,28 +588,39 @@
             showAlert('Redirecionando para o pagamento...', 'success');
             
             try {
-                // Pegamos o primeiro item do carrinho para obter o link de pagamento
-                // Se houver múltiplos, você pode decidir se redireciona para o primeiro ou se há um link global
+                // Pegamos o primeiro item do carrinho
                 const firstItem = cart[0];
                 
-                // Buscar o produto no Firestore para garantir que temos o paymentLink atualizado
-                const snapshot = await db.collection('produtos').where('title', '==', firstItem.title).get();
+                // Se o item já tem paymentLink salvo, usar diretamente
+                if (firstItem.paymentLink) {
+                    setTimeout(() => {
+                        // Limpar carrinho e redirecionar
+                        localStorage.removeItem('cart');
+                        window.location.href = firstItem.paymentLink;
+                    }, 1500);
+                    return;
+                }
                 
-                if (!snapshot.empty) {
-                    const productData = snapshot.docs[0].data();
-                    const paymentLink = productData.paymentLink;
-
-                    if (paymentLink) {
-                        setTimeout(() => {
-                            // Limpar carrinho e redirecionar
-                            localStorage.removeItem('cart');
-                            window.location.href = paymentLink;
-                        }, 1500);
-                    } else {
-                        showAlert('Link de pagamento não configurado para este produto.', 'error');
+                // Caso contrário, buscar no Firestore com busca mais flexível
+                const snapshot = await db.collection('produtos').get();
+                let paymentLink = null;
+                
+                // Procurar pelo produto no banco de dados
+                snapshot.forEach(doc => {
+                    const productData = doc.data();
+                    if (productData.title && productData.title.toLowerCase().trim() === firstItem.title.toLowerCase().trim()) {
+                        paymentLink = productData.paymentLink;
                     }
+                });
+
+                if (paymentLink) {
+                    setTimeout(() => {
+                        // Limpar carrinho e redirecionar
+                        localStorage.removeItem('cart');
+                        window.location.href = paymentLink;
+                    }, 1500);
                 } else {
-                    showAlert('Produto não encontrado no banco de dados.', 'error');
+                    showAlert('Link de pagamento não encontrado. Verifique se o produto está configurado no painel.', 'error');
                 }
             } catch (error) {
                 console.error("Erro ao processar checkout:", error);
