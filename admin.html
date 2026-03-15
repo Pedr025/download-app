@@ -6,357 +6,47 @@
     <title>Painel Administrativo - Sites Lucrativos</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
-    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-storage.js"></script>
+    
+    <!-- Firebase SDKs (Versão Compat) -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-storage-compat.js"></script>
+
     <style>
-        * {
-            font-family: 'Inter', sans-serif;
-        }
-        
-        body {
-            background-color: #0a0e27;
-            color: #ffffff;
-        }
-
-        .nike-bold {
-            font-weight: 900;
-            text-transform: uppercase;
-            letter-spacing: -0.05em;
-        }
-
-        .gradient-text {
-            background: linear-gradient(135deg, #00d4ff, #0099ff);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #00d4ff, #0099ff);
-            color: #0a0e27;
-            font-weight: 700;
-            border: none;
-            border-radius: 8px;
-            padding: 12px 32px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .btn-primary:hover {
-            transform: scale(1.05);
-            box-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
-        }
-
-        .btn-secondary {
-            background: transparent;
-            color: #00d4ff;
-            font-weight: 700;
-            border: 2px solid #00d4ff;
-            border-radius: 8px;
-            padding: 10px 28px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .btn-secondary:hover {
-            background: #00d4ff;
-            color: #0a0e27;
-        }
-
-        .btn-danger {
-            background: linear-gradient(135deg, #ff006e, #ff4757);
-            color: white;
-            font-weight: 700;
-            border: none;
-            border-radius: 8px;
-            padding: 10px 20px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .btn-danger:hover {
-            transform: scale(1.05);
-            box-shadow: 0 0 20px rgba(255, 0, 110, 0.5);
-        }
-
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 600;
-            color: #e2e8f0;
-        }
-
-        .form-group input,
-        .form-group textarea,
-        .form-group select {
-            width: 100%;
-            padding: 12px;
-            background: #1a1f3a;
-            border: 1px solid rgba(0, 212, 255, 0.2);
-            border-radius: 8px;
-            color: #ffffff;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-        }
-
-        .form-group input:focus,
-        .form-group textarea:focus,
-        .form-group select:focus {
-            outline: none;
-            border-color: #00d4ff;
-            box-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
-        }
-
-        .form-group textarea {
-            resize: vertical;
-            min-height: 100px;
-        }
-
-        .product-card {
-            background: linear-gradient(135deg, #1a1f3a 0%, #16213e 100%);
-            border: 1px solid rgba(0, 212, 255, 0.2);
-            border-radius: 12px;
-            overflow: hidden;
-            transition: all 0.3s ease;
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .product-card:hover {
-            border-color: rgba(0, 212, 255, 0.6);
-            box-shadow: 0 0 30px rgba(0, 212, 255, 0.2);
-        }
-
-        .product-image {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-            border-radius: 8px;
-            margin-bottom: 1rem;
-        }
-
-        .product-info {
-            display: flex;
-            justify-content: space-between;
-            align-items: start;
-            gap: 1rem;
-        }
-
-        .product-details {
-            flex: 1;
-        }
-
-        .product-actions {
-            display: flex;
-            gap: 0.5rem;
-            flex-direction: column;
-        }
-
-        .badge {
-            background: linear-gradient(135deg, #ff006e, #00d4ff);
-            color: white;
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            display: inline-block;
-            margin-bottom: 0.5rem;
-        }
-
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.8);
-            animation: fadeIn 0.3s ease;
-        }
-
-        .modal.active {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        .modal-content {
-            background: #0a0e27;
-            padding: 2rem;
-            border-radius: 12px;
-            border: 1px solid rgba(0, 212, 255, 0.2);
-            max-width: 600px;
-            width: 90%;
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-        }
-
-        .modal-header h2 {
-            font-size: 1.5rem;
-            font-weight: 900;
-        }
-
-        .close-btn {
-            background: none;
-            border: none;
-            color: #ffffff;
-            font-size: 2rem;
-            cursor: pointer;
-            transition: color 0.3s ease;
-        }
-
-        .close-btn:hover {
-            color: #00d4ff;
-        }
-
-        .image-preview {
-            width: 100%;
-            height: 200px;
-            background: #1a1f3a;
-            border: 2px dashed rgba(0, 212, 255, 0.3);
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 1rem;
-            overflow: hidden;
-        }
-
-        .image-preview img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .file-input-wrapper {
-            position: relative;
-            overflow: hidden;
-            display: inline-block;
-            width: 100%;
-        }
-
-        .file-input-wrapper input[type=file] {
-            position: absolute;
-            left: -9999px;
-        }
-
-        .file-input-label {
-            display: block;
-            padding: 12px;
-            background: #1a1f3a;
-            border: 1px solid rgba(0, 212, 255, 0.2);
-            border-radius: 8px;
-            color: #00d4ff;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-weight: 600;
-        }
-
-        .file-input-label:hover {
-            border-color: #00d4ff;
-            background: rgba(0, 212, 255, 0.1);
-        }
-
-        .checkbox-wrapper {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .checkbox-wrapper input[type="checkbox"] {
-            width: 20px;
-            height: 20px;
-            cursor: pointer;
-            accent-color: #00d4ff;
-        }
-
-        .loading {
-            display: none;
-            text-align: center;
-            padding: 2rem;
-        }
-
-        .loading.active {
-            display: block;
-        }
-
-        .spinner {
-            border: 4px solid rgba(0, 212, 255, 0.2);
-            border-top: 4px solid #00d4ff;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 1rem;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .alert {
-            padding: 1rem;
-            border-radius: 8px;
-            margin-bottom: 1.5rem;
-            display: none;
-        }
-
-        .alert.active {
-            display: block;
-        }
-
-        .alert-success {
-            background: rgba(34, 197, 94, 0.2);
-            border: 1px solid #22c55e;
-            color: #86efac;
-        }
-
-        .alert-error {
-            background: rgba(239, 68, 68, 0.2);
-            border: 1px solid #ef4444;
-            color: #fca5a5;
-        }
-
-        @media (max-width: 768px) {
-            .product-info {
-                flex-direction: column;
-            }
-
-            .product-actions {
-                flex-direction: row;
-            }
-
-            .modal-content {
-                max-width: 95%;
-            }
-        }
+        * { font-family: 'Inter', sans-serif; }
+        body { background-color: #0a0e27; color: #ffffff; }
+        .nike-bold { font-weight: 900; text-transform: uppercase; letter-spacing: -0.05em; }
+        .gradient-text { background: linear-gradient(135deg, #00d4ff, #0099ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .btn-primary { background: linear-gradient(135deg, #00d4ff, #0099ff); color: #0a0e27; font-weight: 700; border: none; border-radius: 8px; padding: 12px 32px; cursor: pointer; transition: all 0.3s ease; }
+        .btn-primary:hover { transform: scale(1.05); box-shadow: 0 0 20px rgba(0, 212, 255, 0.5); }
+        .btn-secondary { background: transparent; color: #00d4ff; font-weight: 700; border: 2px solid #00d4ff; border-radius: 8px; padding: 10px 28px; cursor: pointer; transition: all 0.3s ease; }
+        .btn-secondary:hover { background: #00d4ff; color: #0a0e27; }
+        .btn-danger { background: linear-gradient(135deg, #ff006e, #ff4757); color: white; font-weight: 700; border: none; border-radius: 8px; padding: 10px 20px; cursor: pointer; transition: all 0.3s ease; }
+        .btn-danger:hover { transform: scale(1.05); box-shadow: 0 0 20px rgba(255, 0, 110, 0.5); }
+        .form-group { margin-bottom: 1.5rem; }
+        .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 600; color: #e2e8f0; }
+        .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 12px; background: #1a1f3a; border: 1px solid rgba(0, 212, 255, 0.2); border-radius: 8px; color: #ffffff; font-size: 1rem; transition: all 0.3s ease; }
+        .form-group input:focus, .form-group textarea:focus { outline: none; border-color: #00d4ff; box-shadow: 0 0 10px rgba(0, 212, 255, 0.3); }
+        .product-card { background: linear-gradient(135deg, #1a1f3a 0%, #16213e 100%); border: 1px solid rgba(0, 212, 255, 0.2); border-radius: 12px; overflow: hidden; transition: all 0.3s ease; padding: 1.5rem; margin-bottom: 1.5rem; }
+        .product-image { width: 100%; height: 150px; object-fit: cover; border-radius: 8px; }
+        .badge { background: linear-gradient(135deg, #ff006e, #00d4ff); color: white; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; text-transform: uppercase; display: inline-block; margin-bottom: 0.5rem; }
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.8); align-items: center; justify-content: center; }
+        .modal.active { display: flex; }
+        .modal-content { background: #0a0e27; padding: 2rem; border-radius: 12px; border: 1px solid rgba(0, 212, 255, 0.2); max-width: 600px; width: 90%; max-height: 90vh; overflow-y: auto; }
+        .image-preview { width: 100%; height: 200px; background: #1a1f3a; border: 2px dashed rgba(0, 212, 255, 0.3); border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-bottom: 1rem; overflow: hidden; }
+        .image-preview img { width: 100%; height: 100%; object-fit: cover; }
+        .loading { display: none; text-align: center; padding: 2rem; }
+        .loading.active { display: block; }
+        .spinner { border: 4px solid rgba(0, 212, 255, 0.2); border-top: 4px solid #00d4ff; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 1rem; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .alert { padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; display: none; }
+        .alert.active { display: block; }
+        .alert-success { background: rgba(34, 197, 94, 0.2); border: 1px solid #22c55e; color: #86efac; }
+        .alert-error { background: rgba(239, 68, 68, 0.2); border: 1px solid #ef4444; color: #fca5a5; }
     </style>
 </head>
 <body>
 
-    <!-- Navigation Bar -->
     <nav class="fixed top-0 w-full bg-[#0a0e27] bg-opacity-95 backdrop-blur-md z-50 border-b border-[rgba(0,212,255,0.1)]">
         <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
             <div class="flex items-center space-x-2">
@@ -365,23 +55,15 @@
                 </div>
                 <span class="text-xl font-black gradient-text">Painel Admin</span>
             </div>
-
             <div class="flex items-center space-x-4">
-                <button onclick="window.location.href='index.html'" class="px-4 py-2 hover:bg-[rgba(0,212,255,0.1)] rounded-lg transition">
-                    Voltar ao Site
-                </button>
-                <button onclick="logout()" class="btn-secondary">Sair</button>
+                <a href="index.html" class="px-4 py-2 hover:bg-[rgba(0,212,255,0.1)] rounded-lg transition">Voltar ao Site</a>
             </div>
         </div>
     </nav>
 
-    <!-- Main Content -->
     <main class="pt-24 pb-20">
         <div class="max-w-7xl mx-auto px-6">
-            <!-- Alert Messages -->
             <div id="alert" class="alert"></div>
-
-            <!-- Header -->
             <div class="flex justify-between items-center mb-8">
                 <div>
                     <h1 class="text-4xl nike-bold mb-2">Gerenciar Produtos</h1>
@@ -390,88 +72,63 @@
                 <button onclick="openAddProductModal()" class="btn-primary text-lg px-8 py-4">+ Novo Produto</button>
             </div>
 
-            <!-- Loading Indicator -->
             <div id="loading" class="loading">
                 <div class="spinner"></div>
-                <p>Carregando produtos...</p>
+                <p>Carregando...</p>
             </div>
 
-            <!-- Products List -->
-            <div id="products-container">
-                <!-- Products will be loaded here -->
-            </div>
+            <div id="products-container"></div>
         </div>
     </main>
 
-    <!-- Add/Edit Product Modal -->
     <div id="productModal" class="modal">
         <div class="modal-content">
-            <div class="modal-header">
-                <h2 id="modalTitle">Novo Produto</h2>
-                <button class="close-btn" onclick="closeProductModal()">&times;</button>
+            <div class="flex justify-between items-center mb-6">
+                <h2 id="modalTitle" class="text-2xl font-bold">Novo Produto</h2>
+                <button onclick="closeProductModal()" class="text-3xl">&times;</button>
             </div>
-
             <form id="productForm" onsubmit="saveProduct(event)">
-                <!-- Product Title -->
                 <div class="form-group">
-                    <label for="productTitle">Título do Produto *</label>
-                    <input type="text" id="productTitle" required placeholder="Ex: Site de Apostas Completo">
+                    <label>Título do Produto *</label>
+                    <input type="text" id="productTitle" required>
                 </div>
-
-                <!-- Product Description -->
                 <div class="form-group">
-                    <label for="productDescription">Descrição *</label>
-                    <textarea id="productDescription" required placeholder="Descreva os principais recursos do seu produto..."></textarea>
+                    <label>Descrição *</label>
+                    <textarea id="productDescription" required class="min-h-[100px]"></textarea>
                 </div>
-
-                <!-- Product Price -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="form-group">
+                        <label>Preço (R$) *</label>
+                        <input type="number" id="productPrice" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Avaliação (0-5) *</label>
+                        <input type="number" id="productRating" min="0" max="5" step="0.1" required>
+                    </div>
+                </div>
                 <div class="form-group">
-                    <label for="productPrice">Preço (R$) *</label>
-                    <input type="number" id="productPrice" step="0.01" required placeholder="Ex: 1999.99">
+                    <label>Badge/Etiqueta *</label>
+                    <input type="text" id="productBadge" required placeholder="Ex: Premium">
                 </div>
-
-                <!-- Product Badge -->
-                <div class="form-group">
-                    <label for="productBadge">Badge/Etiqueta *</label>
-                    <input type="text" id="productBadge" required placeholder="Ex: Mais Vendido, Premium, Destaque">
-                </div>
-
-                <!-- Product Image -->
                 <div class="form-group">
                     <label>Imagem do Produto *</label>
                     <div class="image-preview" id="imagePreview">
                         <p class="text-gray-400">Nenhuma imagem selecionada</p>
                     </div>
-                    <div class="file-input-wrapper">
-                        <input type="file" id="productImage" accept="image/*" onchange="previewImage(event)">
-                        <label for="productImage" class="file-input-label">Clique para selecionar uma imagem</label>
-                    </div>
+                    <input type="file" id="productImage" accept="image/*" onchange="previewImage(event)" class="hidden">
+                    <label for="productImage" class="block p-3 bg-[#1a1f3a] border border-[rgba(0,212,255,0.2)] rounded-lg text-center cursor-pointer text-[#00d4ff] font-bold">Selecionar Imagem</label>
                     <input type="hidden" id="productImageUrl">
                 </div>
-
-                <!-- Promotion Status -->
-                <div class="form-group">
-                    <div class="checkbox-wrapper">
-                        <input type="checkbox" id="productPromotion">
-                        <label for="productPromotion" style="margin-bottom: 0;">Este produto está em promoção?</label>
-                    </div>
+                <div class="form-group flex items-center gap-2">
+                    <input type="checkbox" id="productPromotion" class="w-5 h-5 accent-[#00d4ff]">
+                    <label class="mb-0">Em promoção?</label>
                 </div>
-
-                <!-- Rating -->
                 <div class="form-group">
-                    <label for="productRating">Avaliação (0-5) *</label>
-                    <input type="number" id="productRating" min="0" max="5" step="0.1" required placeholder="Ex: 4.9">
+                    <label>Link de Pagamento *</label>
+                    <input type="url" id="productPaymentLink" required>
                 </div>
-
-                <!-- Payment Link -->
-                <div class="form-group">
-                    <label for="productPaymentLink">Link de Pagamento *</label>
-                    <input type="url" id="productPaymentLink" required placeholder="https://pagamento.exemplo.com/produto">
-                </div>
-
-                <!-- Form Actions -->
-                <div style="display: flex; gap: 1rem; margin-top: 2rem;">
-                    <button type="submit" class="btn-primary flex-1">Salvar Produto</button>
+                <div class="flex gap-4 mt-8">
+                    <button type="submit" class="btn-primary flex-1">Salvar</button>
                     <button type="button" onclick="closeProductModal()" class="btn-secondary flex-1">Cancelar</button>
                 </div>
             </form>
@@ -479,7 +136,7 @@
     </div>
 
     <script>
-        // Firebase Configuration
+        // Configuração do Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyCpi9LmOel3NXEQNLd8y8zEZxVqZzBhCso",
             projectId: "riderprime-78955",
@@ -487,7 +144,7 @@
             storageBucket: "riderprime-78955.appspot.com"
         };
 
-        // Initialize Firebase
+        // Inicializar Firebase
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
         const storage = firebase.storage();
@@ -495,10 +152,33 @@
         let currentEditingProductId = null;
         let selectedFile = null;
 
-        // Load products on page load
-        document.addEventListener('DOMContentLoaded', loadProducts);
+        // Funções Globais
+        window.openAddProductModal = function() {
+            currentEditingProductId = null;
+            document.getElementById('modalTitle').textContent = 'Novo Produto';
+            document.getElementById('productForm').reset();
+            document.getElementById('imagePreview').innerHTML = '<p class="text-gray-400">Nenhuma imagem selecionada</p>';
+            document.getElementById('productImageUrl').value = '';
+            selectedFile = null;
+            document.getElementById('productModal').classList.add('active');
+        };
 
-        // Load all products from Firestore
+        window.closeProductModal = function() {
+            document.getElementById('productModal').classList.remove('active');
+        };
+
+        window.previewImage = function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                selectedFile = file;
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    document.getElementById('imagePreview').innerHTML = `<img src="${e.target.result}">`;
+                };
+                reader.readAsDataURL(file);
+            }
+        };
+
         async function loadProducts() {
             showLoading(true);
             try {
@@ -507,235 +187,116 @@
                 container.innerHTML = '';
 
                 if (snapshot.empty) {
-                    container.innerHTML = '<p class="text-gray-400 text-center py-8">Nenhum produto cadastrado ainda. Clique em "Novo Produto" para começar.</p>';
-                    showLoading(false);
-                    return;
-                }
-
-                snapshot.forEach(doc => {
-                    const product = doc.data();
-                    const productCard = createProductCard(doc.id, product);
-                    container.appendChild(productCard);
-                });
-
-                showLoading(false);
-            } catch (error) {
-                console.error('Erro ao carregar produtos:', error);
-                showAlert('Erro ao carregar produtos: ' + error.message, 'error');
-                showLoading(false);
-            }
-        }
-
-        // Create product card element
-        function createProductCard(productId, product) {
-            const card = document.createElement('div');
-            card.className = 'product-card';
-            card.innerHTML = `
-                <div class="product-info">
-                    <div style="flex: 0 0 150px;">
-                        <img src="${product.imageUrl || 'https://via.placeholder.com/150'}" alt="${product.title}" class="product-image" style="height: 150px; margin-bottom: 0;">
-                    </div>
-                    <div class="product-details" style="flex: 1;">
-                        ${product.promotion ? '<div class="badge">Em Promoção</div>' : ''}
-                        <h3 class="text-xl font-bold mb-2">${product.title}</h3>
-                        <p class="text-gray-400 text-sm mb-3">${product.description.substring(0, 150)}...</p>
-                        <div class="flex gap-4 mb-3">
-                            <div>
-                                <p class="text-gray-500 text-xs">Preço</p>
-                                <p class="text-lg font-bold gradient-text">R$ ${parseFloat(product.price).toFixed(2)}</p>
+                    container.innerHTML = '<p class="text-center py-8 text-gray-400">Nenhum produto encontrado.</p>';
+                } else {
+                    snapshot.forEach(doc => {
+                        const p = doc.data();
+                        const card = document.createElement('div');
+                        card.className = 'product-card flex gap-6 items-center';
+                        card.innerHTML = `
+                            <img src="${p.imageUrl || ''}" class="w-24 h-24 object-cover rounded-lg">
+                            <div class="flex-1">
+                                <h3 class="text-xl font-bold">${p.title}</h3>
+                                <p class="text-gray-400 text-sm">R$ ${parseFloat(p.price).toFixed(2)}</p>
                             </div>
-                            <div>
-                                <p class="text-gray-500 text-xs">Avaliação</p>
-                                <p class="text-lg font-bold">${product.rating}★</p>
+                            <div class="flex flex-col gap-2">
+                                <button onclick="editProduct('${doc.id}')" class="text-[#00d4ff] font-bold">Editar</button>
+                                <button onclick="deleteProduct('${doc.id}')" class="text-red-500 font-bold">Excluir</button>
                             </div>
-                        </div>
-                    </div>
-                    <div class="product-actions">
-                        <button onclick="editProduct('${productId}')" class="btn-secondary" style="padding: 8px 16px; font-size: 0.9rem;">Editar</button>
-                        <button onclick="deleteProduct('${productId}')" class="btn-danger" style="padding: 8px 16px; font-size: 0.9rem;">Deletar</button>
-                    </div>
-                </div>
-            `;
-            return card;
-        }
-
-        // Open add product modal
-        function openAddProductModal() {
-            currentEditingProductId = null;
-            document.getElementById('modalTitle').textContent = 'Novo Produto';
-            document.getElementById('productForm').reset();
-            document.getElementById('imagePreview').innerHTML = '<p class="text-gray-400">Nenhuma imagem selecionada</p>';
-            document.getElementById('productImageUrl').value = '';
-            selectedFile = null;
-            document.getElementById('productModal').classList.add('active');
-        }
-
-        // Close product modal
-        function closeProductModal() {
-            document.getElementById('productModal').classList.remove('active');
-            currentEditingProductId = null;
-            selectedFile = null;
-        }
-
-        // Edit product
-        async function editProduct(productId) {
-            try {
-                const doc = await db.collection('produtos').doc(productId).get();
-                if (!doc.exists) {
-                    showAlert('Produto não encontrado', 'error');
-                    return;
+                        `;
+                        container.appendChild(card);
+                    });
                 }
-
-	                const product = doc.data();
-                currentEditingProductId = productId;
-
-                document.getElementById('modalTitle').textContent = 'Editar Produto';
-                document.getElementById('productTitle').value = product.title;
-                document.getElementById('productDescription').value = product.description;
-                document.getElementById('productPrice').value = product.price;
-                document.getElementById('productBadge').value = product.badge;
-                document.getElementById('productRating').value = product.rating;
-                document.getElementById('productPromotion').checked = product.promotion || false;
-                document.getElementById('productPaymentLink').value = product.paymentLink;
-                document.getElementById('productImageUrl').value = product.imageUrl;
-
-                if (product.imageUrl) {
-                    document.getElementById('imagePreview').innerHTML = `<img src="${product.imageUrl}" alt="Preview">`;
-                }
-
-                document.getElementById('productModal').classList.add('active');
-            } catch (error) {
-                console.error('Erro ao carregar produto:', error);
-                showAlert('Erro ao carregar produto: ' + error.message, 'error');
+            } catch (e) {
+                showAlert('Erro ao carregar: ' + e.message, 'error');
             }
+            showLoading(false);
         }
 
-        // Save product (create or update)
-        async function saveProduct(event) {
+        window.saveProduct = async function(event) {
             event.preventDefault();
-
-            const title = document.getElementById('productTitle').value;
-            const description = document.getElementById('productDescription').value;
-            const price = parseFloat(document.getElementById('productPrice').value);
-            const badge = document.getElementById('productBadge').value;
-            const rating = parseFloat(document.getElementById('productRating').value);
-            const promotion = document.getElementById('productPromotion').checked;
-            const paymentLink = document.getElementById('productPaymentLink').value;
-            let imageUrl = document.getElementById('productImageUrl').value;
-
-            if (!title || !description || !price || !badge || !rating || !paymentLink) {
-                showAlert('Por favor, preencha todos os campos obrigatórios', 'error');
-                return;
-            }
-
+            showLoading(true);
             try {
-                showLoading(true);
-
-                // Upload image if a new file was selected
+                let imageUrl = document.getElementById('productImageUrl').value;
                 if (selectedFile) {
-                    const timestamp = Date.now();
-                    const fileName = `produtos/${timestamp}_${selectedFile.name}`;
-                    const storageRef = storage.ref(fileName);
-                    await storageRef.put(selectedFile);
-                    imageUrl = await storageRef.getDownloadURL();
+                    const ref = storage.ref(`produtos/${Date.now()}_${selectedFile.name}`);
+                    await ref.put(selectedFile);
+                    imageUrl = await ref.getDownloadURL();
                 }
 
-                const productData = {
-                    title,
-                    description,
-                    price,
-                    badge,
-                    rating,
-                    promotion,
-                    paymentLink,
-                    imageUrl,
+	                const data = {
+                    title: document.getElementById('productTitle').value,
+                    description: document.getElementById('productDescription').value,
+                    price: parseFloat(document.getElementById('productPrice').value),
+                    rating: parseFloat(document.getElementById('productRating').value),
+                    badge: document.getElementById('productBadge').value,
+                    promotion: document.getElementById('productPromotion').checked,
+                    paymentLink: document.getElementById('productPaymentLink').value,
+                    imageUrl: imageUrl,
                     updatedAt: new Date()
                 };
 
                 if (currentEditingProductId) {
-                    // Update existing product
-                    await db.collection('produtos').doc(currentEditingProductId).update(productData);
-                    showAlert('Produto atualizado com sucesso!', 'success');
+                    await db.collection('produtos').doc(currentEditingProductId).update(data);
                 } else {
-                    // Create new product
-                    productData.createdAt = new Date();
-                    await db.collection('produtos').add(productData);
-                    showAlert('Produto criado com sucesso!', 'success');
+                    data.createdAt = new Date();
+                    await db.collection('produtos').add(data);
                 }
 
+                showAlert('Sucesso!', 'success');
                 closeProductModal();
                 loadProducts();
-                showLoading(false);
-            } catch (error) {
-                console.error('Erro ao salvar produto:', error);
-                showAlert('Erro ao salvar produto: ' + error.message, 'error');
-                showLoading(false);
+            } catch (e) {
+                showAlert('Erro: ' + e.message, 'error');
             }
-        }
+            showLoading(false);
+        };
 
-        // Delete product
-        async function deleteProduct(productId) {
-            if (!confirm('Tem certeza que deseja deletar este produto?')) {
-                return;
-            }
-
+        window.editProduct = async function(id) {
+            showLoading(true);
             try {
+                const doc = await db.collection('produtos').doc(id).get();
+                const p = doc.data();
+                currentEditingProductId = id;
+                document.getElementById('modalTitle').textContent = 'Editar Produto';
+                document.getElementById('productTitle').value = p.title;
+                document.getElementById('productDescription').value = p.description;
+                document.getElementById('productPrice').value = p.price;
+                document.getElementById('productRating').value = p.rating;
+                document.getElementById('productBadge').value = p.badge;
+                document.getElementById('productPromotion').checked = p.promotion;
+                document.getElementById('productPaymentLink').value = p.paymentLink;
+                document.getElementById('productImageUrl').value = p.imageUrl;
+                document.getElementById('imagePreview').innerHTML = `<img src="${p.imageUrl}">`;
+                document.getElementById('productModal').classList.add('active');
+            } catch (e) {
+                showAlert('Erro: ' + e.message, 'error');
+            }
+            showLoading(false);
+        };
+
+        window.deleteProduct = async function(id) {
+            if (confirm('Deseja excluir?')) {
                 showLoading(true);
-                await db.collection('produtos').doc(productId).delete();
-                showAlert('Produto deletado com sucesso!', 'success');
-                loadProducts();
+                try {
+                    await db.collection('produtos').doc(id).delete();
+                    loadProducts();
+                } catch (e) {
+                    showAlert('Erro: ' + e.message, 'error');
+                }
                 showLoading(false);
-            } catch (error) {
-                console.error('Erro ao deletar produto:', error);
-                showAlert('Erro ao deletar produto: ' + error.message, 'error');
-                showLoading(false);
             }
+        };
+
+        function showLoading(s) { document.getElementById('loading').classList.toggle('active', s); }
+        function showAlert(m, t) {
+            const a = document.getElementById('alert');
+            a.textContent = m;
+            a.className = `alert active alert-${t}`;
+            setTimeout(() => a.classList.remove('active'), 3000);
         }
 
-        // Preview image before upload
-        function previewImage(event) {
-            const file = event.target.files[0];
-            if (file) {
-                selectedFile = file;
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    document.getElementById('imagePreview').innerHTML = `<img src="${e.target.result}" alt="Preview">`;
-                };
-                reader.readAsDataURL(file);
-            }
-        }
-
-        // Show/hide loading indicator
-        function showLoading(show) {
-            document.getElementById('loading').classList.toggle('active', show);
-        }
-
-        // Show alert message
-        function showAlert(message, type) {
-            const alert = document.getElementById('alert');
-            alert.textContent = message;
-            alert.className = `alert active alert-${type}`;
-            setTimeout(() => {
-                alert.classList.remove('active');
-            }, 5000);
-        }
-
-        // Logout
-        function logout() {
-            if (confirm('Tem certeza que deseja sair?')) {
-                // Clear any local storage if needed
-                window.location.href = 'index.html';
-            }
-        }
-
-        // Close modal when clicking outside
-        window.onclick = function(event) {
-            const modal = document.getElementById('productModal');
-            if (event.target === modal) {
-                closeProductModal();
-            }
-        }
+        loadProducts();
     </script>
-
 </body>
 </html>
