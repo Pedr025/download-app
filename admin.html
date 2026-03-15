@@ -9,7 +9,7 @@
     
     <!-- Firebase SDKs (Versão Compat) -->
     <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-storage-compat.js"></script>
 
     <style>
@@ -39,6 +39,11 @@
         @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
         .alert-success { background: #065f46; border: 1px solid #059669; color: #ecfdf5; }
         .alert-error { background: #991b1b; border: 1px solid #dc2626; color: #fef2f2; }
+        .image-input-tabs { display: flex; gap: 1rem; margin-bottom: 1rem; }
+        .image-input-tabs button { flex: 1; padding: 10px; border: 2px solid rgba(0, 212, 255, 0.2); background: transparent; color: #00d4ff; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.3s ease; }
+        .image-input-tabs button.active { border-color: #00d4ff; background: rgba(0, 212, 255, 0.1); }
+        .image-input-section { display: none; }
+        .image-input-section.active { display: block; }
     </style>
 </head>
 <body>
@@ -109,11 +114,29 @@
                 </div>
                 <div class="form-group">
                     <label>Imagem do Produto *</label>
-                    <div class="image-preview" id="imagePreview">
-                        <p class="text-gray-400">Nenhuma imagem selecionada</p>
+                    <div class="image-input-tabs">
+                        <button type="button" class="active" onclick="switchImageTab('file')">Upload de Arquivo</button>
+                        <button type="button" onclick="switchImageTab('url')">URL da Imagem</button>
                     </div>
-                    <input type="file" id="productImage" accept="image/*" class="hidden">
-                    <label for="productImage" class="block p-3 bg-[#1a1f3a] border border-[rgba(0,212,255,0.2)] rounded-lg text-center cursor-pointer text-[#00d4ff] font-bold hover:border-[#00d4ff]">Selecionar Imagem</label>
+                    
+                    <!-- Seção Upload de Arquivo -->
+                    <div id="imageFileSection" class="image-input-section active">
+                        <div class="image-preview" id="imagePreview">
+                            <p class="text-gray-400">Nenhuma imagem selecionada</p>
+                        </div>
+                        <input type="file" id="productImage" accept="image/*" class="hidden">
+                        <label for="productImage" class="block p-3 bg-[#1a1f3a] border border-[rgba(0,212,255,0.2)] rounded-lg text-center cursor-pointer text-[#00d4ff] font-bold hover:border-[#00d4ff]">Selecionar Imagem</label>
+                    </div>
+
+                    <!-- Seção URL de Imagem -->
+                    <div id="imageUrlSection" class="image-input-section">
+                        <input type="url" id="productImageUrlInput" placeholder="https://exemplo.com/imagem.jpg" class="mb-3">
+                        <button type="button" onclick="previewImageFromUrl()" class="block w-full p-3 bg-[#1a1f3a] border border-[rgba(0,212,255,0.2)] rounded-lg text-center cursor-pointer text-[#00d4ff] font-bold hover:border-[#00d4ff]">Visualizar Imagem</button>
+                        <div class="image-preview mt-3" id="imagePreviewUrl">
+                            <p class="text-gray-400">Nenhuma imagem carregada</p>
+                        </div>
+                    </div>
+
                     <input type="hidden" id="productImageUrl">
                 </div>
                 <div class="form-group flex items-center gap-2">
@@ -133,19 +156,19 @@
     </div>
 
     <script>
-        // Configuração do Firebase
+        // Configuração do Firebase (Novo Firebase com Realtime Database)
         const firebaseConfig = {
-            apiKey: "AIzaSyCpi9LmOel3NXEQNLd8y8zEZxVqZzBhCso",
-            projectId: "riderprime-78955",
-            databaseURL: "https://riderprime-78955-default-rtdb.firebaseio.com",
-            storageBucket: "riderprime-78955.appspot.com"
+            apiKey: "AIzaSyAfpLZ0Y4Rh3o4RyJffGxn8_aDM0OCB1l0",
+            projectId: "polarizo-max",
+            databaseURL: "https://polarizo-max-default-rtdb.firebaseio.com",
+            storageBucket: "polarizo-max.appspot.com"
         };
 
         // Inicialização Segura
         let db, storage;
         try {
             firebase.initializeApp(firebaseConfig);
-            db = firebase.firestore();
+            db = firebase.database();
             storage = firebase.storage();
             console.log("Firebase inicializado com sucesso.");
         } catch (e) {
@@ -155,6 +178,7 @@
 
         let currentEditingId = null;
         let selectedFile = null;
+        let currentImageMode = 'file'; // 'file' ou 'url'
 
         // Elementos
         const modal = document.getElementById('productModal');
@@ -172,19 +196,66 @@
             setTimeout(() => a.classList.remove('active'), 4000);
         }
 
+        // Trocar aba de imagem
+        window.switchImageTab = (tab) => {
+            currentImageMode = tab;
+            const fileSection = document.getElementById('imageFileSection');
+            const urlSection = document.getElementById('imageUrlSection');
+            const buttons = document.querySelectorAll('.image-input-tabs button');
+            
+            buttons.forEach((btn, idx) => {
+                btn.classList.remove('active');
+                if ((idx === 0 && tab === 'file') || (idx === 1 && tab === 'url')) {
+                    btn.classList.add('active');
+                }
+            });
+
+            if (tab === 'file') {
+                fileSection.classList.add('active');
+                urlSection.classList.remove('active');
+            } else {
+                fileSection.classList.remove('active');
+                urlSection.classList.add('active');
+            }
+        };
+
+        // Visualizar imagem da URL
+        window.previewImageFromUrl = () => {
+            const url = document.getElementById('productImageUrlInput').value;
+            if (!url) {
+                showAlert('Por favor, insira uma URL válida.', 'error');
+                return;
+            }
+            
+            const img = new Image();
+            img.onload = () => {
+                document.getElementById('imagePreviewUrl').innerHTML = `<img src="${url}">`;
+                document.getElementById('productImageUrl').value = url;
+                selectedFile = null;
+            };
+            img.onerror = () => {
+                showAlert('Erro ao carregar a imagem. Verifique a URL.', 'error');
+            };
+            img.src = url;
+        };
+
         window.openAddProductModal = () => {
             currentEditingId = null;
             form.reset();
+            currentImageMode = 'file';
             document.getElementById('modalTitle').textContent = 'Novo Produto';
             document.getElementById('imagePreview').innerHTML = '<p class="text-gray-400">Nenhuma imagem selecionada</p>';
+            document.getElementById('imagePreviewUrl').innerHTML = '<p class="text-gray-400">Nenhuma imagem carregada</p>';
             document.getElementById('productImageUrl').value = '';
+            document.getElementById('productImageUrlInput').value = '';
             selectedFile = null;
+            switchImageTab('file');
             modal.classList.add('active');
         };
 
         window.closeProductModal = () => { modal.classList.remove('active'); };
 
-        // Preview de Imagem
+        // Preview de Imagem (Upload)
         document.getElementById('productImage').onchange = (e) => {
             const file = e.target.files[0];
             if (file) {
@@ -192,37 +263,47 @@
                 const reader = new FileReader();
                 reader.onload = (ev) => {
                     document.getElementById('imagePreview').innerHTML = `<img src="${ev.target.result}">`;
+                    document.getElementById('productImageUrl').value = '';
                 };
                 reader.readAsDataURL(file);
             }
         };
 
-        // Carregar Produtos
+        // Carregar Produtos do Realtime Database
         async function loadProducts() {
             try {
-                const snapshot = await db.collection('produtos').orderBy('createdAt', 'desc').get();
-                container.innerHTML = '';
-                if (snapshot.empty) {
-                    container.innerHTML = '<p class="text-center py-10 text-gray-500">Nenhum produto cadastrado.</p>';
-                    return;
-                }
-                snapshot.forEach(doc => {
-                    const p = doc.data();
-                    const card = document.createElement('div');
-                    card.className = 'product-card flex flex-col md:flex-row gap-6 items-center';
-                    card.innerHTML = `
-                        <img src="${p.imageUrl || 'https://via.placeholder.com/150'}" class="w-32 h-32 object-cover rounded-xl border border-[rgba(0,212,255,0.2)]">
-                        <div class="flex-1 text-center md:text-left">
-                            <h3 class="text-xl font-bold">${p.title}</h3>
-                            <p class="text-[#00d4ff] font-black text-lg">R$ ${parseFloat(p.price).toFixed(2)}</p>
-                            <p class="text-gray-500 text-sm line-clamp-1">${p.description}</p>
-                        </div>
-                        <div class="flex gap-3">
-                            <button onclick="editProduct('${doc.id}')" class="btn-secondary px-6 py-2">Editar</button>
-                            <button onclick="deleteProduct('${doc.id}')" class="btn-danger px-6 py-2">Excluir</button>
-                        </div>
-                    `;
-	                    container.appendChild(card);
+                const ref = db.ref('produtos');
+                ref.on('value', (snapshot) => {
+                    container.innerHTML = '';
+                    const data = snapshot.val();
+                    
+                    if (!data) {
+                        container.innerHTML = '<p class="text-center py-10 text-gray-500">Nenhum produto cadastrado.</p>';
+                        return;
+                    }
+
+                    // Converter objeto para array e ordenar por data
+                    const products = Object.entries(data)
+                        .map(([id, product]) => ({ id, ...product }))
+                        .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+
+                    products.forEach(p => {
+                        const card = document.createElement('div');
+                        card.className = 'product-card flex flex-col md:flex-row gap-6 items-center';
+                        card.innerHTML = `
+                            <img src="${p.imageUrl}" alt="${p.title}" class="w-full md:w-48 h-48 object-cover rounded-lg">
+                            <div class="flex-1 text-center md:text-left">
+                                <h3 class="text-xl font-bold">${p.title}</h3>
+                                <p class="text-[#00d4ff] font-black text-lg">R$ ${parseFloat(p.price).toFixed(2)}</p>
+                                <p class="text-gray-500 text-sm line-clamp-1">${p.description}</p>
+                            </div>
+                            <div class="flex gap-3">
+                                <button onclick="editProduct('${p.id}')" class="btn-secondary px-6 py-2">Editar</button>
+                                <button onclick="deleteProduct('${p.id}')" class="btn-danger px-6 py-2">Excluir</button>
+                            </div>
+                        `;
+                        container.appendChild(card);
+                    });
                 });
             } catch (e) {
                 console.error("Erro ao carregar:", e);
@@ -230,7 +311,7 @@
             }
         }
 
-        // Salvar Produto
+              // Salvar Produto
         form.onsubmit = async (e) => {
             e.preventDefault();
             showLoading(true);
@@ -248,6 +329,12 @@
                     console.log("Upload concluído:", url);
                 }
 
+                if (!url) {
+                    showAlert('Por favor, selecione ou insira uma imagem.', 'error');
+                    showLoading(false);
+                    return;
+                }
+
                 const productData = {
                     title: document.getElementById('productTitle').value,
                     description: document.getElementById('productDescription').value,
@@ -257,21 +344,21 @@
                     promotion: document.getElementById('productPromotion').checked,
                     paymentLink: document.getElementById('productPaymentLink').value,
                     imageUrl: url,
-                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    updatedAt: Date.now()
                 };
 
                 if (currentEditingId) {
                     console.log("Atualizando produto:", currentEditingId);
-                    await db.collection('produtos').doc(currentEditingId).update(productData);
+                    await db.ref(`produtos/${currentEditingId}`).update(productData);
                 } else {
                     console.log("Criando novo produto...");
-                    productData.createdAt = firebase.firestore.FieldValue.serverTimestamp();
-                    await db.collection('produtos').add(productData);
+                    productData.createdAt = Date.now();
+                    const newRef = db.ref('produtos').push();
+                    await newRef.set(productData);
                 }
 
                 showAlert('Produto salvo com sucesso!', 'success');
                 closeProductModal();
-                loadProducts();
             } catch (err) {
                 console.error("Erro detalhado ao salvar:", err);
                 showAlert('Erro ao salvar: ' + err.message, 'error');
@@ -284,8 +371,15 @@
         window.editProduct = async (id) => {
             showLoading(true);
             try {
-                const doc = await db.collection('produtos').doc(id).get();
-                const p = doc.data();
+                const snapshot = await db.ref(`produtos/${id}`).once('value');
+                const p = snapshot.val();
+                
+                if (!p) {
+                    showAlert('Produto não encontrado.', 'error');
+                    showLoading(false);
+                    return;
+                }
+
                 currentEditingId = id;
                 document.getElementById('modalTitle').textContent = 'Editar Produto';
                 document.getElementById('productTitle').value = p.title;
@@ -297,6 +391,8 @@
                 document.getElementById('productPaymentLink').value = p.paymentLink;
                 document.getElementById('productImageUrl').value = p.imageUrl || '';
                 document.getElementById('imagePreview').innerHTML = p.imageUrl ? `<img src="${p.imageUrl}">` : '';
+                
+                switchImageTab('file');
                 modal.classList.add('active');
             } catch (e) {
                 showAlert('Erro ao carregar dados.', 'error');
@@ -309,9 +405,8 @@
             if (confirm('Tem certeza que deseja excluir este produto?')) {
                 showLoading(true);
                 try {
-                    await db.collection('produtos').doc(id).delete();
+                    await db.ref(`produtos/${id}`).remove();
                     showAlert('Excluído com sucesso.', 'success');
-                    loadProducts();
                 } catch (e) {
                     showAlert('Erro ao excluir.', 'error');
                 }
