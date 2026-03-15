@@ -383,8 +383,7 @@
             </div>
         </div>
     </main>
-
-    <!-- Footer -->
+	    <!-- Footer -->
     <footer class="border-t border-[rgba(0,212,255,0.1)] mt-20 py-12 bg-[#0a0e27]">
         <div class="max-w-7xl mx-auto px-6">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
@@ -441,7 +440,8 @@
             </div>
         </div>
     </footer>
-	    <script>
+
+    <script>
         // Configuração do Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyCpi9LmOel3NXEQNLd8y8zEZxVqZzBhCso",
@@ -601,7 +601,7 @@
                     return;
                 }
                 
-                // Caso contrário, buscar no Firestore com busca mais flexível
+                // Fallback: buscar no Firestore caso o paymentLink não tenha sido passado
                 const snapshot = await db.collection('produtos').get();
                 let paymentLink = null;
                 

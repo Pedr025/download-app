@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Detalhes do Produto - Sites Lucrativos</title>
+    <title>Detalhes do Produto - ZucroBay</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
     
@@ -356,9 +356,9 @@
         <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
             <div class="flex items-center space-x-2">
                 <div class="w-10 h-10 bg-gradient-to-br from-cyan-400 to-blue-600 rounded-lg flex items-center justify-center">
-                    <span class="text-white font-black text-lg">SL</span>
+                    <span class="text-white font-black text-lg">ZCB</span>
                 </div>
-                <span class="text-xl font-black gradient-text">Sites Lucrativos</span>
+                <span class="text-xl font-black gradient-text">ZucroBay</span>
             </div>
 
             <div class="hidden md:flex space-x-8">
@@ -369,11 +369,12 @@
             </div>
 
             <div class="flex items-center space-x-4">
-                <button onclick="openSearchModal()" class="p-2 hover:bg-[rgba(0,212,255,0.1)] rounded-lg transition">
+                <button onclick="window.location.href='index.html'" class="p-2 hover:bg-[rgba(0,212,255,0.1)] rounded-lg transition">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                 </button>
-                <button onclick="window.location.href='carrinho.html'" class="p-2 hover:bg-[rgba(0,212,255,0.1)] rounded-lg transition">
+                <button onclick="window.location.href='carrinho.html'" class="p-2 hover:bg-[rgba(0,212,255,0.1)] rounded-lg transition relative">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+                    <span id="cartBadge" class="absolute top-0 right-0 bg-[#ff006e] text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">0</span>
                 </button>
             </div>
         </div>
@@ -385,91 +386,63 @@
             <!-- Breadcrumb -->
             <div class="mb-8 text-gray-400 text-sm">
                 <a href="index.html" class="hover:text-[#00d4ff] transition">Início</a> / 
-                <a href="index.html#projects" class="hover:text-[#00d4ff] transition">Projetos</a> / 
-                <span id="breadcrumbTitle">Produto</span>
+                <span id="breadcrumbTitle">Carregando...</span>
             </div>
 
-            <!-- Product Details -->
-            <div id="productContent" class="grid grid-cols-1 md:grid-cols-2 gap-12">
-                <!-- Left: Product Image -->
-                <div class="flex flex-col justify-center">
-                    <img id="productImage" src="" alt="Produto" class="product-image">
+            <div id="productContent" class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                <!-- Image Section -->
+                <div>
+                    <img id="productImage" src="" alt="" class="product-image">
                 </div>
 
-                <!-- Right: Product Info -->
+                <!-- Info Section -->
                 <div>
-                    <div class="mb-6">
-                        <p id="productBadge" class="text-[#00d4ff] font-bold text-sm mb-2">BADGE</p>
-                        <h1 id="productTitle" class="text-5xl nike-bold mb-4">Carregando...</h1>
-                        <p id="productDescription" class="text-gray-400 text-lg leading-relaxed">Carregando descrição...</p>
+                    <div class="flex items-center gap-3 mb-4">
+                        <span id="productBadge" class="px-3 py-1 bg-cyan-500/10 text-cyan-400 rounded-full text-xs font-bold uppercase tracking-wider border border-cyan-500/20"></span>
+                        <div class="flex items-center text-yellow-400">
+                            <svg class="w-4 h-4 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                            <span id="productRating" class="ml-1 text-sm font-bold"></span>
+                        </div>
                     </div>
 
-                    <!-- Rating and Reviews -->
-                    <div class="flex items-center gap-4 mb-8">
-                        <div class="flex items-center gap-2">
-                            <span id="productRating" class="text-2xl font-bold">5.0</span>
-                            <span class="text-[#00d4ff]">★★★★★</span>
-                        </div>
-                        <p class="text-gray-400">Avaliações de clientes</p>
-                    </div>
+                    <h1 id="productTitle" class="text-4xl nike-bold mb-4"></h1>
+                    <p id="productDescription" class="text-gray-400 text-lg mb-8"></p>
 
                     <!-- Price Section -->
                     <div class="price-section">
-                        <p class="text-gray-400 text-sm mb-2">Preço</p>
-                        <div class="flex items-baseline gap-4">
-                            <p id="productPrice" class="text-5xl font-black gradient-text">R$ 0.00</p>
-                            <p id="originalPrice" class="text-gray-500 text-xl line-through hidden">R$ 0.00</p>
+                        <div class="flex items-end gap-4 mb-2">
+                            <span id="productPrice" class="text-4xl font-black gradient-text"></span>
+                            <span id="originalPrice" class="text-xl text-gray-500 line-through hidden"></span>
+                        </div>
+                        <p class="text-gray-400 text-sm">Em até 12x no cartão ou à vista no PIX</p>
+                        
+                        <div id="discountBadge" class="discount-badge">
+                            CUPOM APLICADO: <span id="discountValue"></span>% DE DESCONTO
                         </div>
                     </div>
 
                     <!-- Coupon Section -->
                     <div class="coupon-section">
-                        <h3 class="text-lg font-bold mb-4">Tem um cupom?</h3>
+                        <h4 class="text-sm font-bold uppercase tracking-wider mb-4 text-gray-400">Possui um cupom?</h4>
                         <div class="coupon-input-group">
-                            <input type="text" id="couponInput" class="input-field" placeholder="Digite seu código de cupom" style="margin-bottom: 0;">
-                            <button onclick="applyCoupon()" class="btn-primary">Aplicar</button>
-                        </div>
-                        <div id="discountBadge" class="discount-badge">
-                            Desconto de <span id="discountValue">0</span>% aplicado!
+                            <input type="text" id="couponInput" class="input-field mb-0" placeholder="Digite seu cupom">
+                            <button onclick="applyCoupon()" class="btn-secondary">Aplicar</button>
                         </div>
                     </div>
 
                     <!-- Action Buttons -->
                     <div class="action-buttons">
-                        <button onclick="addToCart()" class="btn-cart">
-                            <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
-                            Adicionar ao Carrinho
-                        </button>
-                        <button onclick="openShareModal()" class="btn-share">
-                            <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C9.589 12.938 10 12.052 10 11c0-1.657-1.343-3-3-3s-3 1.343-3 3 1.343 3 3 3c.064 0 .128-.001.192-.003.243.962.807 1.85 1.684 2.342m0 0a9.968 9.968 0 00-5.468-1.384m0 0a9.968 9.968 0 015.466 1.384m0 0A2.991 2.991 0 0019 13a2.991 2.991 0 00-5.466-1.384m0 0a2.991 2.991 0 00-5.468 1.384"></path></svg>
-                            Compartilhar
-                        </button>
-                        <button onclick="buyNow()" class="btn-buy">
-                            Comprar Agora
-                        </button>
-                    </div>
-
-                    <!-- Product Features -->
-                    <div class="mt-8 p-4 bg-[rgba(0,212,255,0.05)] border border-[rgba(0,212,255,0.2)] rounded-lg">
-                        <p class="text-sm text-gray-400">
-                            <svg class="w-5 h-5 inline mr-2 text-[#00d4ff]" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
-                            Suporte 24/7 incluído
-                        </p>
-                        <p class="text-sm text-gray-400 mt-2">
-                            <svg class="w-5 h-5 inline mr-2 text-[#00d4ff]" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
-                            Garantia de 7 dias
-                        </p>
-                        <p class="text-sm text-gray-400 mt-2">
-                            <svg class="w-5 h-5 inline mr-2 text-[#00d4ff]" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
-                            Acesso imediato após compra
-                        </p>
+                        <button onclick="buyNow()" class="btn-buy">Comprar Agora</button>
+                        <button onclick="addToCart()" class="btn-cart">Adicionar ao Carrinho</button>
+                        <button onclick="openShareModal()" class="btn-share">Compartilhar</button>
                     </div>
                 </div>
             </div>
-	            <!-- Description Section -->
-            <div class="description-section mt-20">
-                <h3>Sobre este Produto</h3>
-                <p id="fullDescription">Carregando descrição completa...</p>
+
+            <!-- Description Section -->
+            <div class="description-section">
+                <h3>Descrição Detalhada</h3>
+                <div id="fullDescription" class="text-gray-300"></div>
             </div>
         </div>
     </main>
@@ -478,26 +451,26 @@
     <div id="shareModal" class="share-modal">
         <div class="share-modal-content">
             <div class="flex justify-between items-center mb-6">
-                <h2 class="text-2xl font-bold">Compartilhar Produto</h2>
-                <button onclick="closeShareModal()" class="text-3xl hover:text-red-500">&times;</button>
+                <h2 class="text-xl font-bold">Compartilhar</h2>
+                <button onclick="closeShareModal()" class="text-2xl hover:text-red-500">&times;</button>
             </div>
             <div class="share-options">
                 <div class="share-option" onclick="shareOnWhatsApp()">
-                    <svg class="w-6 h-6 text-green-500" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.272-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.67-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.076 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421-7.403h-.004a9.87 9.87 0 00-9.746 9.798c0 2.734.732 5.41 2.124 7.738L2.505 22l8.227-2.166c2.256 1.214 4.787 1.855 7.359 1.855 5.369 0 9.957-4.488 9.957-9.773 0-2.611-.674-5.023-1.95-7.118-1.277-2.095-3.077-3.808-5.153-4.772-2.076-.964-4.382-1.486-6.785-1.486z"/></svg>
+                    <svg class="w-6 h-6 text-green-400" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.414 0 .018 5.396.015 12.03c0 2.12.554 4.189 1.605 6.04L0 24l6.117-1.605a11.81 11.81 0 005.925 1.585h.005c6.635 0 12.032-5.396 12.035-12.031a11.772 11.772 0 00-3.417-8.529"></path></svg>
                     <div>
                         <p class="font-bold">WhatsApp</p>
-                        <p class="text-sm text-gray-400">Compartilhar via WhatsApp</p>
+                        <p class="text-sm text-gray-400">Enviar para um contato</p>
                     </div>
                 </div>
                 <div class="share-option" onclick="shareOnFacebook()">
-                    <svg class="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                    <svg class="w-6 h-6 text-blue-500" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12.073-12-12.073s-12 5.446-12 12.073c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.469h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.469h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"></path></svg>
                     <div>
                         <p class="font-bold">Facebook</p>
-                        <p class="text-sm text-gray-400">Compartilhar no Facebook</p>
+                        <p class="text-sm text-gray-400">Postar no feed</p>
                     </div>
                 </div>
                 <div class="share-option" onclick="shareOnTwitter()">
-                    <svg class="w-6 h-6 text-blue-400" fill="currentColor" viewBox="0 0 24 24"><path d="M23 3a10.9 10.9 0 01-3.14 1.53 4.48 4.48 0 00-7.86 3v1A10.66 10.66 0 013 4s-4 9 5 13a11.64 11.64 0 01-7 2s9 5 20 5a9.5 9.5 0 00-9-5.5c4.75 2.25 7-7 7-7a10.6 10.6 0 01-9.5 5M21 20.5a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z"/></svg>
+                    <svg class="w-6 h-6 text-blue-400" fill="currentColor" viewBox="0 0 24 24"><path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.84 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"></path></svg>
                     <div>
                         <p class="font-bold">Twitter</p>
                         <p class="text-sm text-gray-400">Compartilhar no Twitter</p>
@@ -514,16 +487,16 @@
         </div>
     </div>
 
-    <!-- Footer -->
+	    <!-- Footer -->
     <footer class="border-t border-[rgba(0,212,255,0.1)] mt-20 py-12 bg-[#0a0e27]">
         <div class="max-w-7xl mx-auto px-6">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
                 <div>
                     <div class="flex items-center space-x-2 mb-4">
                         <div class="w-8 h-8 bg-gradient-to-br from-cyan-400 to-blue-600 rounded-lg flex items-center justify-center">
-                            <span class="text-white font-black text-sm">SL</span>
+                            <span class="text-white font-black text-sm">ZCB</span>
                         </div>
-                        <span class="font-black gradient-text">Sites Lucrativos</span>
+                        <span class="font-black gradient-text">ZucroBay</span>
                     </div>
                     <p class="text-gray-400 text-sm">Templates premium para seu negócio digital.</p>
                 </div>
@@ -575,10 +548,10 @@
     <script>
         // Configuração do Firebase
         const firebaseConfig = {
-            apiKey: "AIzaSyAfpLZ0Y4Rh3o4RyJffGxn8_aDM0OCB1l0",
-            projectId: "polarizo-max",
-            databaseURL: "https://polarizo-max-default-rtdb.firebaseio.com",
-            storageBucket: "polarizo-max.appspot.com"
+            apiKey: "AIzaSyCpi9LmOel3NXEQNLd8y8zEZxVqZzBhCso",
+            projectId: "riderprime-78955",
+            databaseURL: "https://riderprime-78955-default-rtdb.firebaseio.com",
+            storageBucket: "riderprime-78955.appspot.com"
         };
 
         let db;
@@ -587,7 +560,10 @@
 
         try {
             firebase.initializeApp(firebaseConfig);
-            db = firebase.database();
+            // Usando Firestore conforme o admin.html anterior, 
+            // embora o arquivo original usasse database-compat, o admin.html usa firestore.
+            // Vou ajustar para Firestore para ser consistente com o armazenamento do paymentLink.
+            db = firebase.firestore();
             console.log("Firebase inicializado com sucesso.");
         } catch (e) {
             console.error("Erro ao inicializar Firebase:", e);
@@ -600,23 +576,26 @@
         }
 
         // Carregar dados do produto
-        function loadProduct() {
+        async function loadProduct() {
             const productId = getProductIdFromUrl();
             if (!productId) {
                 showAlert('Produto não encontrado.', 'error');
                 return;
             }
 
-            const ref = db.ref(`produtos/${productId}`);
-            ref.once('value', (snapshot) => {
-                const product = snapshot.val();
-                if (product) {
-                    currentProduct = { id: productId, ...product };
+            try {
+                const doc = await db.collection('produtos').doc(productId).get();
+                if (doc.exists) {
+                    currentProduct = { id: doc.id, ...doc.data() };
                     displayProduct(currentProduct);
+                    updateCartBadge();
                 } else {
                     showAlert('Produto não encontrado.', 'error');
                 }
-            });
+            } catch (error) {
+                console.error("Erro ao carregar produto:", error);
+                showAlert('Erro ao conectar com o banco de dados.', 'error');
+            }
         }
 
         // Exibir produto
@@ -632,7 +611,7 @@
         }
 
         // Aplicar cupom
-        function applyCoupon() {
+        async function applyCoupon() {
             const couponCode = document.getElementById('couponInput').value.trim().toUpperCase();
             
             if (!couponCode) {
@@ -640,11 +619,11 @@
                 return;
             }
 
-            const ref = db.ref('cupons');
-            ref.once('value', (snapshot) => {
-                const cupons = snapshot.val();
-                if (cupons && cupons[couponCode]) {
-                    const coupon = cupons[couponCode];
+            try {
+                // No Firestore, buscamos na coleção 'cupons'
+                const doc = await db.collection('cupons').doc(couponCode).get();
+                if (doc.exists) {
+                    const coupon = doc.data();
                     currentDiscount = coupon.desconto || 0;
                     
                     document.getElementById('discountValue').textContent = currentDiscount;
@@ -665,7 +644,10 @@
                     document.getElementById('productPrice').textContent = `R$ ${parseFloat(currentProduct.price).toFixed(2)}`;
                     showAlert('Cupom inválido.', 'error');
                 }
-            });
+            } catch (error) {
+                console.error("Erro ao aplicar cupom:", error);
+                showAlert('Erro ao validar cupom.', 'error');
+            }
         }
 
         // Adicionar ao carrinho
@@ -677,6 +659,7 @@
                 title: currentProduct.title,
                 price: parseFloat(currentProduct.price),
                 imageUrl: currentProduct.imageUrl,
+                paymentLink: currentProduct.paymentLink, // PASSANDO O PAYMENT LINK AQUI
                 discount: currentDiscount,
                 quantity: 1
             };
@@ -691,6 +674,7 @@
             }
 
             localStorage.setItem('cart', JSON.stringify(cart));
+            updateCartBadge();
             showAlert('Produto adicionado ao carrinho!', 'success');
         }
 
@@ -699,7 +683,15 @@
             addToCart();
             setTimeout(() => {
                 window.location.href = 'carrinho.html';
-            }, 1000);
+            }, 800);
+        }
+
+        // Atualizar badge do carrinho
+        function updateCartBadge() {
+            const cart = JSON.parse(localStorage.getItem('cart')) || [];
+            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+            const badge = document.getElementById('cartBadge');
+            if (badge) badge.textContent = totalItems;
         }
 
         // Abrir modal de compartilhamento
