@@ -6,6 +6,11 @@
     <title>Detalhes do Produto - Sites Lucrativos</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database-compat.js"></script>
+    
     <style>
         * {
             font-family: 'Inter', sans-serif;
@@ -27,6 +32,30 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+        }
+
+        .nav-link {
+            position: relative;
+            font-weight: 600;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: color 0.3s ease;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: #00d4ff;
+            transition: width 0.3s ease;
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
         }
 
         .btn-primary {
@@ -61,117 +90,12 @@
             color: #0a0e27;
         }
 
-        .nav-link {
-            position: relative;
-            font-weight: 600;
-            font-size: 14px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            transition: color 0.3s ease;
-        }
-
-        .nav-link::after {
-            content: '';
-            position: absolute;
-            bottom: -4px;
-            left: 0;
-            width: 0;
-            height: 2px;
-            background: #00d4ff;
-            transition: width 0.3s ease;
-        }
-
-        .nav-link:hover::after {
+        .product-image {
             width: 100%;
-        }
-
-        .gallery-container {
-            display: grid;
-            grid-template-columns: 1fr 4fr;
-            gap: 1rem;
-            margin-bottom: 2rem;
-        }
-
-        .gallery-thumbnails {
-            display: flex;
-            flex-direction: column;
-            gap: 0.75rem;
-        }
-
-        .thumbnail {
-            width: 100%;
-            height: 80px;
-            border-radius: 8px;
-            cursor: pointer;
-            border: 2px solid rgba(0, 212, 255, 0.2);
-            overflow: hidden;
-            transition: all 0.3s ease;
-        }
-
-        .thumbnail:hover,
-        .thumbnail.active {
-            border-color: #00d4ff;
-            box-shadow: 0 0 15px rgba(0, 212, 255, 0.3);
-        }
-
-        .thumbnail img {
-            width: 100%;
-            height: 100%;
+            height: 500px;
             object-fit: cover;
-        }
-
-        .main-image {
-            width: 100%;
             border-radius: 12px;
-            overflow: hidden;
             border: 1px solid rgba(0, 212, 255, 0.2);
-        }
-
-        .main-image img {
-            width: 100%;
-            height: auto;
-            display: block;
-        }
-
-        .feature-item {
-            display: flex;
-            align-items: flex-start;
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .feature-icon {
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(135deg, #00d4ff, #0099ff);
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-        }
-
-        .feature-text h4 {
-            font-weight: 700;
-            margin-bottom: 0.25rem;
-        }
-
-        .feature-text p {
-            color: #a0aec0;
-            font-size: 0.95rem;
-        }
-
-        .badge {
-            background: linear-gradient(135deg, #ff006e, #00d4ff);
-            color: white;
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            display: inline-block;
-            margin-bottom: 1rem;
         }
 
         .price-section {
@@ -179,125 +103,253 @@
             border: 1px solid rgba(0, 212, 255, 0.2);
             border-radius: 12px;
             padding: 2rem;
-            margin-bottom: 2rem;
+            margin: 2rem 0;
         }
 
-        .share-buttons {
-            display: flex;
-            gap: 0.75rem;
-            flex-wrap: wrap;
-        }
-
-        .share-btn {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 10px 16px;
+        .input-field {
+            width: 100%;
+            padding: 12px;
+            background: #1a1f3a;
+            border: 1px solid rgba(0, 212, 255, 0.2);
             border-radius: 8px;
-            border: 1px solid rgba(0, 212, 255, 0.3);
-            background: transparent;
-            color: #00d4ff;
-            cursor: pointer;
-            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 1rem;
+            font-size: 16px;
             transition: all 0.3s ease;
-            font-size: 0.9rem;
         }
 
-        .share-btn:hover {
-            background: rgba(0, 212, 255, 0.1);
+        .input-field:focus {
+            outline: none;
             border-color: #00d4ff;
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
         }
 
-        .specs-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-
-        .spec-card {
+        .coupon-section {
             background: linear-gradient(135deg, #1a1f3a 0%, #16213e 100%);
             border: 1px solid rgba(0, 212, 255, 0.2);
             border-radius: 12px;
             padding: 1.5rem;
-            text-align: center;
+            margin: 2rem 0;
         }
 
-        .spec-card h4 {
+        .coupon-input-group {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .coupon-input-group input {
+            flex: 1;
+        }
+
+        .coupon-input-group button {
+            padding: 12px 24px;
+        }
+
+        .discount-badge {
+            background: linear-gradient(135deg, #00d4ff, #0099ff);
+            color: #0a0e27;
+            padding: 12px 24px;
+            border-radius: 8px;
             font-weight: 700;
-            margin-bottom: 0.5rem;
+            text-align: center;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .discount-badge.active {
+            display: block;
+        }
+
+        .action-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .action-buttons button {
+            padding: 16px 24px;
+            font-size: 16px;
+            font-weight: 700;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-buy {
+            background: linear-gradient(135deg, #00d4ff, #0099ff);
+            color: #0a0e27;
+            grid-column: 1 / -1;
+        }
+
+        .btn-buy:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
+        }
+
+        .btn-cart {
+            background: transparent;
+            color: #00d4ff;
+            border: 2px solid #00d4ff;
+        }
+
+        .btn-cart:hover {
+            background: #00d4ff;
+            color: #0a0e27;
+        }
+
+        .btn-share {
+            background: transparent;
+            color: #00d4ff;
+            border: 2px solid #00d4ff;
+        }
+
+        .btn-share:hover {
+            background: #00d4ff;
+            color: #0a0e27;
+        }
+
+        .description-section {
+            background: linear-gradient(135deg, #1a1f3a 0%, #16213e 100%);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-radius: 12px;
+            padding: 2rem;
+            margin: 2rem 0;
+            line-height: 1.8;
+        }
+
+        .description-section h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
             color: #00d4ff;
         }
 
-        .spec-card p {
-            color: #a0aec0;
-            font-size: 0.9rem;
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 400px;
         }
 
-        .breadcrumb {
+        .spinner {
+            border: 4px solid rgba(0, 212, 255, 0.2);
+            border-top: 4px solid #00d4ff;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            display: none;
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            z-index: 3000;
+            min-width: 300px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .alert.active {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
+        }
+
+        .alert-success {
+            background: #065f46;
+            border: 1px solid #059669;
+            color: #ecfdf5;
+        }
+
+        .alert-error {
+            background: #991b1b;
+            border: 1px solid #dc2626;
+            color: #fef2f2;
+        }
+
+        .share-modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            align-items: center;
+            justify-content: center;
+        }
+
+        .share-modal.active {
+            display: flex;
+        }
+
+        .share-modal-content {
+            background: #0a0e27;
+            padding: 2rem;
+            border-radius: 12px;
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .share-options {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .share-option {
+            padding: 1rem;
+            background: #1a1f3a;
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
-            margin-bottom: 2rem;
-            color: #a0aec0;
-            font-size: 0.9rem;
+            gap: 1rem;
         }
 
-        .breadcrumb a {
-            color: #00d4ff;
-            text-decoration: none;
-            transition: color 0.3s ease;
-        }
-
-        .breadcrumb a:hover {
-            color: #ffffff;
-        }
-
-        .breadcrumb span {
-            color: #a0aec0;
+        .share-option:hover {
+            border-color: #00d4ff;
+            background: #16213e;
         }
 
         @media (max-width: 768px) {
-            .gallery-container {
+            .product-image {
+                height: 300px;
+            }
+
+            .action-buttons {
                 grid-template-columns: 1fr;
             }
 
-            .gallery-thumbnails {
-                flex-direction: row;
-                order: 2;
-            }
-
-            .thumbnail {
-                height: 60px;
-                flex: 1;
-            }
-
-            .main-image {
-                order: 1;
-            }
-
-            .specs-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-
-        @media (max-width: 480px) {
-            .specs-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .share-buttons {
-                flex-direction: column;
-            }
-
-            .share-btn {
-                width: 100%;
-                justify-content: center;
+            .btn-buy {
+                grid-column: 1;
             }
         }
     </style>
 </head>
 <body>
+
+    <!-- Alert -->
+    <div id="alert" class="alert"></div>
 
     <!-- Navigation Bar -->
     <nav class="fixed top-0 w-full bg-[#0a0e27] bg-opacity-95 backdrop-blur-md z-50 border-b border-[rgba(0,212,255,0.1)]">
@@ -317,10 +369,10 @@
             </div>
 
             <div class="flex items-center space-x-4">
-                <button class="p-2 hover:bg-[rgba(0,212,255,0.1)] rounded-lg transition">
+                <button onclick="openSearchModal()" class="p-2 hover:bg-[rgba(0,212,255,0.1)] rounded-lg transition">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                 </button>
-                <button class="p-2 hover:bg-[rgba(0,212,255,0.1)] rounded-lg transition">
+                <button onclick="window.location.href='carrinho.html'" class="p-2 hover:bg-[rgba(0,212,255,0.1)] rounded-lg transition">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
                 </button>
             </div>
@@ -331,108 +383,139 @@
     <main class="pt-24 pb-20">
         <div class="max-w-7xl mx-auto px-6">
             <!-- Breadcrumb -->
-            <div class="breadcrumb">
-                <a href="index.html">Home</a>
-                <span>/</span>
-                <a href="index.html#projects">Produtos</a>
-                <span>/</span>
-                <span id="breadcrumb-product">Produto</span>
+            <div class="mb-8 text-gray-400 text-sm">
+                <a href="index.html" class="hover:text-[#00d4ff] transition">Início</a> / 
+                <a href="index.html#projects" class="hover:text-[#00d4ff] transition">Projetos</a> / 
+                <span id="breadcrumbTitle">Produto</span>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16">
-                <!-- Gallery Section -->
-                <div>
-                    <div class="gallery-container">
-                        <div class="gallery-thumbnails" id="thumbnails-container">
-                            <!-- Thumbnails will be inserted here -->
-                        </div>
-                        <div class="main-image">
-                            <img id="main-image" src="" alt="Produto">
-                        </div>
-                    </div>
+            <!-- Product Details -->
+            <div id="productContent" class="grid grid-cols-1 md:grid-cols-2 gap-12">
+                <!-- Left: Product Image -->
+                <div class="flex flex-col justify-center">
+                    <img id="productImage" src="" alt="Produto" class="product-image">
                 </div>
 
-                <!-- Product Info Section -->
+                <!-- Right: Product Info -->
                 <div>
-                    <div id="badge-container"></div>
-                    <h1 id="product-title" class="text-4xl md:text-5xl nike-bold mb-4"></h1>
-                    <p id="product-description" class="text-gray-400 text-lg mb-6"></p>
+                    <div class="mb-6">
+                        <p id="productBadge" class="text-[#00d4ff] font-bold text-sm mb-2">BADGE</p>
+                        <h1 id="productTitle" class="text-5xl nike-bold mb-4">Carregando...</h1>
+                        <p id="productDescription" class="text-gray-400 text-lg leading-relaxed">Carregando descrição...</p>
+                    </div>
+
+                    <!-- Rating and Reviews -->
+                    <div class="flex items-center gap-4 mb-8">
+                        <div class="flex items-center gap-2">
+                            <span id="productRating" class="text-2xl font-bold">5.0</span>
+                            <span class="text-[#00d4ff]">★★★★★</span>
+                        </div>
+                        <p class="text-gray-400">Avaliações de clientes</p>
+                    </div>
 
                     <!-- Price Section -->
                     <div class="price-section">
-                        <div class="flex justify-between items-center mb-6">
-                            <div>
-                                <p class="text-gray-500 text-sm mb-2">Preço</p>
-                                <p id="product-price" class="text-4xl font-black gradient-text"></p>
-                            </div>
-                            <div class="text-right">
-                                <p class="text-gray-500 text-sm mb-2">Avaliação</p>
-                                <p id="product-rating" class="text-2xl font-bold"></p>
-                            </div>
+                        <p class="text-gray-400 text-sm mb-2">Preço</p>
+                        <div class="flex items-baseline gap-4">
+                            <p id="productPrice" class="text-5xl font-black gradient-text">R$ 0.00</p>
+                            <p id="originalPrice" class="text-gray-500 text-xl line-through hidden">R$ 0.00</p>
                         </div>
+                    </div>
 
-                        <!-- Action Buttons -->
-                        <div class="flex flex-col gap-3 mb-6">
-                            <!-- COMENTÁRIO: Altere o link abaixo para o link de pagamento correspondente ao produto -->
-                            <button id="buy-btn" onclick="window.location.href='https://pagamento.exemplo.com/produto'" class="btn-primary w-full text-lg py-3">Comprar Agora</button>
-                            <button class="btn-secondary w-full py-3">Demonstração ao Vivo</button>
+                    <!-- Coupon Section -->
+                    <div class="coupon-section">
+                        <h3 class="text-lg font-bold mb-4">Tem um cupom?</h3>
+                        <div class="coupon-input-group">
+                            <input type="text" id="couponInput" class="input-field" placeholder="Digite seu código de cupom" style="margin-bottom: 0;">
+                            <button onclick="applyCoupon()" class="btn-primary">Aplicar</button>
                         </div>
+                        <div id="discountBadge" class="discount-badge">
+                            Desconto de <span id="discountValue">0</span>% aplicado!
+                        </div>
+                    </div>
 
-                        <!-- Share Buttons -->
-                        <div class="share-buttons">
-                            <button class="share-btn" onclick="shareOnWhatsApp()">
-                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.67-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.076 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421-7.403h-.004a9.87 9.87 0 00-4.255.949c-1.238.503-2.37 1.237-3.285 2.15-.915.913-1.648 2.045-2.157 3.283-.51 1.238-.77 2.56-.77 3.908 0 1.348.26 2.67.77 3.908.509 1.238 1.242 2.37 2.157 3.283.915.913 2.047 1.647 3.285 2.15 1.238.503 2.56.763 3.908.763 1.348 0 2.67-.26 3.908-.763 1.238-.503 2.37-1.237 3.283-2.15.913-.915 1.647-2.045 2.15-3.283.503-1.238.763-2.56.763-3.908 0-1.348-.26-2.67-.763-3.908-.503-1.238-1.237-2.37-2.15-3.283-.913-.915-2.045-1.648-3.283-2.15-1.238-.503-2.56-.763-3.908-.763z"/></svg>
-                                WhatsApp
-                            </button>
-                            <button class="share-btn" onclick="shareOnFacebook()">
-                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
-                                Facebook
-                            </button>
-                            <button class="share-btn" onclick="shareOnTwitter()">
-                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M23 3a10.9 10.9 0 01-3.14 1.53 4.48 4.48 0 00-7.86 3v1A10.66 10.66 0 013 4s-4 9 5 13a11.64 11.64 0 01-7 2s9 5 20 5a9.5 9.5 0 00-9-5.5c4.75 2.25 7-7 7-7s-1.5 2.5-5 5m7-12l-1.294 6.129A4.5 4.5 0 0120.5 14.5"/></svg>
-                                Twitter
-                            </button>
-                            <button class="share-btn" onclick="copyToClipboard()">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
-                                Copiar Link
-                            </button>
-                        </div>
+                    <!-- Action Buttons -->
+                    <div class="action-buttons">
+                        <button onclick="addToCart()" class="btn-cart">
+                            <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                            Adicionar ao Carrinho
+                        </button>
+                        <button onclick="openShareModal()" class="btn-share">
+                            <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C9.589 12.938 10 12.052 10 11c0-1.657-1.343-3-3-3s-3 1.343-3 3 1.343 3 3 3c.064 0 .128-.001.192-.003.243.962.807 1.85 1.684 2.342m0 0a9.968 9.968 0 00-5.468-1.384m0 0a9.968 9.968 0 015.466 1.384m0 0A2.991 2.991 0 0019 13a2.991 2.991 0 00-5.466-1.384m0 0a2.991 2.991 0 00-5.468 1.384"></path></svg>
+                            Compartilhar
+                        </button>
+                        <button onclick="buyNow()" class="btn-buy">
+                            Comprar Agora
+                        </button>
+                    </div>
+
+                    <!-- Product Features -->
+                    <div class="mt-8 p-4 bg-[rgba(0,212,255,0.05)] border border-[rgba(0,212,255,0.2)] rounded-lg">
+                        <p class="text-sm text-gray-400">
+                            <svg class="w-5 h-5 inline mr-2 text-[#00d4ff]" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
+                            Suporte 24/7 incluído
+                        </p>
+                        <p class="text-sm text-gray-400 mt-2">
+                            <svg class="w-5 h-5 inline mr-2 text-[#00d4ff]" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
+                            Garantia de 7 dias
+                        </p>
+                        <p class="text-sm text-gray-400 mt-2">
+                            <svg class="w-5 h-5 inline mr-2 text-[#00d4ff]" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
+                            Acesso imediato após compra
+                        </p>
                     </div>
                 </div>
             </div>
-
-            <!-- Features Section -->
-            <section class="mb-16">
-                <h2 class="text-3xl nike-bold mb-8">Recursos Principais</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <div id="features-container">
-                        <!-- Features will be inserted here -->
-                    </div>
-                </div>
-            </section>
-
-            <!-- Specifications Section -->
-            <section class="mb-16">
-                <h2 class="text-3xl nike-bold mb-8">Especificações Técnicas</h2>
-                <div class="specs-grid" id="specs-container">
-                    <!-- Specs will be inserted here -->
-                </div>
-            </section>
-
-            <!-- CTA Section -->
-            <section class="relative rounded-2xl overflow-hidden p-12 md:p-20 border border-[rgba(0,212,255,0.3)]">
-                <div class="absolute inset-0 bg-gradient-to-r from-[#00d4ff] to-[#0099ff] opacity-5"></div>
-                <div class="relative z-10 text-center">
-                    <h2 class="text-4xl md:text-5xl nike-bold mb-6">Comece Agora</h2>
-                    <p class="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">Não perca a oportunidade de revolucionar seu negócio com nossa solução premium.</p>
-                    <button id="cta-btn" onclick="window.location.href='https://pagamento.exemplo.com/produto'" class="btn-primary text-lg px-8 py-4">Adquirir Agora</button>
-                </div>
-            </section>
+	            <!-- Description Section -->
+            <div class="description-section mt-20">
+                <h3>Sobre este Produto</h3>
+                <p id="fullDescription">Carregando descrição completa...</p>
+            </div>
         </div>
     </main>
 
+    <!-- Share Modal -->
+    <div id="shareModal" class="share-modal">
+        <div class="share-modal-content">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold">Compartilhar Produto</h2>
+                <button onclick="closeShareModal()" class="text-3xl hover:text-red-500">&times;</button>
+            </div>
+            <div class="share-options">
+                <div class="share-option" onclick="shareOnWhatsApp()">
+                    <svg class="w-6 h-6 text-green-500" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.272-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.67-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.076 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421-7.403h-.004a9.87 9.87 0 00-9.746 9.798c0 2.734.732 5.41 2.124 7.738L2.505 22l8.227-2.166c2.256 1.214 4.787 1.855 7.359 1.855 5.369 0 9.957-4.488 9.957-9.773 0-2.611-.674-5.023-1.95-7.118-1.277-2.095-3.077-3.808-5.153-4.772-2.076-.964-4.382-1.486-6.785-1.486z"/></svg>
+                    <div>
+                        <p class="font-bold">WhatsApp</p>
+                        <p class="text-sm text-gray-400">Compartilhar via WhatsApp</p>
+                    </div>
+                </div>
+                <div class="share-option" onclick="shareOnFacebook()">
+                    <svg class="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                    <div>
+                        <p class="font-bold">Facebook</p>
+                        <p class="text-sm text-gray-400">Compartilhar no Facebook</p>
+                    </div>
+                </div>
+                <div class="share-option" onclick="shareOnTwitter()">
+                    <svg class="w-6 h-6 text-blue-400" fill="currentColor" viewBox="0 0 24 24"><path d="M23 3a10.9 10.9 0 01-3.14 1.53 4.48 4.48 0 00-7.86 3v1A10.66 10.66 0 013 4s-4 9 5 13a11.64 11.64 0 01-7 2s9 5 20 5a9.5 9.5 0 00-9-5.5c4.75 2.25 7-7 7-7a10.6 10.6 0 01-9.5 5M21 20.5a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z"/></svg>
+                    <div>
+                        <p class="font-bold">Twitter</p>
+                        <p class="text-sm text-gray-400">Compartilhar no Twitter</p>
+                    </div>
+                </div>
+                <div class="share-option" onclick="copyLink()">
+                    <svg class="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.658 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
+                    <div>
+                        <p class="font-bold">Copiar Link</p>
+                        <p class="text-sm text-gray-400">Copiar link do produto</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Footer -->
-    <footer class="border-t border-[rgba(0,212,255,0.1)] mt-20 py-12">
+    <footer class="border-t border-[rgba(0,212,255,0.1)] mt-20 py-12 bg-[#0a0e27]">
         <div class="max-w-7xl mx-auto px-6">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
                 <div>
@@ -448,7 +531,7 @@
                 <div>
                     <h4 class="font-bold text-white mb-4 uppercase text-sm">Produtos</h4>
                     <ul class="space-y-2 text-gray-400 text-sm">
-                        <li><a href="index.html#projects" class="hover:text-[#00d4ff] transition">Todos os Templates</a></li>
+                        <li><a href="#" class="hover:text-[#00d4ff] transition">Todos os Templates</a></li>
                         <li><a href="#" class="hover:text-[#00d4ff] transition">Novidades</a></li>
                         <li><a href="#" class="hover:text-[#00d4ff] transition">Premium</a></li>
                     </ul>
@@ -473,235 +556,211 @@
                 </div>
             </div>
 
-            <div class="border-t border-[rgba(0,212,255,0.1)] pt-8 flex flex-col md:flex-row justify-between items-center text-gray-400 text-sm">
-                <p>© 2024 Sites Lucrativos. Todos os direitos reservados.</p>
-                <div class="flex space-x-6 mt-4 md:mt-0">
-                    <a href="#" class="hover:text-[#00d4ff] transition">Twitter</a>
-                    <a href="#" class="hover:text-[#00d4ff] transition">Instagram</a>
-                    <a href="#" class="hover:text-[#00d4ff] transition">LinkedIn</a>
+            <div class="border-t border-[rgba(0,212,255,0.1)] pt-8">
+                <div class="flex flex-col md:flex-row justify-between items-center text-gray-400 text-sm">
+                    <div>
+                        <p>© 2026 Todos os direitos reservados</p>
+                        <p class="mt-2 md:mt-0">ZucroLTDA 2026</p>
+                    </div>
+                    <div class="flex space-x-6 mt-4 md:mt-0">
+                        <a href="#" class="hover:text-[#00d4ff] transition">Twitter</a>
+                        <a href="#" class="hover:text-[#00d4ff] transition">Instagram</a>
+                        <a href="#" class="hover:text-[#00d4ff] transition">LinkedIn</a>
+                    </div>
                 </div>
             </div>
         </div>
     </footer>
 
-	    <script>
-        // Product Data
-        const products = {
-            1: {
-                title: 'Site de Apostas Completo',
-                badge: 'Mais Vendido',
-                price: 'R$ 1.999',
-                rating: '4.9★',
-                description: 'Plataforma robusta e segura para apostas esportivas com painel administrativo avançado. Inclui sistema de gerenciamento de usuários, relatórios detalhados, integração com gateways de pagamento e suporte a múltiplas moedas.',
-                images: [
-                    'https://cdn.dribbble.com/userupload/3147367/file/original-e30b7e9a80ec68f7c6274b47d31250b2.jpg?resize=1600x2587&vertical=center',
-                    'https://cdn.dribbble.com/userupload/3147585/file/original-71c31ac613477b35aad5a641e58eb763.jpg?resize=1600x1200&vertical=center',
-                    'https://cdn.dribbble.com/userupload/3147366/file/original-1156b7e9d309ed4ba49a6a75e33f30a2.jpg?resize=1600x1200&vertical=center'
-                ],
-                features: [
-                    { title: 'Sistema de Apostas', description: 'Múltiplos tipos de apostas com odds em tempo real' },
-                    { title: 'Painel Administrativo', description: 'Controle total sobre usuários, apostas e relatórios' },
-                    { title: 'Gateways de Pagamento', description: 'Integração com Stripe, PayPal e outros' },
-                    { title: 'Segurança SSL', description: 'Criptografia de dados e proteção contra fraudes' },
-                    { title: 'Suporte a Múltiplas Moedas', description: 'Aceite pagamentos em diferentes moedas' },
-                    { title: 'API RESTful', description: 'Integração fácil com aplicativos móveis' }
-                ],
-                specs: [
-                    { title: 'Tecnologia', value: 'React + Node.js' },
-                    { title: 'Banco de Dados', value: 'PostgreSQL' },
-                    { title: 'Hospedagem', value: 'Cloud AWS' },
-                    { title: 'SSL', value: 'Incluído' },
-                    { title: 'Suporte', value: '24/7' },
-                    { title: 'Atualizações', value: 'Vitalícias' }
-                ],
-                paymentLink: 'https://pagamento.exemplo.com/produto1'
-            },
-            2: {
-                title: 'Site de Live ao Vivo',
-                badge: 'Premium',
-                price: 'R$ 1.499',
-                rating: '4.8★',
-                description: 'Plataforma de transmissão em tempo real com chat interativo, sistema de doações, monetização integrada e analytics avançado. Suporte a múltiplos streamers simultâneos com qualidade adaptativa.',
-                images: [
-                    'https://cdn.dribbble.com/userupload/3147585/file/original-71c31ac613477b35aad5a641e58eb763.jpg?resize=1600x1200&vertical=center',
-                    'https://cdn.dribbble.com/userupload/3147366/file/original-1156b7e9d309ed4ba49a6a75e33f30a2.jpg?resize=1600x1200&vertical=center',
-                    'https://cdn.dribbble.com/userupload/3147367/file/original-e30b7e9a80ec68f7c6274b47d31250b2.jpg?resize=1600x2587&vertical=center'
-                ],
-                features: [
-                    { title: 'Transmissão em Tempo Real', description: 'Qualidade adaptativa até 4K com baixa latência' },
-                    { title: 'Chat Interativo', description: 'Chat em tempo real com moderação automática' },
-                    { title: 'Sistema de Doações', description: 'Receba doações e dicas dos espectadores' },
-                    { title: 'Monetização Integrada', description: 'Anúncios, assinaturas e conteúdo exclusivo' },
-                    { title: 'Analytics Avançado', description: 'Métricas detalhadas de audiência e engajamento' },
-                    { title: 'Múltiplos Streamers', description: 'Suporte para vários transmissores simultâneos' }
-                ],
-                specs: [
-                    { title: 'Tecnologia', value: 'WebRTC + Node.js' },
-                    { title: 'Qualidade Máxima', value: '4K @ 60fps' },
-                    { title: 'Latência', value: '< 2 segundos' },
-                    { title: 'Usuários Simultâneos', value: 'Ilimitado' },
-                    { title: 'Armazenamento', value: '1TB incluído' },
-                    { title: 'CDN', value: 'Global' }
-                ],
-                paymentLink: 'https://pagamento.exemplo.com/produto2'
-            },
-            3: {
-                title: 'Site de Streaming',
-                badge: 'Destaque',
-                price: 'R$ 2.499',
-                rating: '5.0★',
-                description: 'Plataforma completa de streaming com biblioteca de vídeos, sistema de recomendação baseado em IA, planos de assinatura flexíveis, controle parental e qualidade adaptativa de vídeo.',
-                images: [
-                    'https://cdn.dribbble.com/userupload/3147366/file/original-1156b7e9d309ed4ba49a6a75e33f30a2.jpg?resize=1600x1200&vertical=center',
-                    'https://cdn.dribbble.com/userupload/3147367/file/original-e30b7e9a80ec68f7c6274b47d31250b2.jpg?resize=1600x2587&vertical=center',
-                    'https://cdn.dribbble.com/userupload/3147585/file/original-71c31ac613477b35aad5a641e58eb763.jpg?resize=1600x1200&vertical=center'
-                ],
-                features: [
-                    { title: 'Biblioteca de Vídeos', description: 'Gerencie milhares de vídeos com metadados' },
-                    { title: 'Recomendação com IA', description: 'Sistema inteligente de sugestões personalizadas' },
-                    { title: 'Planos de Assinatura', description: 'Crie múltiplos planos com diferentes recursos' },
-                    { title: 'Controle Parental', description: 'Restrições de conteúdo por classificação etária' },
-                    { title: 'Qualidade Adaptativa', description: 'Reprodução automática na melhor qualidade' },
-                    { title: 'Download Offline', description: 'Permita que usuários baixem conteúdo' }
-                ],
-                specs: [
-                    { title: 'Tecnologia', value: 'React + Django' },
-                    { title: 'Qualidade Máxima', value: '4K HDR' },
-                    { title: 'Codec de Vídeo', value: 'H.265 HEVC' },
-                    { title: 'Armazenamento', value: '10TB incluído' },
-                    { title: 'Usuários', value: 'Ilimitado' },
-                    { title: 'Suporte', value '24/7 Premium' }
-                ],
-                paymentLink: 'https://pagamento.exemplo.com/produto3'
+    <script>
+        // Configuração do Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyAfpLZ0Y4Rh3o4RyJffGxn8_aDM0OCB1l0",
+            projectId: "polarizo-max",
+            databaseURL: "https://polarizo-max-default-rtdb.firebaseio.com",
+            storageBucket: "polarizo-max.appspot.com"
+        };
+
+        let db;
+        let currentProduct = null;
+        let currentDiscount = 0;
+
+        try {
+            firebase.initializeApp(firebaseConfig);
+            db = firebase.database();
+            console.log("Firebase inicializado com sucesso.");
+        } catch (e) {
+            console.error("Erro ao inicializar Firebase:", e);
+        }
+
+        // Obter ID do produto da URL
+        function getProductIdFromUrl() {
+            const params = new URLSearchParams(window.location.search);
+            return params.get('id');
+        }
+
+        // Carregar dados do produto
+        function loadProduct() {
+            const productId = getProductIdFromUrl();
+            if (!productId) {
+                showAlert('Produto não encontrado.', 'error');
+                return;
+            }
+
+            const ref = db.ref(`produtos/${productId}`);
+            ref.once('value', (snapshot) => {
+                const product = snapshot.val();
+                if (product) {
+                    currentProduct = { id: productId, ...product };
+                    displayProduct(currentProduct);
+                } else {
+                    showAlert('Produto não encontrado.', 'error');
+                }
+            });
+        }
+
+        // Exibir produto
+        function displayProduct(product) {
+            document.getElementById('productImage').src = product.imageUrl;
+            document.getElementById('productTitle').textContent = product.title;
+            document.getElementById('productDescription').textContent = product.description;
+            document.getElementById('fullDescription').textContent = product.description;
+            document.getElementById('productBadge').textContent = product.badge;
+            document.getElementById('productRating').textContent = product.rating;
+            document.getElementById('productPrice').textContent = `R$ ${parseFloat(product.price).toFixed(2)}`;
+            document.getElementById('breadcrumbTitle').textContent = product.title;
+        }
+
+        // Aplicar cupom
+        function applyCoupon() {
+            const couponCode = document.getElementById('couponInput').value.trim().toUpperCase();
+            
+            if (!couponCode) {
+                showAlert('Por favor, digite um código de cupom.', 'error');
+                return;
+            }
+
+            const ref = db.ref('cupons');
+            ref.once('value', (snapshot) => {
+                const cupons = snapshot.val();
+                if (cupons && cupons[couponCode]) {
+                    const coupon = cupons[couponCode];
+                    currentDiscount = coupon.desconto || 0;
+                    
+                    document.getElementById('discountValue').textContent = currentDiscount;
+                    document.getElementById('discountBadge').classList.add('active');
+                    
+                    const originalPrice = parseFloat(currentProduct.price);
+                    const discountedPrice = originalPrice - (originalPrice * currentDiscount / 100);
+                    
+                    document.getElementById('originalPrice').textContent = `R$ ${originalPrice.toFixed(2)}`;
+                    document.getElementById('originalPrice').classList.remove('hidden');
+                    document.getElementById('productPrice').textContent = `R$ ${discountedPrice.toFixed(2)}`;
+                    
+                    showAlert(`Cupom aplicado! Desconto de ${currentDiscount}%`, 'success');
+                } else {
+                    currentDiscount = 0;
+                    document.getElementById('discountBadge').classList.remove('active');
+                    document.getElementById('originalPrice').classList.add('hidden');
+                    document.getElementById('productPrice').textContent = `R$ ${parseFloat(currentProduct.price).toFixed(2)}`;
+                    showAlert('Cupom inválido.', 'error');
+                }
+            });
+        }
+
+        // Adicionar ao carrinho
+        function addToCart() {
+            if (!currentProduct) return;
+
+            const cartItem = {
+                id: currentProduct.id,
+                title: currentProduct.title,
+                price: parseFloat(currentProduct.price),
+                imageUrl: currentProduct.imageUrl,
+                discount: currentDiscount,
+                quantity: 1
+            };
+
+            let cart = JSON.parse(localStorage.getItem('cart')) || [];
+            
+            const existingItem = cart.find(item => item.id === currentProduct.id);
+            if (existingItem) {
+                existingItem.quantity += 1;
+            } else {
+                cart.push(cartItem);
+            }
+
+            localStorage.setItem('cart', JSON.stringify(cart));
+            showAlert('Produto adicionado ao carrinho!', 'success');
+        }
+
+        // Comprar agora
+        function buyNow() {
+            addToCart();
+            setTimeout(() => {
+                window.location.href = 'carrinho.html';
+            }, 1000);
+        }
+
+        // Abrir modal de compartilhamento
+        function openShareModal() {
+            document.getElementById('shareModal').classList.add('active');
+        }
+
+        function closeShareModal() {
+            document.getElementById('shareModal').classList.remove('active');
+        }
+
+        // Compartilhar no WhatsApp
+        function shareOnWhatsApp() {
+            const text = `Confira este produto incrível: ${currentProduct.title} - ${window.location.href}`;
+            const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
+            window.open(url, '_blank');
+            closeShareModal();
+        }
+
+        // Compartilhar no Facebook
+        function shareOnFacebook() {
+            const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`;
+            window.open(url, '_blank');
+            closeShareModal();
+        }
+
+        // Compartilhar no Twitter
+        function shareOnTwitter() {
+            const text = `Confira este produto: ${currentProduct.title}`;
+            const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(window.location.href)}`;
+            window.open(url, '_blank');
+            closeShareModal();
+        }
+
+        // Copiar link
+        function copyLink() {
+            const link = window.location.href;
+            navigator.clipboard.writeText(link).then(() => {
+                showAlert('Link copiado para a área de transferência!', 'success');
+                closeShareModal();
+            });
+        }
+
+        // Mostrar alerta
+        function showAlert(msg, type) {
+            const alert = document.getElementById('alert');
+            alert.textContent = msg;
+            alert.className = `alert active alert-${type}`;
+            setTimeout(() => alert.classList.remove('active'), 4000);
+        }
+
+        // Fechar modal ao clicar fora
+        document.getElementById('shareModal').onclick = (e) => {
+            if (e.target.id === 'shareModal') {
+                closeShareModal();
             }
         };
 
-        // Get product ID from URL
-        const urlParams = new URLSearchParams(window.location.search);
-        const productId = urlParams.get('id') || 1;
-        const product = products[productId];
-
-        // Populate page with product data
-        function loadProduct() {
-            // Update breadcrumb
-            document.getElementById('breadcrumb-product').textContent = product.title;
-
-            // Update badge
-            const badgeContainer = document.getElementById('badge-container');
-            badgeContainer.innerHTML = `<div class="badge">${product.badge}</div>`;
-
-            // Update title and description
-            document.getElementById('product-title').textContent = product.title;
-            document.getElementById('product-description').textContent = product.description;
-
-            // Update price and rating
-            document.getElementById('product-price').textContent = product.price;
-            document.getElementById('product-rating').textContent = product.rating;
-
-            // Update payment links
-            document.getElementById('buy-btn').onclick = () => window.location.href = product.paymentLink;
-            document.getElementById('cta-btn').onclick = () => window.location.href = product.paymentLink;
-
-            // Load gallery
-            loadGallery();
-
-            // Load features
-            loadFeatures();
-
-            // Load specs
-            loadSpecs();
-
-            // Update page title
-            document.title = `${product.title} - Sites Lucrativos`;
-        }
-
-        function loadGallery() {
-            const mainImage = document.getElementById('main-image');
-            const thumbnailsContainer = document.getElementById('thumbnails-container');
-
-            // Set main image
-            mainImage.src = product.images[0];
-
-            // Create thumbnails
-            product.images.forEach((image, index) => {
-                const thumbnail = document.createElement('img');
-                thumbnail.src = image;
-                thumbnail.alt = `Imagem ${index + 1}`;
-                thumbnail.className = `thumbnail ${index === 0 ? 'active' : ''}`;
-                thumbnail.onclick = () => {
-                    mainImage.src = image;
-                    document.querySelectorAll('.thumbnail').forEach(t => t.classList.remove('active'));
-                    thumbnail.classList.add('active');
-                };
-                thumbnailsContainer.appendChild(thumbnail);
-            });
-        }
-
-        function loadFeatures() {
-            const featuresContainer = document.getElementById('features-container');
-            featuresContainer.innerHTML = '';
-
-            product.features.forEach(feature => {
-                const featureItem = document.createElement('div');
-                featureItem.className = 'feature-item';
-                featureItem.innerHTML = `
-                    <div class="feature-icon">
-                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                        </svg>
-                    </div>
-                    <div class="feature-text">
-                        <h4>${feature.title}</h4>
-                        <p>${feature.description}</p>
-                    </div>
-                `;
-                featuresContainer.appendChild(featureItem);
-            });
-        }
-
-        function loadSpecs() {
-            const specsContainer = document.getElementById('specs-container');
-            specsContainer.innerHTML = '';
-
-            product.specs.forEach(spec => {
-                const specCard = document.createElement('div');
-                specCard.className = 'spec-card';
-                specCard.innerHTML = `
-                    <h4>${spec.title}</h4>
-                    <p>${spec.value}</p>
-                `;
-                specsContainer.appendChild(specCard);
-            });
-        }
-
-        // Share functions
-        function shareOnWhatsApp() {
-            const url = window.location.href;
-            const text = `Confira este produto incrível: ${product.title} - ${url}`;
-            window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
-        }
-
-        function shareOnFacebook() {
-            const url = window.location.href;
-            window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, '_blank');
-        }
-
-        function shareOnTwitter() {
-            const url = window.location.href;
-            const text = `Confira este produto incrível: ${product.title}`;
-            window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`, '_blank');
-        }
-
-        function copyToClipboard() {
-            const url = window.location.href;
-            navigator.clipboard.writeText(url).then(() => {
-                alert('Link copiado para a área de transferência!');
-            });
-        }
-
-        // Initialize
+        // Inicializar
         loadProduct();
     </script>
 
 </body>
-</html>	
+</html>
