@@ -3,10 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Carrinho de Compras - Sites Lucrativos</title>
+    <title>Carrinho de Compras - ZucroBay</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
     
+    <!-- Firebase SDKs (Versão Compat) -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+
     <style>
         * {
             font-family: 'Inter', sans-serif;
@@ -289,9 +293,9 @@
         <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
             <div class="flex items-center space-x-2">
                 <div class="w-10 h-10 bg-gradient-to-br from-cyan-400 to-blue-600 rounded-lg flex items-center justify-center">
-                    <span class="text-white font-black text-lg">SL</span>
+                    <span class="text-white font-black text-lg">ZCB</span>
                 </div>
-                <span class="text-xl font-black gradient-text">Sites Lucrativos</span>
+                <span class="text-xl font-black gradient-text">ZucroBay</span>
             </div>
 
             <div class="hidden md:flex space-x-8">
@@ -325,7 +329,7 @@
             <!-- Page Title -->
             <div class="mb-12">
                 <h1 class="text-5xl nike-bold mb-4">Carrinho de Compras</h1>
-                <p class="text-gray-400 text-lg">Revise seus itens e finalize a compra</p>
+                <p class="text-gray-400 text-lg">Revise seus itens e finalize seu pedido.</p>
             </div>
 
             <!-- Cart Content -->
@@ -342,7 +346,7 @@
                     </div>
                 </div>
 
-                <!-- Summary -->
+	                <!-- Summary -->
                 <div class="lg:col-span-1">
                     <div class="summary-card">
                         <h2 class="text-2xl font-bold mb-6">Resumo do Pedido</h2>
@@ -387,9 +391,9 @@
                 <div>
                     <div class="flex items-center space-x-2 mb-4">
                         <div class="w-8 h-8 bg-gradient-to-br from-cyan-400 to-blue-600 rounded-lg flex items-center justify-center">
-                            <span class="text-white font-black text-sm">SL</span>
+                            <span class="text-white font-black text-sm">ZCB</span>
                         </div>
-                        <span class="font-black gradient-text">Sites Lucrativos</span>
+                        <span class="font-black gradient-text">ZucroBay</span>
                     </div>
                     <p class="text-gray-400 text-sm">Templates premium para seu negócio digital.</p>
                 </div>
@@ -439,6 +443,18 @@
     </footer>
 
     <script>
+        // Configuração do Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyCpi9LmOel3NXEQNLd8y8zEZxVqZzBhCso",
+            projectId: "riderprime-78955",
+            databaseURL: "https://riderprime-78955-default-rtdb.firebaseio.com",
+            storageBucket: "riderprime-78955.appspot.com"
+        };
+
+        // Inicialização do Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
         let cart = [];
 
         // Carregar carrinho do localStorage
@@ -563,26 +579,43 @@
             document.getElementById('cartBadge').textContent = totalItems;
         }
 
-        // Finalizar compra
-        function checkout() {
+        // Finalizar compra - Redirecionando para o paymentLink do Firebase
+        async function checkout() {
             if (cart.length === 0) {
                 showAlert('Seu carrinho está vazio', 'error');
                 return;
             }
 
-            // Aqui você pode integrar com seu gateway de pagamento
-            // Por enquanto, vamos simular uma compra bem-sucedida
-            showAlert('Redirecionando para pagamento...', 'success');
+            showAlert('Redirecionando para o pagamento...', 'success');
             
-            setTimeout(() => {
-                // Limpar carrinho após "compra"
-                localStorage.removeItem('cart');
-                cart = [];
+            try {
+                // Pegamos o primeiro item do carrinho para obter o link de pagamento
+                // Se houver múltiplos, você pode decidir se redireciona para o primeiro ou se há um link global
+                const firstItem = cart[0];
                 
-                // Redirecionar para página de sucesso ou checkout
-                alert('Compra realizada com sucesso! Obrigado por sua compra.');
-                window.location.href = 'index.html';
-            }, 2000);
+                // Buscar o produto no Firestore para garantir que temos o paymentLink atualizado
+                const snapshot = await db.collection('produtos').where('title', '==', firstItem.title).get();
+                
+                if (!snapshot.empty) {
+                    const productData = snapshot.docs[0].data();
+                    const paymentLink = productData.paymentLink;
+
+                    if (paymentLink) {
+                        setTimeout(() => {
+                            // Limpar carrinho e redirecionar
+                            localStorage.removeItem('cart');
+                            window.location.href = paymentLink;
+                        }, 1500);
+                    } else {
+                        showAlert('Link de pagamento não configurado para este produto.', 'error');
+                    }
+                } else {
+                    showAlert('Produto não encontrado no banco de dados.', 'error');
+                }
+            } catch (error) {
+                console.error("Erro ao processar checkout:", error);
+                showAlert('Erro ao conectar com o servidor.', 'error');
+            }
         }
 
         // Mostrar alerta
