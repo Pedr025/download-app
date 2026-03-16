@@ -509,8 +509,7 @@
             </div>
         </div>
     </nav>
-
-    <!-- Hero Banner with Carousel -->
+	    <!-- Hero Banner with Carousel -->
     <section class="pt-16">
         <div class="carousel-wrapper">
             <div class="carousel" id="carousel">
@@ -576,7 +575,7 @@
                 <p class="text-gray-400">Equipe disponível 24 horas, 7 dias da semana para ajudar você.</p>
             </div>
 
-	            <!-- Benefit 3: Mobile & PC -->
+            <!-- Benefit 3: Mobile & PC -->
             <div class="benefit-card">
                 <div class="benefit-icon">
                     <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
@@ -748,6 +747,7 @@
                     
                     renderCarousel();
                     renderProducts();
+                    initializeDynamicContent();
                 }
             });
         }
@@ -871,7 +871,7 @@
             autoPlayInterval = setInterval(nextSlide, 8000);
         }
 
-        // Funções de Busca
+	        // Funções de Busca
         function openSearchModal() {
             document.getElementById('searchModal').classList.add('active');
             document.getElementById('searchInput').focus();
@@ -943,7 +943,7 @@
             });
         }
 
-	        // Renderizar depoimentos de clientes
+        // Renderizar depoimentos de clientes
         function renderTestimonials() {
             const scroll = document.getElementById('testimonialsScroll');
             scroll.innerHTML = '';
@@ -1016,10 +1016,10 @@
         loadProducts();
         
         // Renderizar produtos em destaque e depoimentos quando os produtos forem carregados
-        setTimeout(() => {
+        function initializeDynamicContent() {
             renderFeaturedProducts();
             renderTestimonials();
-        }, 500);
+        }
     </script>
 
 </body>
